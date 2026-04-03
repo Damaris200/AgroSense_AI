@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// User model for authentication and farm management
+model User {
+    id        String   @id @default(cuid())
+    email     String   @unique
+    password  String
+    firstName String
+    lastName  String
+    phone     String?  @unique
+    language  String   @default("en") // en or fr
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    farms           Farm[]
+    notifications   Notification[]
+    recommendations Recommendation[]
+
+    @@map("users")
+}
+
+// Farm model - represents a user's farm
+model Farm {
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    name      String
+    location  String
+    latitude  Float
+    longitude Float
+    soilType  String?
+    size      Float? // in hectares
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    farmCrops   FarmCrop[]
+    sensorData  SensorData[]
+    weatherData WeatherData[]
+
+    @@index([userId])
+    @@map("farms")
+}
+
+// Crop type model - supported crops in the system
+model CropType {
+    id          String   @id @default(cuid())
+    name        String   @unique // Maize, Tomato, Groundnut, etc.
+    tag         String   @unique // MZ, TM, GN, etc.
+    description String?
+    createdAt   DateTime @default(now())
+
+    // Relations
+    farmCrops       FarmCrop[]
+    recommendations Recommendation[]
+
+    @@map("crop_types")
+}
+
+// Farm Crop model - tracks specific crops grown on each farm
+model FarmCrop {
+    id         String   @id @default(cuid())
+    farmId     String
+    farm       Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+    cropTypeId String
+    cropType   CropType @relation(fields: [cropTypeId], references: [id], onDelete: Cascade)
+
+    plantingDate        DateTime?
+    expectedHarvestDate DateTime?
+    growthStage         String? // e.g., "seedling", "vegetative", "flowering", "fruiting"
+    healthStatus        String? // e.g., "healthy", "at-risk", "diseased"
+    soilMoisture        Float? // percentage
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    sensorData      SensorData[]
+    recommendations Recommendation[]
+    analytics       Analytics?       @relation("analyticsEntry")
+
+    @@unique([farmId, cropTypeId])
+    @@index([farmId])
+    @@index([cropTypeId])
+    @@map("farm_crops")
+}
+
+// Sensor Data model - IoT sensor readings
+model SensorData {
+    id         String    @id @default(cuid())
+    farmId     String
+    farm       Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+    farmCropId String?
+    farmCrop   FarmCrop? @relation(fields: [farmCropId], references: [id], onDelete: SetNull)
+
+    soilMoisture    Float // percentage
+    soilTemperature Float?
+    soilPH          Float?
+    soilNitrogen    Float?
+
+    timestamp DateTime @default(now())
+    createdAt DateTime @default(now())
+
+    @@index([farmId])
+    @@index([farmCropId])
+    @@map("sensor_data")
+}
+
+// Weather Data model - weather information for farm location
+model WeatherData {
+    id     String @id @default(cuid())
+    farmId String
+    farm   Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+    temperature Float
+    humidity    Float
+    rainfall    Float?
+    windSpeed   Float?
+    condition   String // e.g., "sunny", "cloudy", "rainy"
+    uvIndex     Float?
+
+    forecastedAt DateTime
+    timestamp    DateTime @default(now())
+    createdAt    DateTime @default(now())
+
+    @@index([farmId])
+    @@map("weather_data")
+}
+
+// AI Recommendation model - recommendations generated for the farm
+model Recommendation {
+    id         String   @id @default(cuid())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    farmCropId String
+    farmCrop   FarmCrop @relation(fields: [farmCropId], references: [id], onDelete: Cascade)
+    cropTypeId String
+    cropType   CropType @relation(fields: [cropTypeId], references: [id], onDelete: Cascade)
+
+    title       String
+    description String
+    action      String // The specific recommendation (irrigate, apply pesticide, etc.)
+    urgency     String // "low", "medium", "high", "critical"
+    confidence  Float // 0-100 percentage
+
+    reasoning String? // Explanation of why this recommendation was made
+
+    viewed     Boolean   @default(false)
+    viewedAt   DateTime?
+    actioned   Boolean   @default(false)
+    actionedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    alertsSent Notification[]
+
+    @@index([userId])
+    @@index([farmCropId])
+    @@index([cropTypeId])
+    @@map("recommendations")
+}
+
+// Notification model - SMS and in-app alerts sent to users
+model Notification {
+    id               String          @id @default(cuid())
+    userId           String
+    user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    recommendationId String?
+    recommendation   Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: SetNull)
+
+    type    String // "sms", "email", "in-app"
+    title   String
+    message String
+
+    delivered   Boolean   @default(false)
+    deliveredAt DateTime?
+    read        Boolean   @default(false)
+    readAt      DateTime?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([recommendationId])
+    @@map("notifications")
+}
+
+// Analytics model - track user activity and outcomes
+model Analytics {
+    id         String   @id @default(cuid())
+    farmCropId String   @unique
+    farmCrop   FarmCrop @relation("analyticsEntry", fields: [farmCropId], references: [id], onDelete: Cascade)
+
+    recommendationsReceived Int    @default(0)
+    recommendationsActioned Int    @default(0)
+    yieldImprovement        Float? // percentage
+
+    season String // e.g., "2024-01"
+    notes  String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("analytics")
+}
