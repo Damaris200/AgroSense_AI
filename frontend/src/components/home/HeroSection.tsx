@@ -199,44 +199,4 @@ export function HeroSection() {
     </section>
   );
 }
-                <div className="h-2 flex-1 rounded-full bg-zinc-100">
-                  <div className="h-full w-[62%] rounded-full bg-emerald-500" />
-                </div>
-                <span className="font-semibold">62%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Growth Stage</span>
-                <span className="font-semibold">Vegetative</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>AI Action</span>
-                <span className="font-semibold text-emerald-700">Irrigate Today</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Confidence</span>
-                <span className="font-semibold text-emerald-700">94%</span>
-              </div>
-            </div>
 
-            <p className="mt-5 rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-center text-xs font-semibold text-amber-900">
-              HIGH URGENCY: act within 24 hours
-            </p>
-          </article>
-
-          <div className="grid grid-cols-2 gap-3">
-            {weatherItems.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-center"
-              >
-                <p className="font-display text-lg font-bold text-zinc-900">{item.symbol}</p>
-                <p className="text-sm font-semibold text-zinc-800">{item.value}</p>
-                <p className="text-xs text-zinc-500">{item.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
