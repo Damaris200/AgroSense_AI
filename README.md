@@ -3,6 +3,18 @@
 
 ---
 
+## 🐳 Local Dev Services (Postgres + Redis)
+
+```bash
+# Start Postgres 15 and Redis 7 in the background
+docker compose -f docker-compose.dev.yml up -d
+
+# Stop and remove containers (data volumes are preserved)
+docker compose -f docker-compose.dev.yml down
+```
+
+---
+
 ## 📌 Overview
 AgroSense AI is a smart farming assistant designed to help small-scale farmers make better decisions using data and Artificial Intelligence.  
 
