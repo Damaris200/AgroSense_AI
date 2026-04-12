@@ -1,7 +1,4 @@
-# AgroSense AI — Claude Code Task File
-
-> Paste this entire file into Claude Code in VS Code. It is structured so Claude can work through it sequentially. Each task has clear acceptance criteria. Do NOT skip the "Before you start" section.
-
+# AgroSense AI Task 
 ---
 
 ## Project context
@@ -16,7 +13,7 @@
 **Stack to add:**
 - Backend: Node.js + Express + TypeScript
 - Database: PostgreSQL 15
-- Event broker + cache: Redis 7 (using Redis Streams)
+- Event broker + apache kafka
 - Weather: OpenWeatherMap API (real weather data)
 - AI: Google Gemini API (for nuanced recommendations) + rule-based fallback
 - Containerization: Docker (multi-stage) + docker-compose
