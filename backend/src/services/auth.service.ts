@@ -32,6 +32,14 @@ const publicUserSelect = {
 
 export type PublicUser = Prisma.UserGetPayload<{ select: typeof publicUserSelect }>;
 
+export function signAuthToken(user: Pick<PublicUser, 'id' | 'role' | 'email'>) {
+  return jwt.sign(
+    { sub: user.id, role: user.role, email: user.email },
+    env.jwtSecret,
+    { expiresIn: env.jwtExpiresIn } as jwt.SignOptions,
+  );
+}
+
 // ── Service functions ─────────────────────────────────────────────────────────
 
 export async function registerUser(input: CreateUserDto): Promise<PublicUser> {
@@ -71,11 +79,7 @@ export async function loginUser(
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new UnauthorizedError('Invalid credentials');
 
-  const token = jwt.sign(
-    { sub: user.id, role: user.role, email: user.email },
-    env.jwtSecret,
-    { expiresIn: env.jwtExpiresIn } as jwt.SignOptions,
-  );
+  const token = signAuthToken(user);
 
   const { passwordHash: _ph, ...safeUser } = user;
   return { user: safeUser as PublicUser, token };

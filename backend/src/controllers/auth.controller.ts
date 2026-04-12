@@ -7,7 +7,8 @@ import { ok, created } from '../utils/response';
 export async function register(req: Request, _res: Response, next: NextFunction) {
   try {
     const user = await authService.registerUser(req.body);
-    created(_res, { user });
+    const token = authService.signAuthToken(user);
+    created(_res, { user, token });
   } catch (err) {
     next(err);
   }

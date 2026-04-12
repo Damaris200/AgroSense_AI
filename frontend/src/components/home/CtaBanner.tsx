@@ -1,69 +1,82 @@
+import { ArrowRight, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useTheme } from '../../context/ThemeContext';
+
 export function CtaBanner() {
+  const { isDark } = useTheme();
+
   return (
-    <section className="relative py-24 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 overflow-hidden">
-      {/* Animated background patterns */}
-      <div className="absolute inset-0">
-        {/* Gradient orbs */}
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-900/20 rounded-full blur-3xl" />
+    <section
+      id="impact"
+      className={`scroll-mt-28 py-20 transition-colors duration-300 sm:py-24 ${
+        isDark ? 'bg-[linear-gradient(180deg,#020617_0%,#04110d_100%)]' : 'bg-[linear-gradient(180deg,#f0fdf4_0%,#ffffff_100%)]'
+      }`}
+    >
+      <div className="mx-auto w-full max-w-6xl px-4 lg:px-8">
+        <div
+          className={`rounded-[2rem] border p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-colors sm:p-10 lg:p-14 ${
+            isDark ? 'border-white/10 bg-white/5' : 'border-emerald-100 bg-white'
+          }`}
+        >
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div className="space-y-6">
+              <div
+                className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${
+                  isDark ? 'bg-emerald-500/10 text-emerald-300' : 'bg-emerald-50 text-emerald-700'
+                }`}
+              >
+                <Quote className="h-6 w-6" />
+              </div>
+              <blockquote
+                className={`font-display text-2xl font-semibold leading-tight sm:text-4xl ${
+                  isDark ? 'text-white' : 'text-zinc-950'
+                }`}
+              >
+                "When smallholder farmers get clear, timely advice, every field becomes more resilient, more
+                productive, and more profitable."
+              </blockquote>
+              <p className={`text-base leading-8 ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                AgroSense AI helps bridge the gap between climate uncertainty and confident daily farm decisions.
+                The goal is not just prediction, but practical impact farmers can feel in the field.
+              </p>
+            </div>
 
-        {/* Animated farming pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none" viewBox="0 0 1440 400">
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{ stopColor: '#fff', stopOpacity: 0.1 }} />
-              <stop offset="100%" style={{ stopColor: '#fff', stopOpacity: 0 }} />
-            </linearGradient>
-          </defs>
-          <path d="M0,200 Q360,100 720,200 T1440,200" stroke="url(#grad1)" strokeWidth="2" fill="none" />
-          <path d="M0,250 Q360,150 720,250 T1440,250" stroke="url(#grad1)" strokeWidth="2" fill="none" />
-        </svg>
-      </div>
-
-      <div className="relative mx-auto w-full max-w-4xl px-4 text-center lg:px-8 space-y-8">
-        {/* Main heading */}
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur border border-white/30">
-            <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-            <span className="text-sm font-bold text-white">Join the Agricultural Revolution</span>
+            <div
+              className={`rounded-[2rem] p-8 text-white ${
+                isDark
+                  ? 'bg-gradient-to-br from-zinc-900 via-emerald-950 to-green-900'
+                  : 'bg-gradient-to-br from-emerald-900 via-green-800 to-lime-900'
+              }`}
+            >
+              <p className="text-sm uppercase tracking-[0.24em] text-emerald-200">Why it matters</p>
+              <div className="mt-6 space-y-4">
+                <p className="text-lg leading-8 text-emerald-50/85">
+                  Advisory quality means more than dashboards. It means helping farmers decide what to do next,
+                  before uncertainty becomes loss.
+                </p>
+                <p className="text-sm leading-7 text-emerald-100/75">
+                  Built for lecturers, evaluators, and real users to see a product that feels thoughtful, modern,
+                  and ready for real deployment.
+                </p>
+              </div>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50"
+                >
+                  Create account
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </div>
           </div>
-
-          <h2 className="font-display text-5xl md:text-6xl font-black text-white leading-tight">
-            Ready to farm <span className="bg-gradient-to-r from-yellow-100 to-white bg-clip-text text-transparent">smarter?</span>
-          </h2>
-
-          <p className="mx-auto max-w-3xl text-lg md:text-xl text-white/90 leading-relaxed">
-            Join thousands of farmers already using AgroSense AI to make better decisions, reduce waste, increase yields, and boost their bottom line. Get started in minutes.
-          </p>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link
-            to="/register"
-            className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-emerald-600 shadow-2xl shadow-black/20 transition hover:shadow-2xl hover:shadow-black/30 hover:scale-105 hover:-translate-y-1"
-          >
-            <span>Create Your Free Account</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </Link>
-
-          <a
-            href="#how"
-            className="inline-flex items-center gap-2 rounded-xl border-2 border-white/60 px-8 py-3.5 text-base font-bold text-white hover:bg-white/10 transition backdrop-blur"
-          >
-            <span>Watch a Demo</span>
-          </a>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="pt-8 space-y-3">
-          <p className="text-white/90 font-medium">✓ Completely Free • ✓ SMS Support • ✓ Bilingual (EN/FR)</p>
-          <p className="text-white/70 text-sm">
-            🔒 Your data is encrypted and secure • 🌍 Works across Africa • 📱 Works on any phone
-          </p>
         </div>
       </div>
     </section>

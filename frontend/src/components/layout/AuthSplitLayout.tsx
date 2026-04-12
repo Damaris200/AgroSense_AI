@@ -1,107 +1,122 @@
 import type { ReactNode } from 'react';
+import { Leaf, Radar, ShieldCheck, Sparkles, Wheat } from 'lucide-react';
 
 interface AuthSplitLayoutProps {
-  title: string;
-  subtitle: string;
+  formTitle: string;
+  formDescription: string;
   panelTitle: string;
   panelDescription: string;
-  panelItems: string[];
+  panelHighlights: string[];
+  footerLink: ReactNode;
   children: ReactNode;
 }
 
+const panelStats = [
+  { label: 'Advisories delivered', value: '12.4k' },
+  { label: 'Supported regions', value: '48' },
+  { label: 'Uptime', value: '99%' },
+];
+
+const panelIcons = [Leaf, Radar, ShieldCheck, Sparkles];
+
 export function AuthSplitLayout({
-  title,
-  subtitle,
+  formTitle,
+  formDescription,
   panelTitle,
   panelDescription,
-  panelItems,
+  panelHighlights,
+  footerLink,
   children,
 }: AuthSplitLayoutProps) {
   return (
-    <main className="min-h-screen bg-zinc-950 md:grid md:grid-cols-2">
-      {/* Left panel - Agriculture themed */}
-      <section className="relative hidden overflow-hidden border-r border-emerald-900/40 bg-gradient-to-br from-emerald-950 via-emerald-900 to-zinc-950 p-10 text-white md:flex md:flex-col md:justify-between">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Animated gradient orbs */}
-          <div className="absolute top-20 -left-20 w-96 h-96 bg-emerald-700/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-emerald-800/15 rounded-full blur-3xl animate-pulse delay-1000" />
-          
-          {/* Farming pattern SVG */}
-          <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none" viewBox="0 0 800 1200">
-            <defs>
-              <pattern id="farming-field" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <line x1="0" y1="0" x2="100" y2="0" stroke="#10b981" strokeWidth="0.5" opacity="0.5"/>
-                <line x1="0" y1="20" x2="100" y2="20" stroke="#10b981" strokeWidth="0.5" opacity="0.3"/>
-                <circle cx="20" cy="30" r="2" fill="#34d399" opacity="0.4"/>
-                <circle cx="60" cy="50" r="1.5" fill="#10b981" opacity="0.3"/>
-              </pattern>
-            </defs>
-            <rect width="800" height="1200" fill="url(#farming-field)"/>
-          </svg>
-
-          {/* Decorative shapes */}
-          <div className="absolute top-1/4 right-1/3 w-32 h-32 border-2 border-emerald-500/20 rounded-full" />
-          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-emerald-600/15 rounded-lg" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 space-y-8">
-          {/* Logo and branding */}
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg shadow-emerald-600/50">
-              🌾
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.1),_transparent_45%),linear-gradient(180deg,#f3f8f2_0%,#ffffff_42%,#ecfdf5_100%)]">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8 lg:py-8 md:grid md:grid-cols-2 md:gap-6">
+        <section className="order-1 flex items-center justify-center py-4 md:order-2 md:py-0">
+          <div className="w-full max-w-md rounded-3xl border border-white/70 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-10">
+            <div className="mb-8 space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                <Sparkles className="h-3.5 w-3.5" />
+                AgroSense AI
+              </div>
+              <h1 className="font-display text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
+                {formTitle}
+              </h1>
+              <p className="text-sm leading-7 text-zinc-600 sm:text-base">{formDescription}</p>
             </div>
-            <div>
-              <p className="font-display text-2xl font-bold">
-                AgroSense <span className="text-emerald-300">AI</span>
-              </p>
-              <p className="text-xs text-emerald-200/60">Smart Farming</p>
+
+            <div>{children}</div>
+
+            <div className="mt-8 border-t border-zinc-100 pt-5 text-sm text-zinc-600">{footerLink}</div>
+          </div>
+        </section>
+
+        <section className="relative order-2 overflow-hidden rounded-[2rem] border border-emerald-900/10 bg-gradient-to-br from-emerald-900 via-green-800 to-lime-900 px-6 py-8 text-white shadow-[0_24px_80px_rgba(4,120,87,0.2)] md:order-1 md:flex md:flex-col md:justify-between md:px-8 md:py-10">
+          <div className="absolute inset-0">
+            <div className="animate-drift absolute -top-20 right-6 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+            <div className="animate-float-slow absolute bottom-0 left-0 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl" />
+            <svg
+              aria-hidden="true"
+              className="animate-float-slow absolute -right-8 top-16 h-36 w-36 text-white/10"
+              viewBox="0 0 120 120"
+              fill="none"
+            >
+              <path
+                d="M60 14C53 34 35 38 28 55c-8 20 5 41 24 47 18 6 39-2 48-22 9-21 1-49-40-66Z"
+                fill="currentColor"
+              />
+              <path d="M46 62c14-2 28-10 41-26" stroke="rgba(255,255,255,0.4)" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          <div className="relative z-10 space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 shadow-lg backdrop-blur-sm">
+                <Wheat className="h-6 w-6 text-emerald-100" />
+              </div>
+              <div>
+                <p className="font-display text-xl font-bold">AgroSense AI</p>
+                <p className="text-sm text-emerald-100/80">Event-driven farm intelligence</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100 backdrop-blur-sm">
+                <Leaf className="h-3.5 w-3.5" />
+                Built for smallholder resilience
+              </div>
+              <h2 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{panelTitle}</h2>
+              <p className="max-w-xl text-sm leading-7 text-emerald-50/85 sm:text-base">{panelDescription}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {panelHighlights.map((item, index) => {
+                const Icon = panelIcons[index % panelIcons.length];
+
+                return (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm"
+                  >
+                    <Icon className="mb-3 h-5 w-5 text-emerald-100" />
+                    <p className="text-sm leading-6 text-emerald-50">{item}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Main message */}
-          <div className="space-y-4">
-            <h2 className="font-display text-4xl font-black leading-tight bg-gradient-to-r from-emerald-200 to-emerald-100 bg-clip-text text-transparent">
-              {panelTitle}
-            </h2>
-            <p className="text-lg text-emerald-100/80 leading-relaxed">
-              {panelDescription}
-            </p>
-          </div>
-
-          {/* Benefits list */}
-          <ul className="space-y-4">
-            {panelItems.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-base">
-                <div className="flex-shrink-0 mt-1">
-                  <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-300 block" />
+          <div className="relative z-10 mt-8 rounded-3xl border border-white/10 bg-zinc-950/20 p-5 backdrop-blur-sm">
+            <div className="grid grid-cols-3 gap-4">
+              {panelStats.map((stat) => (
+                <div key={stat.label}>
+                  <p className="font-display text-2xl font-bold text-white">{stat.value}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-100/70">{stat.label}</p>
                 </div>
-                <span className="text-emerald-100/90">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Footer message */}
-        <div className="relative z-10 space-y-4 pt-4 border-t border-emerald-900/40">
-          <p className="text-sm text-emerald-200/70">
-            💚 "AgroSense AI transformed how I manage my maize farm. The recommendations are practical and my yields improved by 40%." 
-          </p>
-          <p className="text-xs text-emerald-300/60 font-medium">— Farmer from Cameroon</p>
-        </div>
-      </section>
-
-      {/* Right panel - Form */}
-      <section className="flex items-center justify-center bg-white px-4 py-12 md:px-10">
-        <div className="w-full max-w-md">
-          <div className="space-y-2 mb-8">
-            <h1 className="font-display text-4xl font-bold text-zinc-950">{title}</h1>
-            <p className="text-base text-zinc-600">{subtitle}</p>
+              ))}
+            </div>
           </div>
-          <div className="mt-8">{children}</div>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

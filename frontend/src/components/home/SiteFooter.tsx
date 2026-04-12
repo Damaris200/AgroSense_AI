@@ -1,151 +1,90 @@
+import { Globe, Mail, MessageCircle, Send, Sprout } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+import { useTheme } from '../../context/ThemeContext';
+
+const quickLinks = [
+  { label: 'Features', href: '#features' },
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Sign in', to: '/login' },
+  { label: 'Register', to: '/register' },
+];
+
+const socialLinks = [
+  { label: 'AgroSense AI website', href: 'https://agrosense.ai', icon: Globe },
+  { label: 'AgroSense AI community channel', href: 'https://wa.me/2348000000000', icon: MessageCircle },
+  { label: 'Contact AgroSense AI by email', href: 'mailto:hello@agrosense.ai', icon: Mail },
+  { label: 'AgroSense AI updates', href: 'https://t.me/agrosenseai', icon: Send },
+];
+
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
+  const { isDark } = useTheme();
 
   return (
-    <footer id="about" className="relative bg-gradient-to-b from-zinc-950 to-black text-zinc-400 border-t border-emerald-900/30">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/3 w-96 h-96 bg-emerald-900/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative">
-        {/* Main footer content */}
-        <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-16 lg:grid-cols-5 lg:px-8">
-          {/* Brand section */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center text-lg">
-                🌾
+    <footer className={`transition-colors duration-300 ${isDark ? 'bg-zinc-950 text-white' : 'bg-emerald-950 text-white'}`}>
+      <div className="mx-auto w-full max-w-7xl px-4 py-14 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-200">
+                <Sprout className="h-5 w-5" />
               </div>
-              <p className="font-display text-xl font-bold text-white">
-                AgroSense <span className="text-emerald-400">AI</span>
-              </p>
+              <div>
+                <p className="font-display text-xl font-bold">AgroSense AI</p>
+                <p className="text-sm text-zinc-400">Event-driven advisory for small-scale farming</p>
+              </div>
             </div>
-            <p className="text-sm leading-6 text-zinc-500">
-              Smart farming support for African growers. Empowering small-scale farmers with practical AI recommendations for better harvests.
+            <p className="max-w-xl text-sm leading-7 text-zinc-400">
+              A professional, farmer-centered experience for climate-aware crop guidance, bilingual access, and
+              modern agricultural decision support.
             </p>
-            <div className="flex gap-3 pt-2">
-              <a href="#" className="h-10 w-10 rounded-lg bg-emerald-950/50 flex items-center justify-center hover:bg-emerald-900 transition text-emerald-400 font-bold">f</a>
-              <a href="#" className="h-10 w-10 rounded-lg bg-emerald-950/50 flex items-center justify-center hover:bg-emerald-900 transition text-emerald-400 font-bold">𝕏</a>
-              <a href="#" className="h-10 w-10 rounded-lg bg-emerald-950/50 flex items-center justify-center hover:bg-emerald-900 transition text-emerald-400 font-bold">📧</a>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Quick links</h2>
+              <div className="mt-5 flex flex-col gap-3 text-sm text-zinc-300">
+                {quickLinks.map((item) =>
+                  item.to ? (
+                    <Link key={item.label} to={item.to} className="transition hover:text-white">
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a key={item.label} href={item.href} className="transition hover:text-white">
+                      {item.label}
+                    </a>
+                  ),
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Product column */}
-          <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-white mb-6">Product</p>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="#features" className="text-zinc-500 transition hover:text-emerald-400">
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="#how" className="text-zinc-500 transition hover:text-emerald-400">
-                  How It Works
-                </a>
-              </li>
-              <li>
-                <a href="#crops" className="text-zinc-500 transition hover:text-emerald-400">
-                  Supported Crops
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Pricing
-                </a>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Connect</h2>
+              <div className="mt-5 flex flex-wrap gap-3">
+                {socialLinks.map((social) => {
+                  const Icon = social.icon;
 
-          {/* Support column */}
-          <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-white mb-6">Support</p>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  API Docs
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Contact Support
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  FAQ
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company column */}
-          <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-white mb-6">Company</p>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-zinc-500 transition hover:text-emerald-400">
-                  Research
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tech Stack column */}
-          <div>
-            <p className="font-display text-sm font-bold uppercase tracking-widest text-white mb-6">Tech Stack</p>
-            <p className="text-sm leading-6 text-zinc-500 space-y-1">
-              <div>• Bun & TypeScript</div>
-              <div>• React & Vite</div>
-              <div>• PostgreSQL & Prisma</div>
-              <div>• Redis & Kubernetes</div>
-              <div>• TensorFlow</div>
-            </p>
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      aria-label={social.label}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-200 transition hover:border-emerald-300/40 hover:text-white"
+                      target={social.href.startsWith('http') ? '_blank' : undefined}
+                      rel={social.href.startsWith('http') ? 'noreferrer' : undefined}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-zinc-800/50" />
-
-        {/* Bottom section */}
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <p className="text-xs text-zinc-600">
-              © {currentYear} AgroSense AI. All rights reserved. Built with ❤️ for farmers in Africa.
-            </p>
-            <div className="flex items-center gap-6 text-xs text-zinc-600">
-              <a href="#" className="hover:text-emerald-400 transition">
-                Privacy Policy
-              </a>
-              <a href="#" className="hover:text-emerald-400 transition">
-                Terms of Service
-              </a>
-              <a href="#" className="hover:text-emerald-400 transition">
-                Cookie Policy
-              </a>
-            </div>
-          </div>
+        <div className="mt-10 border-t border-white/10 pt-6 text-sm text-zinc-400">
+          <p>Copyright {currentYear} AgroSense AI. All rights reserved.</p>
         </div>
       </div>
     </footer>

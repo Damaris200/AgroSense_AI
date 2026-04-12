@@ -19,8 +19,8 @@ export function PasswordStrength({ value }: PasswordStrengthProps) {
   const score = scorePassword(value);
 
   return (
-    <div className="mt-2">
-      <div className="flex gap-1">
+    <div className="mt-3">
+      <div className="flex gap-2">
         {[0, 1, 2, 3].map((idx) => {
           const active = idx < score;
           const color = score <= 1 ? 'bg-rose-500' : score <= 2 ? 'bg-amber-500' : 'bg-emerald-500';
@@ -28,13 +28,13 @@ export function PasswordStrength({ value }: PasswordStrengthProps) {
           return (
             <span
               key={idx}
-              className={`h-1.5 flex-1 rounded-full ${active ? color : 'bg-zinc-200'}`}
+              className={`h-2 flex-1 rounded-full ${active ? color : 'bg-zinc-200'}`}
               aria-hidden="true"
             />
           );
         })}
       </div>
-      <p className="mt-1 text-xs text-zinc-500">{labels[score]}</p>
+      <p className="mt-2 text-xs font-medium text-zinc-500">{labels[score]}</p>
     </div>
   );
 }

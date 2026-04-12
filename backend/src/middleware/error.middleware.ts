@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import { AppError } from '../errors';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
@@ -12,6 +13,16 @@ export function errorHandler(
   // Typed application errors — safe to expose message to client
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ success: false, error: err.message });
+  }
+
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    const message =
+      err.errorCode === 'P1000'
+        ? 'Database authentication failed. Check DATABASE_URL and make sure your local Postgres user, password, and database match the running container.'
+        : 'Database connection failed. Make sure Postgres is running and DATABASE_URL is correct.';
+
+    logger.error(message, { stack: err.stack });
+    return res.status(503).json({ success: false, error: message });
   }
 
   // Unknown / unexpected errors
