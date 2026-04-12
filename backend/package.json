@@ -9,6 +9,7 @@
     "start": "bun dist/index.js",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
+    "seed:admin": "bun src/scripts/seed-admin.ts",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
