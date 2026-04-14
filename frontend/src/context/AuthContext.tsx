@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { api, type ApiEnvelope, TOKEN_STORAGE_KEY } from '../lib/api';
+import { TOKEN_STORAGE_KEY, getMeRequest } from '../services/auth.service';
 import type { AuthResponse, AuthUser } from '../types/auth';
 
 interface AuthContextValue {
@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
-
     setToken(null);
     setUser(null);
   };
@@ -33,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
     }
-
     setToken(nextToken);
     setUser(nextUser);
   };
@@ -61,27 +59,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(storedToken);
 
       try {
-        const response = await api.get<ApiEnvelope<{ user: AuthUser }>>('/api/auth/me');
-
-        if (isMounted) {
-          setUser(response.data.data.user);
-        }
+        const authUser = await getMeRequest();
+        if (isMounted) setUser(authUser);
       } catch {
-        if (isMounted) {
-          clearSession();
-        }
+        if (isMounted) clearSession();
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
     void initializeAuth();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   return (
@@ -102,10 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-
   return context;
 }
