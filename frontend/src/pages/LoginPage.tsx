@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { AuthSplitLayout } from '../components/layout/AuthSplitLayout';
 import { useAuth } from '../context/AuthContext';
-import { api, extractApiError, type ApiEnvelope } from '../lib/api';
+import { api, extractApiError, type ApiEnvelope } from '../services/auth.service';
 import type { AuthResponse } from '../types/auth';
 
 const loginSchema = z.object({

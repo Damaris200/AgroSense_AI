@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { PasswordStrength } from '../components/auth/PasswordStrength';
 import { AuthSplitLayout } from '../components/layout/AuthSplitLayout';
 import { useAuth } from '../context/AuthContext';
-import { api, extractApiError, type ApiEnvelope } from '../lib/api';
+import { api, extractApiError, type ApiEnvelope } from '../services/auth.service';
 import type { AuthResponse, AuthUser, Locale } from '../types/auth';
 
 const phonePattern = /^\+?[1-9]\d{7,14}$/;
