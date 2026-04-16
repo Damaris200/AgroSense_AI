@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Recommendation {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  farmId       String   @map("farm_id") @db.Uuid       // cross-DB ref to farm_db.farms — no FK enforced
+  submissionId String   @map("submission_id") @db.Uuid // Kafka event correlation ID
+  content      String
+  model        String
+  generatedAt  DateTime @default(now()) @map("generated_at")
+
+  @@map("recommendations")
+}

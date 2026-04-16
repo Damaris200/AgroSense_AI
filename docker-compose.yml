@@ -23,14 +23,15 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./infrastructure/postgres/schemas:/schemas:ro
     networks:
       - agrosense-net
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U agrosense']
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
