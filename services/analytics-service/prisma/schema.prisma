@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model EventLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventType    String   @map("event_type")
+  submissionId String   @map("submission_id") @db.Uuid // Kafka event correlation ID
+  payloadJson  Json     @map("payload_json")
+  loggedAt     DateTime @default(now()) @map("logged_at")
+
+  @@map("event_logs")
+}
