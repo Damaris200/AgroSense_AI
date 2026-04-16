@@ -29,7 +29,7 @@ export function AuthSplitLayout({
   children,
 }: AuthSplitLayoutProps) {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.1),_transparent_45%),linear-gradient(180deg,#f3f8f2_0%,#ffffff_42%,#ecfdf5_100%)]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.1),transparent_45%),linear-gradient(180deg,#f3f8f2_0%,#ffffff_42%,#ecfdf5_100%)]">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8 lg:py-8 md:grid md:grid-cols-2 md:gap-6">
         <section className="order-1 flex items-center justify-center py-4 md:order-2 md:py-0">
           <div className="w-full max-w-md rounded-3xl border border-white/70 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-10">
@@ -50,7 +50,7 @@ export function AuthSplitLayout({
           </div>
         </section>
 
-        <section className="relative order-2 overflow-hidden rounded-[2rem] border border-emerald-900/10 bg-gradient-to-br from-emerald-900 via-green-800 to-lime-900 px-6 py-8 text-white shadow-[0_24px_80px_rgba(4,120,87,0.2)] md:order-1 md:flex md:flex-col md:justify-between md:px-8 md:py-10">
+        <section className="relative order-2 overflow-hidden rounded-4xl border border-emerald-900/10 bg-linear-to-br from-emerald-900 via-green-800 to-lime-900 px-6 py-8 text-white shadow-[0_24px_80px_rgba(4,120,87,0.2)] md:order-1 md:flex md:flex-col md:justify-between md:px-8 md:py-10">
           <div className="absolute inset-0">
             <div className="animate-drift absolute -top-20 right-6 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
             <div className="animate-float-slow absolute bottom-0 left-0 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl" />

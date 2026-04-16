@@ -1,26 +1,14 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { env } from '../config/env';
 import { ConflictError, UnauthorizedError, ValidationError } from '../errors';
 import type { CreateUserDto } from '../models/user.model';
+import { registerSchema, loginSchema } from '../schemas/auth.schemas';
 
-// ── Zod validation schemas ────────────────────────────────────────────────────
-
-export const registerSchema = z.object({
-  name:     z.string().min(2, 'Name must be at least 2 characters').max(100),
-  email:    z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  phone:    z.string().optional(),
-  locale:   z.enum(['en', 'fr']).optional(),
-});
-
-export const loginSchema = z.object({
-  email:    z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+// Re-export schemas so routes can import from one place
+export { registerSchema, loginSchema };
 
 // ── Public user select (never exposes passwordHash) ───────────────────────────
 
