@@ -6,9 +6,9 @@ import {
 } from '../models/weather.model';
 
 const validFarmSaved = {
-  submissionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  farmId:       'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-  userId:       'c3d4e5f6-a7b8-9012-cdef-012345678912',
+  submissionId: '11111111-1111-4111-8111-111111111111',
+  farmId:       '22222222-2222-4222-8222-222222222222',
+  userId:       '33333333-3333-4333-8333-333333333333',
   name:         'Okoro Farm',
   location:     'Enugu, Nigeria',
   cropType:     'maize',
@@ -22,6 +22,21 @@ const validFarmSaved = {
 describe('farmSavedEventSchema (weather-service)', () => {
   it('accepts a valid farm.saved payload', () => {
     expect(farmSavedEventSchema.safeParse(validFarmSaved).success).toBe(true);
+  });
+
+  it('rejects latitude outside valid range', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, gpsLat: -91 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects longitude outside valid range', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, gpsLng: 181 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty location', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, location: '' });
+    expect(result.success).toBe(false);
   });
 
   it('rejects missing gpsLat', () => {
@@ -70,10 +85,10 @@ describe('openWeatherResponseSchema', () => {
 // ── weatherFetchedEventSchema ─────────────────────────────────────────────────
 
 const validWeatherFetched = {
-  submissionId:  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  farmId:        'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-  userId:        'c3d4e5f6-a7b8-9012-cdef-012345678912',
-  weatherDataId: 'e5f6a7b8-c9d0-1234-ef01-234567890123',
+  submissionId:  '11111111-1111-4111-8111-111111111111',
+  farmId:        '22222222-2222-4222-8222-222222222222',
+  userId:        '33333333-3333-4333-8333-333333333333',
+  weatherDataId: '55555555-5555-4555-8555-555555555555',
   temperature:   28.5,
   humidity:      72,
   rainfall:      2.3,

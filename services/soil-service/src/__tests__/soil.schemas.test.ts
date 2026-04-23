@@ -2,9 +2,9 @@ import { describe, it, expect } from 'bun:test';
 import { farmSavedEventSchema, soilAnalyzedEventSchema } from '../models/soil.model';
 
 const validFarmSaved = {
-  submissionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  farmId:       'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-  userId:       'c3d4e5f6-a7b8-9012-cdef-012345678912',
+  submissionId: '11111111-1111-4111-8111-111111111111',
+  farmId:       '22222222-2222-4222-8222-222222222222',
+  userId:       '33333333-3333-4333-8333-333333333333',
   name:         'Okoro Farm',
   location:     'Enugu, Nigeria',
   cropType:     'maize',
@@ -18,6 +18,21 @@ const validFarmSaved = {
 describe('farmSavedEventSchema', () => {
   it('accepts a valid farm.saved payload', () => {
     expect(farmSavedEventSchema.safeParse(validFarmSaved).success).toBe(true);
+  });
+
+  it('rejects latitude outside valid range', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, gpsLat: 120 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects longitude outside valid range', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, gpsLng: -190 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty cropType', () => {
+    const result = farmSavedEventSchema.safeParse({ ...validFarmSaved, cropType: '' });
+    expect(result.success).toBe(false);
   });
 
   it('rejects missing submissionId', () => {
@@ -39,10 +54,10 @@ describe('farmSavedEventSchema', () => {
 // ── soilAnalyzedEventSchema ───────────────────────────────────────────────────
 
 const validSoilAnalyzed = {
-  submissionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  farmId:       'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-  userId:       'c3d4e5f6-a7b8-9012-cdef-012345678912',
-  soilDataId:   'd4e5f6a7-b8c9-0123-def0-123456789123',
+  submissionId: '11111111-1111-4111-8111-111111111111',
+  farmId:       '22222222-2222-4222-8222-222222222222',
+  userId:       '33333333-3333-4333-8333-333333333333',
+  soilDataId:   '44444444-4444-4444-8444-444444444444',
   ph:           6.5,
   moisture:     45.2,
   nitrogen:     120.0,

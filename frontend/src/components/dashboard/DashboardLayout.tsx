@@ -113,7 +113,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className={`flex h-screen overflow-hidden ${mainBg}`}>
       {/* desktop sidebar */}
-      <div className="hidden w-56 flex-shrink-0 md:block">{sidebar}</div>
+      <div className="hidden w-56 shrink-0 md:block">{sidebar}</div>
 
       {/* mobile sidebar overlay */}
       {sidebarOpen && (

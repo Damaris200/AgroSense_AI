@@ -28,7 +28,7 @@ export function StatCard({ label, value, icon, accent = 'emerald', sub }: StatCa
           <p className={`mt-1.5 font-display text-3xl font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>{value}</p>
           {sub && <p className={`mt-1 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{sub}</p>}
         </div>
-        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${isDark ? colors.darkBg : colors.bg}`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isDark ? colors.darkBg : colors.bg}`}>
           {icon}
         </div>
       </div>
