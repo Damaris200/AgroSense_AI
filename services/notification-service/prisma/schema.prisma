@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Notification {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId  String   @map("user_id") @db.Uuid   // cross-DB ref to auth_db.users — no FK enforced
+  farmId  String   @map("farm_id") @db.Uuid   // cross-DB ref to farm_db.farms — no FK enforced
+  message String
+  channel String   // e.g. "email" | "sms" | "push"
+  sentAt  DateTime @default(now()) @map("sent_at")
+
+  @@map("notifications")
+}
