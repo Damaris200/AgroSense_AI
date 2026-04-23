@@ -1,4 +1,4 @@
-import { AlertCircle, Eye, EyeOff, LoaderCircle, Mail, LockKeyhole } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Fingerprint, LoaderCircle, Mail, LockKeyhole } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
 import { AuthSplitLayout } from '../components/layout/AuthSplitLayout';
@@ -7,8 +7,18 @@ import { useLoginForm } from '../hooks/useLoginForm';
 
 export function LoginPage() {
   const { isAuthenticated } = useAuth();
-  const { form, onSubmit, apiError, showPassword, togglePassword, isSubmitting, errors } =
-    useLoginForm();
+  const {
+    form,
+    onSubmit,
+    apiError,
+    showPassword,
+    togglePassword,
+    onPasskeySignIn,
+    isPasskeySubmitting,
+    isPasskeySupported,
+    isSubmitting,
+    errors,
+  } = useLoginForm();
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
@@ -105,6 +115,35 @@ export function LoginPage() {
               'Sign In'
             )}
           </button>
+
+          <div className="flex items-center gap-3 pt-1">
+            <div className="h-px flex-1 bg-zinc-200" />
+            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">or</span>
+            <div className="h-px flex-1 bg-zinc-200" />
+          </div>
+
+          <button
+            type="button"
+            onClick={onPasskeySignIn}
+            disabled={isSubmitting || isPasskeySubmitting || !isPasskeySupported}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPasskeySubmitting ? (
+              <>
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+                Verifying passkey...
+              </>
+            ) : (
+              <>
+                <Fingerprint className="h-4 w-4" />
+                Continue with Passkey
+              </>
+            )}
+          </button>
+
+          <p className="text-center text-xs text-zinc-500">
+            Passkey uses your device biometric (fingerprint/face) where available.
+          </p>
         </form>
       </div>
     </AuthSplitLayout>

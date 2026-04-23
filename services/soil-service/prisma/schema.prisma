@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SoilData {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  farmId      String   @map("farm_id") @db.Uuid   // cross-DB ref to farm_db.farms — no FK enforced
+  ph          Float
+  moisture    Float
+  nitrogen    Float
+  phosphorus  Float
+  potassium   Float
+  analyzedAt  DateTime @default(now()) @map("analyzed_at")
+
+  @@map("soil_data")
+}

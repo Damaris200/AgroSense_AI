@@ -1,0 +1,12 @@
+{
+  "name": "agrosense-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:infra": "bun test tests/infrastructure"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "pg": "^8.13.0"
+  }
+}
