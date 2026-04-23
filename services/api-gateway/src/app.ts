@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
 import { notFoundHandler, errorHandler } from './middleware/error';
+import farmRoutes from "./routes/farm.routes";
 
 export function createApp() {
   const app = express();
@@ -18,9 +19,7 @@ export function createApp() {
     res.json({ status: 'ok', service: 'api-gateway', timestamp: new Date().toISOString() });
   });
 
-  // Route modules are mounted here as each service is built, e.g.:
-  // import farmRoutes from './routes/farm.routes';
-  // app.use('/api/farm', farmRoutes);
+  app.use("/api/farm", farmRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
