@@ -1,5 +1,3 @@
-import { prisma } from '../config/prisma';
-import { env } from '../config/env';
 import { openWeatherResponseSchema } from '../models/weather.model';
 import type { FarmSavedEvent, OpenWeatherResponse, WeatherFetchedEvent } from '../models/weather.model';
 
@@ -40,8 +38,13 @@ export function buildWeatherFetchedEvent(
 }
 
 async function fetchFromOpenWeather(lat: number, lng: number): Promise<ParsedWeather> {
+  const openWeatherApiKey = process.env.OPENWEATHER_API_KEY;
+  if (!openWeatherApiKey) {
+    throw new Error('OPENWEATHER_API_KEY is required');
+  }
+
   const url =
-    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${env.openWeatherApiKey}`;
+    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${openWeatherApiKey}`;
 
   const res = await fetch(url);
   if (!res.ok) {
@@ -58,6 +61,7 @@ async function fetchFromOpenWeather(lat: number, lng: number): Promise<ParsedWea
 }
 
 export async function processFarmSaved(event: FarmSavedEvent): Promise<WeatherFetchedEvent> {
+  const { prisma } = await import('../config/prisma');
   const weather = await fetchFromOpenWeather(event.gpsLat, event.gpsLng);
 
   const record = await prisma.weatherData.create({

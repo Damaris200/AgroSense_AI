@@ -4,11 +4,11 @@ export const farmSavedEventSchema = z.object({
   submissionId: z.string().uuid(),
   farmId:       z.string().uuid(),
   userId:       z.string().uuid(),
-  name:         z.string(),
-  location:     z.string(),
-  cropType:     z.string(),
-  gpsLat:       z.number(),
-  gpsLng:       z.number(),
+  name:         z.string().trim().min(1),
+  location:     z.string().trim().min(1),
+  cropType:     z.string().trim().min(1),
+  gpsLat:       z.number().min(-90).max(90),
+  gpsLng:       z.number().min(-180).max(180),
   savedAt:      z.string().datetime(),
 });
 

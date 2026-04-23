@@ -58,7 +58,7 @@ export function FarmerOverviewPage() {
           <ul className="space-y-3">
             {recentActivity.map((item) => (
               <li key={item.id} className="flex items-start gap-3">
-                <div className={`mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[item.type as keyof typeof typeBgDark] : typeBg[item.type as keyof typeof typeBg]}`}>
+                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[item.type as keyof typeof typeBgDark] : typeBg[item.type as keyof typeof typeBg]}`}>
                   {typeIcon[item.type as keyof typeof typeIcon]}
                 </div>
                 <div className="min-w-0">

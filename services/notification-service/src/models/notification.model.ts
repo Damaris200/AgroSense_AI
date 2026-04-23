@@ -4,8 +4,8 @@ export const recommendationGeneratedEventSchema = z.object({
   farmId:         z.string().uuid(),
   userId:         z.string().uuid(),
   userEmail:      z.string().email(),
-  userName:       z.string().min(1),
-  recommendation: z.string().min(1),
+  userName:       z.string().trim().min(1),
+  recommendation: z.string().trim().min(1),
   generatedAt:    z.string().datetime(),
 });
 

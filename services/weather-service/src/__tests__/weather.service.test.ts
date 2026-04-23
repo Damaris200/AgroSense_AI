@@ -47,9 +47,9 @@ describe('parseOpenWeatherResponse', () => {
 
 describe('buildWeatherFetchedEvent', () => {
   const farmEvent = {
-    submissionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    farmId:       'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-    userId:       'c3d4e5f6-a7b8-9012-cdef-012345678912',
+    submissionId: '11111111-1111-4111-8111-111111111111',
+    farmId:       '22222222-2222-4222-8222-222222222222',
+    userId:       '33333333-3333-4333-8333-333333333333',
     name:         'Okoro Farm',
     location:     'Enugu',
     cropType:     'maize',
@@ -59,8 +59,8 @@ describe('buildWeatherFetchedEvent', () => {
   };
 
   const weatherRecord = {
-    id:          'e5f6a7b8-c9d0-1234-ef01-234567890123',
-    farmId:      'b2c3d4e5-f6a7-8901-bcde-f01234567891',
+    id:          '55555555-5555-4555-8555-555555555555',
+    farmId:      '22222222-2222-4222-8222-222222222222',
     temperature: 28.5,
     humidity:    72,
     rainfall:    3.0,

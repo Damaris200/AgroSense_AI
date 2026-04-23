@@ -2,8 +2,8 @@ import { describe, it, expect } from 'bun:test';
 import { buildRecommendationEmail } from '../services/email.service';
 
 const event = {
-  farmId:         'b2c3d4e5-f6a7-8901-bcde-f01234567891',
-  userId:         'c3d4e5f6-a7b8-9012-cdef-012345678912',
+  farmId:         '22222222-2222-4222-8222-222222222222',
+  userId:         '33333333-3333-4333-8333-333333333333',
   userEmail:      'anya@farm.com',
   userName:       'Anya Okoro',
   recommendation: 'Plant maize between May 1–10 when soil moisture reaches 50%.',

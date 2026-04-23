@@ -1,18 +1,22 @@
 import nodemailer from 'nodemailer';
-import { env } from '../config/env';
 import type { RecommendationGeneratedEvent, EmailPayload } from '../models/notification.model';
 
 let _transporter: nodemailer.Transporter | null = null;
 
 function getTransporter(): nodemailer.Transporter {
   if (!_transporter) {
+    const smtpHost = process.env.SMTP_HOST ?? 'smtp.ethereal.email';
+    const smtpPort = Number.parseInt(process.env.SMTP_PORT ?? '587', 10);
+    const smtpUser = process.env.SMTP_USER ?? '';
+    const smtpPass = process.env.SMTP_PASS ?? '';
+
     _transporter = nodemailer.createTransport({
-      host:   env.smtp.host,
-      port:   env.smtp.port,
-      secure: env.smtp.port === 465,
+      host:   smtpHost,
+      port:   smtpPort,
+      secure: smtpPort === 465,
       auth: {
-        user: env.smtp.user,
-        pass: env.smtp.pass,
+        user: smtpUser,
+        pass: smtpPass,
       },
     });
   }
@@ -81,8 +85,9 @@ export function buildRecommendationEmail(event: RecommendationGeneratedEvent): E
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
   const transporter = getTransporter();
+  const smtpFrom = process.env.SMTP_FROM ?? 'AgroSense AI <noreply@agrosense.ai>';
   const info = await transporter.sendMail({
-    from:    env.smtp.from,
+    from:    smtpFrom,
     to:      payload.to,
     subject: payload.subject,
     html:    payload.html,

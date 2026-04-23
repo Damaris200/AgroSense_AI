@@ -1,4 +1,3 @@
-import { prisma } from '../config/prisma';
 import type { FarmSavedEvent, SoilAnalyzedEvent } from '../models/soil.model';
 
 interface SoilReading {
@@ -47,6 +46,7 @@ export function buildSoilAnalyzedEvent(
 }
 
 export async function processFarmSaved(event: FarmSavedEvent): Promise<SoilAnalyzedEvent> {
+  const { prisma } = await import('../config/prisma');
   const reading = simulateSoilData(event.cropType);
 
   const soilRecord = await prisma.soilData.create({

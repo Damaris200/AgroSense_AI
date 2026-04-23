@@ -51,7 +51,7 @@ export function FarmerNotificationsPage() {
 
               return (
                 <li key={notif.id} className={`flex items-start gap-4 p-4 ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
-                  <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${isDark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-50 text-blue-600'}`}>
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${isDark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-50 text-blue-600'}`}>
                     {channelIcon[notif.channel]}
                   </div>
                   <div className="min-w-0 flex-1">
