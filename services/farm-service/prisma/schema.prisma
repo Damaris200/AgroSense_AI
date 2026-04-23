@@ -7,14 +7,14 @@ datasource db {
 }
 
 model Farm {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid   // cross-DB ref to auth_db.users — no FK enforced
-  name      String
-  location  String
-  cropType  String   @map("crop_type")
-  gpsLat    Float    @map("gps_lat")
-  gpsLng    Float    @map("gps_lng")
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  submissionId String   @unique
+  userId       String
+  cropType     String
+  location     String
+  gpsLat       Float
+  gpsLng       Float
+  createdAt    DateTime @default(now())
 
   @@map("farms")
 }
