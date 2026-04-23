@@ -113,6 +113,7 @@ services:
       DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/farm_db
       JWT_SECRET: dev_secret_key
       NODE_ENV: development
+      KAFKA_BROKERS: kafka:29092
     depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
     networks: [agrosense-net]
 
