@@ -16,7 +16,7 @@ export function PageHeader({ title, subtitle, action }: PageHeaderProps) {
         <h1 className={`font-display text-2xl font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>{title}</h1>
         {subtitle && <p className={`mt-1 text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{subtitle}</p>}
       </div>
-      {action && <div className="flex-shrink-0">{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
