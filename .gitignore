@@ -34,3 +34,4 @@ generated/
 
 # Test coverage
 coverage/
+node_modules
