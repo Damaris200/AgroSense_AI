@@ -141,10 +141,15 @@ services:
   #   depends_on: { kafka: { condition: service_healthy } }
   #   networks: [agrosense-net]
 
-  # orchestrator-service:
-  #   build: ./services/orchestrator-service
-  #   depends_on: { kafka: { condition: service_healthy } }
-  #   networks: [agrosense-net]
+  orchestrator-service:
+    build: ./services/orchestrator-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: orchestrator-service
+      KAFKA_GROUP_ID: orchestrator-service-group
+      NODE_ENV: development
+    depends_on: { kafka: { condition: service_healthy } }
+    networks: [agrosense-net]
 
   # ai-service:
   #   build: ./services/ai-service
