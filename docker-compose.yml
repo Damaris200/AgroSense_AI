@@ -170,12 +170,16 @@ services:
   #   depends_on: { kafka: { condition: service_healthy } }
   #   networks: [agrosense-net]
 
-  # analytics-service:
-  #   build: ./services/analytics-service
-  #   environment:
-  #     DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
-  #   depends_on: { kafka: { condition: service_healthy } }
-  #   networks: [agrosense-net]
+  analytics-service:
+      build: ./services/analytics-service
+      environment:
+        KAFKA_BROKERS: kafka:29092
+        KAFKA_CLIENT_ID: analytics-service
+        KAFKA_GROUP_ID: analytics-service-group
+        DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
+        NODE_ENV: production
+      depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
+      networks: [agrosense-net]
 
   # ── Frontend ─────────────────────────────────────────────────────────────────
 
