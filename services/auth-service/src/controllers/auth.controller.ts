@@ -45,3 +45,36 @@ export async function updateProfile(req: AuthRequest, res: Response, next: NextF
     next(err);
   }
 }
+
+export async function listUsers(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const ids = (req.query.ids as string | undefined)
+      ?.split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const limit = Number(req.query.limit ?? 100);
+    const users = await authService.listUsers({ ids, limit });
+    ok(res, { users });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getUserStats(_req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const stats = await authService.getUserStats();
+    ok(res, { stats });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateUserActive(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const { isActive } = req.body as { isActive: boolean };
+    const user = await authService.setUserActive(req.params.id!, Boolean(isActive));
+    ok(res, { user });
+  } catch (err) {
+    next(err);
+  }
+}

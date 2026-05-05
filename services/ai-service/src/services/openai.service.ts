@@ -1,6 +1,13 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
+const openAiModel = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+const openAiKey = process.env.OPENAI_API_KEY ?? "";
+
+const client = openAiKey ? new OpenAI({ apiKey: openAiKey }) : null;
+
+export function getOpenAiModel(): string {
+  return openAiModel;
+}
 
 export async function generateRecommendation(data: {
   cropType: string;
@@ -19,15 +26,12 @@ export async function generateRecommendation(data: {
     potassium: number;
   };
 }): Promise<string> {
-
-  // Use mock if API key is not set or quota is exhausted
-  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "mock") {
+  // Use mock if API key is not set or explicitly disabled.
+  if (!client || openAiKey === "mock") {
     return generateMockRecommendation(data);
   }
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-    const prompt = `
+  const prompt = `
 You are an expert agricultural advisor helping small-scale farmers in Africa.
 
 A farmer has submitted the following data:
@@ -43,12 +47,18 @@ Provide a concise practical farming recommendation (3-5 sentences) covering:
 
 Keep language simple and actionable.
 `;
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+
+  try {
+    const response = await client.chat.completions.create({
+      model: openAiModel,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    return response.choices[0]?.message?.content?.trim() || generateMockRecommendation(data);
   } catch (err: any) {
-    // Fall back to mock if quota exceeded
     if (err?.status === 429) {
-      console.warn("[ai-service] Gemini quota exceeded, using mock recommendation");
+      console.warn("[ai-service] OpenAI quota exceeded, using mock recommendation");
       return generateMockRecommendation(data);
     }
     throw err;
@@ -63,7 +73,7 @@ function generateMockRecommendation(data: {
 }): string {
   const phStatus = data.soil.pH >= 5.5 && data.soil.pH <= 7.0 ? "suitable" : "needs adjustment";
   const weatherStatus = data.weather.temperature >= 20 && data.weather.temperature <= 35 ? "favorable" : "challenging";
-  
+
   return `Current conditions in ${data.location} are ${weatherStatus} for growing ${data.cropType}. ` +
     `Temperature of ${data.weather.temperature}°C and humidity of ${data.weather.humidity}% provide ${weatherStatus} growing conditions. ` +
     `Your soil pH of ${data.soil.pH} is ${phStatus} for ${data.cropType} cultivation — ${phStatus === "suitable" ? "no amendments needed" : "consider adding lime to raise pH"}. ` +

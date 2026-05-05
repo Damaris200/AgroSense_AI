@@ -20,3 +20,29 @@ export async function listNotifications(req: Request): Promise<Response> {
     return handleError(err);
   }
 }
+
+export async function listAllNotifications(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const limit = Number(url.searchParams.get('limit') ?? 100);
+
+  try {
+    const notifications = await prisma.notification.findMany({
+      orderBy: { sentAt: 'desc' },
+      take: limit,
+    });
+    return Response.json({ success: true, data: notifications });
+  } catch (err) {
+    console.error('[notification-service] GET /api/admin/notifications error:', err);
+    return handleError(err);
+  }
+}
+
+export async function getNotificationStats(): Promise<Response> {
+  try {
+    const totalNotifications = await prisma.notification.count();
+    return Response.json({ success: true, data: { totalNotifications } });
+  } catch (err) {
+    console.error('[notification-service] GET /api/admin/notifications/stats error:', err);
+    return handleError(err);
+  }
+}

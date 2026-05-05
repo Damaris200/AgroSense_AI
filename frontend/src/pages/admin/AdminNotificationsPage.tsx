@@ -1,27 +1,11 @@
-import { Bell, Filter, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, Bell, Filter, Loader2, Mail } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
 import { useTheme } from '../../context/ThemeContext';
-
-interface NotificationLog {
-  id:        string;
-  channel:   'email' | 'sms' | 'push';
-  recipient: string;
-  message:   string;
-  status:    'sent' | 'failed' | 'pending';
-  sentAt:    string;
-}
-
-const mockNotifications: NotificationLog[] = [
-  { id: '1', channel: 'email', recipient: 'anya@farm.com',     message: 'Farm analysis complete: North Field maize.',      status: 'sent',    sentAt: '2026-04-21T08:32:00.000Z' },
-  { id: '2', channel: 'email', recipient: 'kofi@agro.com',     message: 'System notification: New user registration.',     status: 'sent',    sentAt: '2026-04-21T07:15:00.000Z' },
-  { id: '3', channel: 'email', recipient: 'amara@farm.com',    message: 'Weekly summary: 5 farms analyzed.',              status: 'failed',  sentAt: '2026-04-20T18:00:00.000Z' },
-  { id: '4', channel: 'sms',   recipient: '+234-803-456-7890', message: 'Your farm analysis is ready. Check your email.',  status: 'sent',    sentAt: '2026-04-20T14:22:00.000Z' },
-  { id: '5', channel: 'email', recipient: 'emeka@farm.com',    message: 'Recommendation: Apply irrigation to field B.',    status: 'sent',    sentAt: '2026-04-20T12:10:00.000Z' },
-  { id: '6', channel: 'push',  recipient: 'emeka@farm.com',    message: 'Soil moisture alert: Below optimal range.',       status: 'pending', sentAt: '2026-04-21T10:05:00.000Z' },
-];
+import { extractApiError } from '../../services/auth.service';
+import { getAdminNotifications, type AdminNotification } from '../../services/admin.service';
 
 const channelIcon = {
   email: <Mail className="h-4 w-4" />,
@@ -53,21 +37,48 @@ const statusFilterButton = {
 export function AdminNotificationsPage() {
   const { isDark } = useTheme();
   const [filter, setFilter] = useState<'all' | 'sent' | 'failed' | 'pending'>('all');
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filtered = mockNotifications.filter(
+  const filtered = notifications.filter(
     (n) => filter === 'all' || n.status === filter,
   );
 
   const stats = {
-    total: mockNotifications.length,
-    sent: mockNotifications.filter((n) => n.status === 'sent').length,
-    failed: mockNotifications.filter((n) => n.status === 'failed').length,
-    pending: mockNotifications.filter((n) => n.status === 'pending').length,
+    total: notifications.length,
+    sent: notifications.filter((n) => n.status === 'sent').length,
+    failed: notifications.filter((n) => n.status === 'failed').length,
+    pending: notifications.filter((n) => n.status === 'pending').length,
   };
+
+  async function loadNotifications() {
+    setLoading(true);
+    setError('');
+    try {
+      setNotifications(await getAdminNotifications());
+    } catch (err) {
+      setError(extractApiError(err, 'Could not load notifications.'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { void loadNotifications(); }, []);
 
   return (
     <DashboardLayout>
       <PageHeader title="Notification Logs" subtitle="Monitor all notifications sent to farmers and users." />
+
+      {error && (
+        <div className={`mb-4 flex items-start gap-3 rounded-2xl border p-4 ${isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <p className="font-semibold">Unable to load notifications</p>
+            <p className="mt-0.5 text-sm opacity-80">{error}</p>
+          </div>
+        </div>
+      )}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className={`rounded-2xl border p-4 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
@@ -139,7 +150,13 @@ export function AdminNotificationsPage() {
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-500" />
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className={`py-10 text-center text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No notifications found.</td>
                 </tr>

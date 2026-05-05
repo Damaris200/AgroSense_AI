@@ -28,3 +28,8 @@ export async function getRecentEvents(limit = 100): Promise<EventLogRecord[]> {
     take:    limit,
   });
 }
+
+export async function getEventStats(): Promise<{ totalEvents: number }> {
+  const totalEvents = await prisma.eventLog.count();
+  return { totalEvents };
+}

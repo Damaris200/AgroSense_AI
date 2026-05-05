@@ -29,4 +29,5 @@ export const env = {
   soilServiceUrl:      process.env.SOIL_SERVICE_URL         ?? 'http://localhost:3004',
   aiServiceUrl:        process.env.AI_SERVICE_URL           ?? 'http://localhost:4006',
   notificationSvcUrl:  process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3006',
+  analyticsServiceUrl: process.env.ANALYTICS_SERVICE_URL     ?? 'http://localhost:4007',
 } as const;

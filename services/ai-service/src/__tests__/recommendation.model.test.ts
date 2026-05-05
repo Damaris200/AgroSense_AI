@@ -53,7 +53,7 @@ describe('RecommendationGeneratedEvent shape', () => {
     cropType: 'maize',
     location: 'Yaounde, Cameroon',
     recommendation: 'Current conditions are favorable for maize cultivation.',
-    model: 'gemini-2.0-flash-lite',
+    model: 'gpt-4.1-mini',
     generatedAt: new Date().toISOString(),
   };
 
@@ -62,7 +62,7 @@ describe('RecommendationGeneratedEvent shape', () => {
   });
 
   it('has a model name', () => {
-    expect(validEvent.model).toBe('gemini-2.0-flash-lite');
+    expect(validEvent.model).toBe('gpt-4.1-mini');
   });
 
   it('links back to the correct submissionId', () => {
