@@ -1,10 +1,13 @@
 import {
   Bell,
   BarChart2,
+  CloudRain,
+  FlaskConical,
   Leaf,
   LogOut,
   Menu,
   Sprout,
+  UserCircle,
   Users,
   Wheat,
   X,
@@ -24,10 +27,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Overview',        href: '/dashboard',                   icon: <BarChart2 className="h-4 w-4" />,  roles: ['farmer', 'agronomist'] },
-  { label: 'My Farms',        href: '/dashboard/farms',             icon: <Leaf className="h-4 w-4" />,      roles: ['farmer', 'agronomist'] },
-  { label: 'Recommendations', href: '/dashboard/recommendations',   icon: <Wheat className="h-4 w-4" />,     roles: ['farmer', 'agronomist'] },
-  { label: 'Notifications',   href: '/dashboard/notifications',     icon: <Bell className="h-4 w-4" />,      roles: ['farmer', 'agronomist'] },
+  { label: 'Overview',        href: '/dashboard',                   icon: <BarChart2 className="h-4 w-4" />,       roles: ['farmer', 'agronomist'] },
+  { label: 'My Farms',        href: '/dashboard/farms',             icon: <Leaf className="h-4 w-4" />,           roles: ['farmer', 'agronomist'] },
+  { label: 'Weather',         href: '/dashboard/weather',           icon: <CloudRain className="h-4 w-4" />,      roles: ['farmer', 'agronomist'] },
+  { label: 'Soil Analysis',   href: '/dashboard/soil',              icon: <FlaskConical className="h-4 w-4" />,   roles: ['farmer', 'agronomist'] },
+  { label: 'Recommendations', href: '/dashboard/recommendations',   icon: <Wheat className="h-4 w-4" />,          roles: ['farmer', 'agronomist'] },
+  { label: 'Notifications',   href: '/dashboard/notifications',     icon: <Bell className="h-4 w-4" />,           roles: ['farmer', 'agronomist'] },
+  { label: 'Profile',         href: '/dashboard/profile',           icon: <UserCircle className="h-4 w-4" />,     roles: ['farmer', 'agronomist'] },
   { label: 'Admin Overview',  href: '/admin',                       icon: <BarChart2 className="h-4 w-4" />, roles: ['admin'] },
   { label: 'Users',           href: '/admin/users',                 icon: <Users className="h-4 w-4" />,     roles: ['admin'] },
   { label: 'Notifications',   href: '/admin/notifications',         icon: <Bell className="h-4 w-4" />,      roles: ['admin'] },

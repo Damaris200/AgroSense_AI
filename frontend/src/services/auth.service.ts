@@ -10,7 +10,7 @@ export interface ApiEnvelope<T> {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4001',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -59,5 +59,14 @@ export async function registerRequest(payload: {
 
 export async function getMeRequest() {
   const res = await api.get<ApiEnvelope<{ user: AuthUser }>>('/api/auth/me');
+  return res.data.data.user;
+}
+
+export async function updateProfileRequest(data: {
+  name?: string;
+  phone?: string;
+  locale?: 'en' | 'fr';
+}) {
+  const res = await api.put<ApiEnvelope<{ user: AuthUser }>>('/api/auth/profile', data);
   return res.data.data.user;
 }

@@ -8,6 +8,8 @@ const kafka = new Kafka({
 const TEST_TOPIC = "agrosense.test";
 const TEST_MESSAGE = "hello from agrosense";
 
+const RUN_INFRA_TESTS = process.env.RUN_INFRA_TESTS === "1";
+
 async function runTest() {
   const producer = kafka.producer();
   const consumer = kafka.consumer({ groupId: "agrosense-test-group" });
@@ -45,7 +47,11 @@ async function runTest() {
   }
 }
 
-runTest().catch((err) => {
-  console.error(" Kafka test error:", err.message);
-  process.exit(1);
-});
+if (!RUN_INFRA_TESTS) {
+  console.log("Skipping Kafka infrastructure test; set RUN_INFRA_TESTS=1 to run it.");
+} else {
+  runTest().catch((err) => {
+    console.error(" Kafka test error:", err.message);
+    process.exit(1);
+  });
+}

@@ -1,36 +1,38 @@
 interface AnalysisState {
-  farmId: string;
+  farmId:      string;
   submissionId: string;
-  cropType: string;
-  location: string;
-  gpsLat: number;
-  gpsLng: number;
+  userId?:     string;
+  userEmail?:  string;
+  userName?:   string;
+  cropType:    string;
+  location:    string;
+  gpsLat:      number;
+  gpsLng:      number;
   weather?: {
     temperature: number;
-    humidity: number;
-    rainfall: number;
+    humidity:    number;
+    rainfall:    number;
     description: string;
   };
   soil?: {
-    pH: number;
-    moisture: number;
-    nitrogen: number;
+    pH:         number;
+    moisture:   number;
+    nitrogen:   number;
     phosphorus: number;
-    potassium: number;
+    potassium:  number;
   };
 }
 
-// In-memory state store — keyed by submissionId
 const state = new Map<string, AnalysisState>();
 
-export function initState(submissionId: string, data: Omit<AnalysisState, "weather" | "soil">) {
+export function initState(submissionId: string, data: Omit<AnalysisState, 'weather' | 'soil'>) {
   if (!state.has(submissionId)) {
     state.set(submissionId, { ...data });
     console.log(`[orchestrator] initialized state for submissionId=${submissionId}`);
   }
 }
 
-export function setWeather(submissionId: string, weather: AnalysisState["weather"]) {
+export function setWeather(submissionId: string, weather: AnalysisState['weather']) {
   const entry = state.get(submissionId);
   if (entry) {
     entry.weather = weather;
@@ -38,7 +40,7 @@ export function setWeather(submissionId: string, weather: AnalysisState["weather
   }
 }
 
-export function setSoil(submissionId: string, soil: AnalysisState["soil"]) {
+export function setSoil(submissionId: string, soil: AnalysisState['soil']) {
   const entry = state.get(submissionId);
   if (entry) {
     entry.soil = soil;

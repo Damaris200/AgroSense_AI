@@ -1,8 +1,8 @@
-import { consumer } from "../../config/kafka";
-import { initState, setWeather, setSoil, isReady, getState, clearState } from "../../state/analysis.state";
-import { publishAnalysisReady } from "../producers/analysis-ready.producer";
+import { consumer } from '../../config/kafka';
+import { initState, setWeather, setSoil, isReady, getState, clearState } from '../../state/analysis.state';
+import { publishAnalysisReady } from '../producers/analysis-ready.producer';
 
-const TOPICS = ["farm.saved", "weather.fetched", "soil.analyzed"];
+const TOPICS = ['farm.saved', 'weather.fetched', 'soil.analyzed'];
 
 export async function startOrchestratorConsumer(): Promise<void> {
   await consumer.connect();
@@ -22,66 +22,78 @@ export async function startOrchestratorConsumer(): Promise<void> {
       }
 
       try {
-        if (topic === "farm.saved") {
+        if (topic === 'farm.saved') {
           initState(data.submissionId, {
-            farmId: data.farmId,
+            farmId:      data.farmId,
             submissionId: data.submissionId,
-            cropType: data.cropType,
-            location: data.location,
-            gpsLat: data.gpsLat,
-            gpsLng: data.gpsLng,
+            userId:      data.userId,
+            userEmail:   data.userEmail,
+            userName:    data.userName,
+            cropType:    data.cropType,
+            location:    data.location,
+            gpsLat:      data.gpsLat,
+            gpsLng:      data.gpsLng,
           });
         }
 
-        if (topic === "weather.fetched") {
+        if (topic === 'weather.fetched') {
           initState(data.submissionId, {
-            farmId: data.farmId,
+            farmId:      data.farmId,
             submissionId: data.submissionId,
-            cropType: data.cropType ?? "unknown",
-            location: data.location ?? "unknown",
-            gpsLat: data.gpsLat ?? 0,
-            gpsLng: data.gpsLng ?? 0,
+            userId:      data.userId,
+            userEmail:   data.userEmail,
+            userName:    data.userName,
+            cropType:    data.cropType  ?? 'unknown',
+            location:    data.location  ?? 'unknown',
+            gpsLat:      data.gpsLat    ?? 0,
+            gpsLng:      data.gpsLng    ?? 0,
           });
           setWeather(data.submissionId, {
             temperature: data.temperature,
-            humidity: data.humidity,
-            rainfall: data.rainfall,
+            humidity:    data.humidity,
+            rainfall:    data.rainfall,
             description: data.description,
           });
         }
 
-        if (topic === "soil.analyzed") {
+        if (topic === 'soil.analyzed') {
           initState(data.submissionId, {
-            farmId: data.farmId,
+            farmId:      data.farmId,
             submissionId: data.submissionId,
-            cropType: data.cropType ?? "unknown",
-            location: data.location ?? "unknown",
-            gpsLat: data.gpsLat ?? 0,
-            gpsLng: data.gpsLng ?? 0,
+            userId:      data.userId,
+            userEmail:   data.userEmail,
+            userName:    data.userName,
+            cropType:    data.cropType  ?? 'unknown',
+            location:    data.location  ?? 'unknown',
+            gpsLat:      data.gpsLat    ?? 0,
+            gpsLng:      data.gpsLng    ?? 0,
           });
           setSoil(data.submissionId, {
-            pH: data.pH,
-            moisture: data.moisture,
-            nitrogen: data.nitrogen,
+            pH:         data.pH,
+            moisture:   data.moisture,
+            nitrogen:   data.nitrogen,
             phosphorus: data.phosphorus,
-            potassium: data.potassium,
+            potassium:  data.potassium,
           });
         }
 
         if (isReady(data.submissionId)) {
-          const state = getState(data.submissionId)!;
+          const s = getState(data.submissionId)!;
           await publishAnalysisReady({
-            submissionId: state.submissionId,
-            farmId: state.farmId,
-            cropType: state.cropType,
-            location: state.location,
-            gpsLat: state.gpsLat,
-            gpsLng: state.gpsLng,
-            weather: state.weather,
-            soil: state.soil,
-            readyAt: new Date().toISOString(),
+            submissionId: s.submissionId,
+            farmId:       s.farmId,
+            userId:       s.userId   ?? 'anonymous',
+            userEmail:    s.userEmail ?? '',
+            userName:     s.userName  ?? '',
+            cropType:     s.cropType,
+            location:     s.location,
+            gpsLat:       s.gpsLat,
+            gpsLng:       s.gpsLng,
+            weather:      s.weather,
+            soil:         s.soil,
+            readyAt:      new Date().toISOString(),
           });
-          clearState(state.submissionId);
+          clearState(s.submissionId);
         }
       } catch (err) {
         console.error(`[orchestrator] error processing ${topic}:`, err);

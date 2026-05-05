@@ -9,8 +9,11 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AdminNotificationsPage } from './pages/admin/AdminNotificationsPage';
 import { FarmerOverviewPage } from './pages/dashboard/FarmerOverviewPage';
 import { FarmerFarmsPage } from './pages/dashboard/FarmerFarmsPage';
+import { FarmerWeatherPage } from './pages/dashboard/FarmerWeatherPage';
+import { FarmerSoilPage } from './pages/dashboard/FarmerSoilPage';
 import { FarmerRecommendationsPage } from './pages/dashboard/FarmerRecommendationsPage';
 import { FarmerNotificationsPage } from './pages/dashboard/FarmerNotificationsPage';
+import { ProfilePage } from './pages/dashboard/ProfilePage';
 
 function App() {
   return (
@@ -23,8 +26,11 @@ function App() {
         {/* Farmer dashboard routes */}
         <Route path="/dashboard" element={<FarmerOverviewPage />} />
         <Route path="/dashboard/farms" element={<FarmerFarmsPage />} />
+        <Route path="/dashboard/weather" element={<FarmerWeatherPage />} />
+        <Route path="/dashboard/soil" element={<FarmerSoilPage />} />
         <Route path="/dashboard/recommendations" element={<FarmerRecommendationsPage />} />
         <Route path="/dashboard/notifications" element={<FarmerNotificationsPage />} />
+        <Route path="/dashboard/profile" element={<ProfilePage />} />
         {/* Admin routes */}
         <Route path="/admin" element={<AdminOverviewPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />

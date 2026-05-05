@@ -19,6 +19,9 @@ const BASE_CONN = {
   password: 'agrosense_dev',
 };
 
+const RUN_INFRA_TESTS = Bun.env.RUN_INFRA_TESTS === '1';
+const describeInfra = RUN_INFRA_TESTS ? describe : describe.skip;
+
 async function getTablesInDb(database: string): Promise<string[]> {
   const client = new Client({ ...BASE_CONN, database });
   await client.connect();
@@ -55,7 +58,7 @@ async function getColumnsInTable(database: string, table: string): Promise<strin
 }
 
 // ── auth_db ────────────────────────────────────────────────────────────────────
-describe('auth_db schema', () => {
+describeInfra('auth_db schema', () => {
   it('has a users table', async () => {
     const tables = await getTablesInDb('auth_db');
     expect(tables).toContain('users');
@@ -70,7 +73,7 @@ describe('auth_db schema', () => {
 });
 
 // ── farm_db ────────────────────────────────────────────────────────────────────
-describe('farm_db schema', () => {
+describeInfra('farm_db schema', () => {
   it('has a farms table', async () => {
     const tables = await getTablesInDb('farm_db');
     expect(tables).toContain('farms');
@@ -85,7 +88,7 @@ describe('farm_db schema', () => {
 });
 
 // ── weather_db ─────────────────────────────────────────────────────────────────
-describe('weather_db schema', () => {
+describeInfra('weather_db schema', () => {
   it('has a weather_data table', async () => {
     const tables = await getTablesInDb('weather_db');
     expect(tables).toContain('weather_data');
@@ -100,7 +103,7 @@ describe('weather_db schema', () => {
 });
 
 // ── soil_db ────────────────────────────────────────────────────────────────────
-describe('soil_db schema', () => {
+describeInfra('soil_db schema', () => {
   it('has a soil_data table', async () => {
     const tables = await getTablesInDb('soil_db');
     expect(tables).toContain('soil_data');
@@ -115,7 +118,7 @@ describe('soil_db schema', () => {
 });
 
 // ── notification_db ────────────────────────────────────────────────────────────
-describe('notification_db schema', () => {
+describeInfra('notification_db schema', () => {
   it('has a notifications table', async () => {
     const tables = await getTablesInDb('notification_db');
     expect(tables).toContain('notifications');
@@ -130,7 +133,7 @@ describe('notification_db schema', () => {
 });
 
 // ── ai_db ──────────────────────────────────────────────────────────────────────
-describe('ai_db schema', () => {
+describeInfra('ai_db schema', () => {
   it('has a recommendations table', async () => {
     const tables = await getTablesInDb('ai_db');
     expect(tables).toContain('recommendations');
@@ -145,7 +148,7 @@ describe('ai_db schema', () => {
 });
 
 // ── analytics_db ───────────────────────────────────────────────────────────────
-describe('analytics_db schema', () => {
+describeInfra('analytics_db schema', () => {
   it('has an event_logs table', async () => {
     const tables = await getTablesInDb('analytics_db');
     expect(tables).toContain('event_logs');
