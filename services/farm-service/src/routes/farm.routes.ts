@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getFarmById, getFarmsByUserId } from "../services/farm.service";
+import { countFarms, getFarmById, getFarmsByUserId } from "../services/farm.service";
 
 const router = Router();
 
@@ -12,6 +12,16 @@ router.get("/", async (req, res, next) => {
       "anonymous";
     const farms = await getFarmsByUserId(userId);
     res.json({ success: true, data: farms });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/farms/admin/stats — basic farm stats
+router.get("/admin/stats", async (_req, res, next) => {
+  try {
+    const totalFarms = await countFarms();
+    res.json({ success: true, data: { totalFarms } });
   } catch (err) {
     next(err);
   }

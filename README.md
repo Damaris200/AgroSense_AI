@@ -75,17 +75,17 @@ API GATEWAY  ──publishes──►  farm.submitted
 
 ## Services
 
-| Service | Responsibility | Owns DB |
-|---|---|---|
-| **API Gateway** | Single entry point. Validates incoming requests, publishes events. | — |
-| **Auth Service** | Registration, login, JWT issuance and validation. | `auth_db` |
-| **Farm Service** | Persists farm submissions. Publishes `farm.saved`. | `farm_db` |
-| **Weather Service** | Fetches weather data via OpenWeather API. | `weather_db` |
-| **Soil Service** | Analyzes (or simulates) soil data. | `soil_db` |
-| **Orchestrator** | Waits for weather + soil per submission, then emits `analysis.ready`. | (state store) |
-| **AI Service** | Calls the LLM, generates recommendations. | `ai_db` |
-| **Notification Service** | Delivers recommendations via email/SMS/in-app. | `notification_db` |
-| **Analytics Service** | Logs events and metrics across the system. | `analytics_db` |
+| Service                        | Responsibility                                                          | Owns DB             |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------- |
+| **API Gateway**          | Single entry point. Validates incoming requests, publishes events.      | —                  |
+| **Auth Service**         | Registration, login, JWT issuance and validation.                       | `auth_db`         |
+| **Farm Service**         | Persists farm submissions. Publishes `farm.saved`.                    | `farm_db`         |
+| **Weather Service**      | Fetches weather data via OpenWeather API.                               | `weather_db`      |
+| **Soil Service**         | Analyzes (or simulates) soil data.                                      | `soil_db`         |
+| **Orchestrator**         | Waits for weather + soil per submission, then emits `analysis.ready`. | (state store)       |
+| **AI Service**           | Calls the LLM, generates recommendations.                               | `ai_db`           |
+| **Notification Service** | Delivers recommendations via email/SMS/in-app.                          | `notification_db` |
+| **Analytics Service**    | Logs events and metrics across the system.                              | `analytics_db`    |
 
 See **[docs/EVENTS.md](./docs/EVENTS.md)** for the full event contract.
 
@@ -93,14 +93,14 @@ See **[docs/EVENTS.md](./docs/EVENTS.md)** for the full event contract.
 
 ## Event flow
 
-| # | Topic | Producer | Consumer(s) | Purpose |
-|---|---|---|---|---|
-| 1 | `farm.submitted` | API Gateway | Farm Service | New farm data from client |
-| 2 | `farm.saved` | Farm Service | Weather, Soil | Farm persisted, trigger analysis |
-| 3 | `weather.fetched` | Weather Service | Orchestrator | Weather ready for this farm |
-| 4 | `soil.analyzed` | Soil Service | Orchestrator | Soil ready for this farm |
-| 5 | `analysis.ready` | Orchestrator | AI Service | Both weather + soil ready |
-| 6 | `recommendation.generated` | AI Service | Notification, Analytics | AI output ready |
+| # | Topic                        | Producer        | Consumer(s)             | Purpose                          |
+| - | ---------------------------- | --------------- | ----------------------- | -------------------------------- |
+| 1 | `farm.submitted`           | API Gateway     | Farm Service            | New farm data from client        |
+| 2 | `farm.saved`               | Farm Service    | Weather, Soil           | Farm persisted, trigger analysis |
+| 3 | `weather.fetched`          | Weather Service | Orchestrator            | Weather ready for this farm      |
+| 4 | `soil.analyzed`            | Soil Service    | Orchestrator            | Soil ready for this farm         |
+| 5 | `analysis.ready`           | Orchestrator    | AI Service              | Both weather + soil ready        |
+| 6 | `recommendation.generated` | AI Service      | Notification, Analytics | AI output ready                  |
 
 Full schemas, examples, and error-handling rules are in **[docs/EVENTS.md](./docs/EVENTS.md)**.
 
@@ -288,11 +288,11 @@ We write tests **before** the code, not after. The loop is:
 
 We write three kinds of tests:
 
-| Kind | What it tests | Tools |
-|---|---|---|
-| **Unit** | Pure functions, schemas, validators | Jest |
-| **Integration** | Service + DB, service + Kafka | Jest + Testcontainers |
-| **E2E** | Full flow: form submit → recommendation displayed | Cypress |
+| Kind                  | What it tests                                      | Tools                 |
+| --------------------- | -------------------------------------------------- | --------------------- |
+| **Unit**        | Pure functions, schemas, validators                | Jest                  |
+| **Integration** | Service + DB, service + Kafka                      | Jest + Testcontainers |
+| **E2E**         | Full flow: form submit → recommendation displayed | Cypress               |
 
 ---
 
@@ -359,4 +359,3 @@ test(auth): cover expired JWT case
 ## Team
 
 Built by the AgroSense team as a real-world demonstration of event-driven architecture and applied AI in agriculture.
-

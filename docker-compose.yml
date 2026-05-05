@@ -23,7 +23,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -114,6 +114,7 @@ services:
       JWT_SECRET: dev_secret_key
       NODE_ENV: development
       KAFKA_BROKERS: kafka:29092
+      ANALYTICS_SERVICE_URL: http://analytics-service:4007
     depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
     networks: [agrosense-net]
 
@@ -178,8 +179,11 @@ services:
         KAFKA_GROUP_ID: analytics-service-group
         DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
         NODE_ENV: production
+        PORT: 4007
       depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
       networks: [agrosense-net]
+      ports:
+        - '4007:4007'
 
   # ── Frontend ─────────────────────────────────────────────────────────────────
 

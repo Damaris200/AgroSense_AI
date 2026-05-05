@@ -10,16 +10,19 @@
  */
 
 import { Client } from 'pg';
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
+
+
+const PG_PORT = Number(process.env.PG_PORT ?? '5433');
 
 const BASE_CONN = {
   host: 'localhost',
-  port: 5432,
+  port: PG_PORT,
   user: 'agrosense',
   password: 'agrosense_dev',
 };
 
-const RUN_INFRA_TESTS = Bun.env.RUN_INFRA_TESTS === '1';
+const RUN_INFRA_TESTS = process.env.RUN_INFRA_TESTS === '1';
 const describeInfra = RUN_INFRA_TESTS ? describe : describe.skip;
 
 async function getTablesInDb(database: string): Promise<string[]> {
@@ -96,7 +99,7 @@ describeInfra('weather_db schema', () => {
 
   it('weather_data table has required columns', async () => {
     const cols = await getColumnsInTable('weather_db', 'weather_data');
-    for (const col of ['id', 'farm_id', 'temperature', 'humidity', 'rainfall', 'forecast_json', 'fetched_at']) {
+    for (const col of ['id', 'farm_id', 'temperature', 'humidity', 'rainfall', 'wind_speed', 'description', 'fetched_at']) {
       expect(cols).toContain(col);
     }
   });

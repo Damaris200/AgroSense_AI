@@ -1,5 +1,5 @@
 import { consumer } from '../../config/kafka';
-import { generateRecommendation } from '../../services/gemini.service';
+import { generateRecommendation, getOpenAiModel } from '../../services/openai.service';
 import { publishRecommendation } from '../producers/recommendation.producer';
 import { prisma } from '../../config/prisma';
 import type { AnalysisReadyEvent } from '../../models/recommendation.model';
@@ -35,13 +35,15 @@ export async function startAnalysisReadyConsumer(): Promise<void> {
         const userEmail = data.userEmail ?? '';
         const userName  = data.userName  ?? '';
 
+        const model = getOpenAiModel();
+
         await prisma.recommendation.create({
           data: {
             farmId:       data.farmId,
             userId,
             submissionId: data.submissionId,
             content:      recommendation,
-            model:        'gemini-2.0-flash-lite',
+            model,
           },
         });
 
@@ -56,7 +58,7 @@ export async function startAnalysisReadyConsumer(): Promise<void> {
           cropType:       data.cropType,
           location:       data.location,
           recommendation,
-          model:          'gemini-2.0-flash-lite',
+          model,
           generatedAt:    new Date().toISOString(),
         });
       } catch (err) {

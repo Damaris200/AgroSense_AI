@@ -19,9 +19,11 @@ const REQUIRED_DATABASES = [
   'analytics_db',
 ];
 
+const PG_PORT = Number(process.env.PG_PORT ?? '5433');
+
 const client = new Client({
   host: 'localhost',
-  port: 5432,
+  port: PG_PORT,
   user: 'agrosense',
   password: 'agrosense_dev',
   database: 'postgres',
