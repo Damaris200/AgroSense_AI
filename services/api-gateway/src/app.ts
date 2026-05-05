@@ -4,7 +4,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
 import { notFoundHandler, errorHandler } from './middleware/error';
-import farmRoutes from "./routes/farm.routes";
+import farmRoutes           from './routes/farm.routes';
+import authRoutes           from './routes/auth.routes';
+import recommendationRoutes from './routes/recommendation.routes';
+import notificationRoutes   from './routes/notification.routes';
+import weatherRoutes        from './routes/weather.routes';
+import soilRoutes           from './routes/soil.routes';
 
 export function createApp() {
   const app = express();
@@ -19,7 +24,12 @@ export function createApp() {
     res.json({ status: 'ok', service: 'api-gateway', timestamp: new Date().toISOString() });
   });
 
-  app.use("/api/farm", farmRoutes);
+  app.use('/api/auth',            authRoutes);
+  app.use('/api/farm',            farmRoutes);
+  app.use('/api/weather',         weatherRoutes);
+  app.use('/api/soil',            soilRoutes);
+  app.use('/api/recommendations', recommendationRoutes);
+  app.use('/api/notifications',   notificationRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

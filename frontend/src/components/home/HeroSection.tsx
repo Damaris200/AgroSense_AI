@@ -10,15 +10,15 @@ export function HeroSection() {
     <section
       className={`relative overflow-hidden pt-32 transition-colors duration-300 sm:pt-36 ${
         isDark
-          ? 'bg-gradient-to-br from-zinc-950 via-emerald-950 to-green-900 text-white'
-          : 'bg-gradient-to-br from-emerald-900 via-green-800 to-lime-900 text-white'
+          ? 'bg-linear-to-br from-zinc-950 via-emerald-950 to-green-900 text-white'
+          : 'bg-linear-to-br from-emerald-900 via-green-800 to-lime-900 text-white'
       }`}
     >
       <div
         className={`animate-gradient-pan absolute inset-0 ${
           isDark
-            ? 'bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.08),_transparent_35%),radial-gradient(circle_at_75%_20%,_rgba(16,185,129,0.16),_transparent_28%),linear-gradient(120deg,rgba(0,0,0,0.35),rgba(0,0,0,0))]'
-            : 'bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_35%),radial-gradient(circle_at_75%_20%,_rgba(190,242,100,0.16),_transparent_28%),linear-gradient(120deg,rgba(4,120,87,0.2),rgba(0,0,0,0))]'
+            ? 'bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_35%),radial-gradient(circle_at_75%_20%,rgba(16,185,129,0.16),transparent_28%),linear-gradient(120deg,rgba(0,0,0,0.35),rgba(0,0,0,0))]'
+            : 'bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_75%_20%,rgba(190,242,100,0.16),transparent_28%),linear-gradient(120deg,rgba(4,120,87,0.2),rgba(0,0,0,0))]'
         }`}
       />
       <div className="absolute inset-0">
@@ -30,7 +30,7 @@ export function HeroSection() {
         />
         <svg
           aria-hidden="true"
-          className="animate-float-slow absolute right-0 top-20 h-[420px] w-[420px] text-white/8"
+          className="animate-float-slow absolute right-0 top-20 h-105 w-105 text-white/8"
           viewBox="0 0 320 320"
           fill="none"
         >

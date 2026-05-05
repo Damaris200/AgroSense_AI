@@ -274,6 +274,8 @@ bun test --coverage
 
 Coverage target: **70%+ across all services.**
 
+Infrastructure tests under `tests/infrastructure/` are opt-in on local machines. Run them after starting Docker with `RUN_INFRA_TESTS=1 bun test tests/infrastructure`.
+
 ### Test philosophy — TDD
 
 We write tests **before** the code, not after. The loop is:

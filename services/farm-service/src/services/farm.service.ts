@@ -6,6 +6,9 @@ export async function saveFarm(event: FarmSubmittedEvent): Promise<FarmSavedEven
     data: {
       submissionId: event.submissionId,
       userId:       event.userId,
+      userEmail:    event.userEmail ?? "",
+      userName:     event.userName  ?? "",
+      name:         event.name      ?? "",
       cropType:     event.cropType,
       location:     event.location,
       gpsLat:       event.gpsLat,
@@ -17,6 +20,9 @@ export async function saveFarm(event: FarmSubmittedEvent): Promise<FarmSavedEven
     submissionId: farm.submissionId,
     farmId:       farm.id,
     userId:       farm.userId,
+    userEmail:    farm.userEmail,
+    userName:     farm.userName,
+    name:         farm.name,
     cropType:     farm.cropType,
     location:     farm.location,
     gpsLat:       farm.gpsLat,
@@ -27,4 +33,12 @@ export async function saveFarm(event: FarmSubmittedEvent): Promise<FarmSavedEven
 
 export async function getFarmById(id: string) {
   return prisma.farm.findUnique({ where: { id } });
+}
+
+export async function getFarmsByUserId(userId: string) {
+  return prisma.farm.findMany({
+    where:   { userId },
+    orderBy: { createdAt: "desc" },
+    take:    100,
+  });
 }

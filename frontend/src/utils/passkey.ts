@@ -14,23 +14,23 @@ function toBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
-function fromBase64Url(value: string): Uint8Array {
+function fromBase64Url(value: string): ArrayBuffer {
   const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
   const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  return bytes.buffer.slice(0);
 }
 
-function randomChallenge(length = 32): Uint8Array {
+function randomChallenge(length = 32): ArrayBuffer {
   const challenge = new Uint8Array(length);
   crypto.getRandomValues(challenge);
-  return challenge;
+  return challenge.buffer.slice(0);
 }
 
-function textBytes(value: string): Uint8Array {
-  return new TextEncoder().encode(value);
+function textBytes(value: string): ArrayBuffer {
+  return new TextEncoder().encode(value).buffer.slice(0);
 }
 
 export function isPasskeySupported(): boolean {
@@ -51,14 +51,12 @@ export async function enablePasskeyForSession(session: AuthResponse): Promise<{ 
   }
 
   try {
-    const userIdBytes = textBytes(session.user.id).slice(0, 64);
-
     const credential = await navigator.credentials.create({
       publicKey: {
         challenge: randomChallenge(),
         rp: { name: 'AgroSense AI' },
         user: {
-          id: userIdBytes,
+          id: textBytes(session.user.id).slice(0, 64),
           name: session.user.email,
           displayName: session.user.name,
         },

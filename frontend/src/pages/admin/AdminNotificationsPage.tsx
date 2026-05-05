@@ -106,7 +106,6 @@ export function AdminNotificationsPage() {
           All
         </button>
         {(['sent', 'failed', 'pending'] as const).map((status) => {
-          const style = statusStyles[status];
           const filterStyle = statusFilterButton[status];
           return (
             <button

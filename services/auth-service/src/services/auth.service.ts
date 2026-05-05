@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Prisma } from '@prisma/client';
+import { Prisma, type Locale } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { env } from '../config/env';
 import { ConflictError, UnauthorizedError, ValidationError } from '../errors';
@@ -74,4 +74,15 @@ export async function loginUser(
 
 export async function getUserById(id: string): Promise<PublicUser | null> {
   return prisma.user.findUnique({ where: { id }, select: publicUserSelect });
+}
+
+export async function updateProfile(
+  id: string,
+  data: { name?: string; phone?: string; locale?: Locale },
+): Promise<PublicUser> {
+  return prisma.user.update({
+    where:  { id },
+    data:   { name: data.name, phone: data.phone, locale: data.locale },
+    select: publicUserSelect,
+  });
 }

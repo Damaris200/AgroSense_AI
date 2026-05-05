@@ -27,7 +27,10 @@ const client = new Client({
   database: 'postgres',
 });
 
-describe('PostgreSQL infrastructure', () => {
+const RUN_INFRA_TESTS = Bun.env.RUN_INFRA_TESTS === '1';
+const describeInfra = RUN_INFRA_TESTS ? describe : describe.skip;
+
+describeInfra('PostgreSQL infrastructure', () => {
   beforeAll(async () => {
     await client.connect();
   });
