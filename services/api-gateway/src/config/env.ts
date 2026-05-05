@@ -19,8 +19,14 @@ if (!parsed.success) {
 }
 
 export const env = {
-  port:       parseInt(parsed.data.PORT, 10),
-  nodeEnv:    parsed.data.NODE_ENV,
-  corsOrigin: parsed.data.CORS_ORIGIN,
-  jwtSecret:  parsed.data.JWT_SECRET,
+  port:                parseInt(parsed.data.PORT, 10),
+  nodeEnv:             parsed.data.NODE_ENV,
+  corsOrigin:          parsed.data.CORS_ORIGIN,
+  jwtSecret:           parsed.data.JWT_SECRET,
+  authServiceUrl:      process.env.AUTH_SERVICE_URL         ?? 'http://localhost:4001',
+  farmServiceUrl:      process.env.FARM_SERVICE_URL         ?? 'http://localhost:4002',
+  weatherServiceUrl:   process.env.WEATHER_SERVICE_URL      ?? 'http://localhost:3003',
+  soilServiceUrl:      process.env.SOIL_SERVICE_URL         ?? 'http://localhost:3004',
+  aiServiceUrl:        process.env.AI_SERVICE_URL           ?? 'http://localhost:4006',
+  notificationSvcUrl:  process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3006',
 } as const;

@@ -66,7 +66,7 @@ export function FeaturesSection() {
     >
       <div className="mx-auto w-full max-w-7xl px-4 lg:px-8">
         <div
-          className={`rounded-[2rem] border p-6 shadow-[0_18px_60px_rgba(16,24,40,0.06)] transition-colors sm:p-8 ${
+          className={`rounded-4xl border p-6 shadow-[0_18px_60px_rgba(16,24,40,0.06)] transition-colors sm:p-8 ${
             isDark ? 'border-white/10 bg-white/5' : 'border-emerald-100 bg-white'
           }`}
         >

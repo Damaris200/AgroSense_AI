@@ -33,3 +33,15 @@ export async function me(req: AuthRequest, res: Response, next: NextFunction) {
     next(err);
   }
 }
+
+export async function updateProfile(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) return next(new UnauthorizedError());
+    const { name, phone, locale } = req.body as { name?: string; phone?: string; locale?: string };
+    const normalizedLocale = locale === 'en' || locale === 'fr' ? locale : undefined;
+    const user = await authService.updateProfile(req.user.id, { name, phone, locale: normalizedLocale });
+    ok(res, { user });
+  } catch (err) {
+    next(err);
+  }
+}

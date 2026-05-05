@@ -9,5 +9,6 @@ const router = Router();
 router.post('/register', validateBody(registerSchema), ctrl.register);
 router.post('/login',    validateBody(loginSchema),    ctrl.login);
 router.get('/me',        requireAuth,                  ctrl.me);
+router.put('/profile',   requireAuth,                  ctrl.updateProfile);
 
 export default router;

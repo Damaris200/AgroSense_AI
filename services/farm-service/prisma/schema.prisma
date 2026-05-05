@@ -8,13 +8,16 @@ datasource db {
 
 model Farm {
   id           String   @id @default(uuid())
-  submissionId String   @unique
-  userId       String
-  cropType     String
+  submissionId String   @unique @map("submission_id")
+  userId       String   @map("user_id")
+  userEmail    String   @default("") @map("user_email")
+  userName     String   @default("") @map("user_name")
+  name         String   @default("")
+  cropType     String   @map("crop_type")
   location     String
-  gpsLat       Float
-  gpsLng       Float
-  createdAt    DateTime @default(now())
+  gpsLat       Float    @map("gps_lat")
+  gpsLng       Float    @map("gps_lng")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("farms")
 }

@@ -1,8 +1,23 @@
 import { Router } from "express";
-import { getFarmById } from "../services/farm.service";
+import { getFarmById, getFarmsByUserId } from "../services/farm.service";
 
 const router = Router();
 
+// GET /api/farms?userId=<id>  — list all farms for a user
+router.get("/", async (req, res, next) => {
+  try {
+    const userId =
+      (req.query.userId as string) ||
+      (req.headers["x-user-id"] as string) ||
+      "anonymous";
+    const farms = await getFarmsByUserId(userId);
+    res.json({ success: true, data: farms });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/farms/:id  — get a single farm by id
 router.get("/:id", async (req, res, next) => {
   try {
     const farm = await getFarmById(req.params.id);
