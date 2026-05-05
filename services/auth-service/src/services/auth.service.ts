@@ -76,6 +76,35 @@ export async function getUserById(id: string): Promise<PublicUser | null> {
   return prisma.user.findUnique({ where: { id }, select: publicUserSelect });
 }
 
+export async function listUsers(options?: {
+  ids?: string[];
+  limit?: number;
+}): Promise<PublicUser[]> {
+  const limit = options?.limit ?? 100;
+  return prisma.user.findMany({
+    where: options?.ids?.length ? { id: { in: options.ids } } : undefined,
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    select: publicUserSelect,
+  });
+}
+
+export async function getUserStats(): Promise<{ totalUsers: number; activeUsers: number }> {
+  const [totalUsers, activeUsers] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { isActive: true } }),
+  ]);
+  return { totalUsers, activeUsers };
+}
+
+export async function setUserActive(id: string, isActive: boolean): Promise<PublicUser> {
+  return prisma.user.update({
+    where: { id },
+    data: { isActive },
+    select: publicUserSelect,
+  });
+}
+
 export async function updateProfile(
   id: string,
   data: { name?: string; phone?: string; locale?: Locale },

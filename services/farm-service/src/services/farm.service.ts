@@ -42,3 +42,7 @@ export async function getFarmsByUserId(userId: string) {
     take:    100,
   });
 }
+
+export async function countFarms(): Promise<number> {
+  return prisma.farm.count();
+}

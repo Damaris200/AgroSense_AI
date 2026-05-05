@@ -1,7 +1,7 @@
 import { env } from './config/env';
 import { consumer } from './config/kafka';
 import { startRecommendationGeneratedConsumer } from './events/consumers/recommendation-generated.consumer';
-import { listNotifications } from './controllers/notification.controller';
+import { listNotifications, listAllNotifications, getNotificationStats } from './controllers/notification.controller';
 
 // ── Bun native HTTP server — no express dependency required ────────────────────
 const server = Bun.serve({
@@ -15,6 +15,14 @@ const server = Bun.serve({
 
     if (url.pathname === '/api/notifications' && req.method === 'GET') {
       return listNotifications(req);
+    }
+
+    if (url.pathname === '/api/admin/notifications' && req.method === 'GET') {
+      return listAllNotifications(req);
+    }
+
+    if (url.pathname === '/api/admin/notifications/stats' && req.method === 'GET') {
+      return getNotificationStats();
     }
 
     return new Response('Not Found', { status: 404 });
