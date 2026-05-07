@@ -358,4 +358,4 @@ test(auth): cover expired JWT case
 
 ## Team
 
-Built by the AgroSense team as a real-world demonstration of event-driven architecture and applied AI in agriculture.
+Built by the AgroSense team as a real-world demonstration (Via a school project) of event-driven architecture and applied AI in agriculture.
