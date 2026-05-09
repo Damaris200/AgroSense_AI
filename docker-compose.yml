@@ -15,7 +15,6 @@ services:
     image: postgres:16-alpine
     container_name: agrosense-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_USER: agrosense
       POSTGRES_PASSWORD: agrosense_dev
@@ -31,10 +30,11 @@ services:
     networks:
       - agrosense-net
     healthcheck:
-        test: ['CMD-SHELL', 'pg_isready -U agrosense -d postgres']
-        interval: 5s
-        timeout: 5s
-        retries: 10
+      test: ['CMD-SHELL', 'pg_isready -U agrosense -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     container_name: agrosense-zookeeper
@@ -67,7 +67,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      
     networks:
       - agrosense-net
     healthcheck:
@@ -76,8 +75,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # ── Services ─────────────────────────────────────────────────────────────────
-  # Only auth-service is implemented. Uncomment each service as you build it.
+  # ── Application Services ──────────────────────────────────────────────────────
 
   auth-service:
     build:
@@ -94,7 +92,7 @@ services:
       DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/auth_db
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       JWT_EXPIRES_IN: 24h
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     ports:
       - '4001:4001'
     networks:
@@ -106,96 +104,217 @@ services:
       retries: 5
 
   api-gateway:
-    build: ./services/api-gateway
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
     container_name: agrosense-api-gateway
-    ports: ['4000:4000']
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - '4000:4000'
     environment:
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/farm_db
-      JWT_SECRET: dev_secret_key
-      NODE_ENV: development
-      KAFKA_BROKERS: kafka:29092
+      NODE_ENV: production
+      PORT: 4000
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      AUTH_SERVICE_URL: http://auth-service:4001
+      FARM_SERVICE_URL: http://farm-service:4002
+      WEATHER_SERVICE_URL: http://weather-service:3003
+      SOIL_SERVICE_URL: http://soil-service:3004
+      AI_SERVICE_URL: http://ai-service:4006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3006
       ANALYTICS_SERVICE_URL: http://analytics-service:4007
-    depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
-    networks: [agrosense-net]
-
+      KAFKA_BROKERS: kafka:29092
+    networks:
+      - agrosense-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   farm-service:
-    build: ./services/farm-service
-    environment:
-      KAFKA_BROKERS: kafka:29092
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/farm_db
-    depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
-    networks: [agrosense-net]
+    build:
+      context: ./services/farm-service
+      dockerfile: Dockerfile
+    container_name: agrosense-farm
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     ports:
-      - "4002:4002"
-  # weather-service:
-  #   build: ./services/weather-service
-  #   environment:
-  #     DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/weather_db
-  #   depends_on: { kafka: { condition: service_healthy } }
-  #   networks: [agrosense-net]
+      - '4002:4002'
+    environment:
+      NODE_ENV: production
+      PORT: 4002
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/farm_db
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: farm-service
+      KAFKA_GROUP_ID: farm-service-group
+    networks:
+      - agrosense-net
 
-  # soil-service:
-  #   build: ./services/soil-service
-  #   environment:
-  #     DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/soil_db
-  #   depends_on: { kafka: { condition: service_healthy } }
-  #   networks: [agrosense-net]
+  weather-service:
+    build:
+      context: ./services/weather-service
+      dockerfile: Dockerfile
+    container_name: agrosense-weather
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '3003:3003'
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/weather_db
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: weather-service
+      KAFKA_GROUP_ID: weather-service-group
+      TOMORROW_API_KEY: ${TOMORROW_API_KEY}
+    networks:
+      - agrosense-net
+
+  soil-service:
+    build:
+      context: ./services/soil-service
+      dockerfile: Dockerfile
+    container_name: agrosense-soil
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '3004:3004'
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/soil_db
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: soil-service
+      KAFKA_GROUP_ID: soil-service-group
+    networks:
+      - agrosense-net
 
   orchestrator-service:
-    build: ./services/orchestrator-service
+    build:
+      context: ./services/orchestrator-service
+      dockerfile: Dockerfile
+    container_name: agrosense-orchestrator
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
     environment:
+      NODE_ENV: production
+      PORT: 4005
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: orchestrator-service
       KAFKA_GROUP_ID: orchestrator-service-group
-      NODE_ENV: development
-    depends_on: { kafka: { condition: service_healthy } }
-    networks: [agrosense-net]
+    networks:
+      - agrosense-net
 
   ai-service:
-    build: ./services/ai-service
+    build:
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+    container_name: agrosense-ai
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '4006:4006'
     environment:
+      NODE_ENV: production
+      PORT: 4006
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/ai_db
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: ai-service
       KAFKA_GROUP_ID: ai-service-group
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-mock}
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/ai_db
-      NODE_ENV: production
-    depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
-    networks: [agrosense-net]
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+    networks:
+      - agrosense-net
 
-  # notification-service:
-  #   build: ./services/notification-service
-  #   environment:
-  #     DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/notification_db
-  #   depends_on: { kafka: { condition: service_healthy } }
-  #   networks: [agrosense-net]
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: agrosense-notification
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '3006:3006'
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/notification_db
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: notification-service
+      KAFKA_GROUP_ID: notification-service-group
+      SMTP_HOST: ${SMTP_HOST:-smtp.ethereal.email}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM:-AgroSense AI <noreply@agrosense.ai>}
+    networks:
+      - agrosense-net
 
   analytics-service:
-      build: ./services/analytics-service
-      environment:
-        KAFKA_BROKERS: kafka:29092
-        KAFKA_CLIENT_ID: analytics-service
-        KAFKA_GROUP_ID: analytics-service-group
-        DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
-        NODE_ENV: production
-        PORT: 4007
-      depends_on: { postgres: { condition: service_healthy }, kafka: { condition: service_healthy } }
-      networks: [agrosense-net]
-      ports:
-        - '4007:4007'
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: agrosense-analytics
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '4007:4007'
+    environment:
+      NODE_ENV: production
+      PORT: 4007
+      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_CLIENT_ID: analytics-service
+      KAFKA_GROUP_ID: analytics-service-group
+    networks:
+      - agrosense-net
 
-  # ── Frontend ─────────────────────────────────────────────────────────────────
+  # ── Frontend ──────────────────────────────────────────────────────────────────
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000}
     container_name: agrosense-frontend
     restart: unless-stopped
     depends_on:
-      auth-service:
-        condition: service_healthy
+      - api-gateway
     ports:
       - '5173:80'
     networks:
