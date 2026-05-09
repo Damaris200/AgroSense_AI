@@ -12,6 +12,7 @@ interface AnalysisState {
     temperature: number;
     humidity:    number;
     rainfall:    number;
+    windSpeed:   number;
     description: string;
   };
   soil?: {
