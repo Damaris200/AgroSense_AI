@@ -52,6 +52,7 @@ export async function startOrchestratorConsumer(): Promise<void> {
             temperature: data.temperature,
             humidity:    data.humidity,
             rainfall:    data.rainfall,
+            windSpeed:   data.windSpeed ?? 0,
             description: data.description,
           });
         }
@@ -69,7 +70,7 @@ export async function startOrchestratorConsumer(): Promise<void> {
             gpsLng:      data.gpsLng    ?? 0,
           });
           setSoil(data.submissionId, {
-            pH:         data.pH,
+            pH:         data.ph ?? data.pH,
             moisture:   data.moisture,
             nitrogen:   data.nitrogen,
             phosphorus: data.phosphorus,
