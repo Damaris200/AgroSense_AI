@@ -1,0 +1,19 @@
+---
+# Non-sensitive variables for the AgroSense VPS
+
+k3s_version: "v1.30.0+k3s1"
+app_namespace: agrosense
+monitoring_namespace: monitoring
+
+# Your registered domain (used in Nginx vhost and CORS_ORIGIN)
+domain: "agrosense.example.com"
+
+# Docker Hub username matching the image names in docker-compose.yml
+docker_hub_username: damarisateh
+
+# NodePorts exposed by the NGINX Ingress Controller
+ingress_http_nodeport: 30080
+ingress_https_nodeport: 30443
+
+# Path where K8s manifests are copied on the VPS
+k8s_manifests_dest: /opt/agrosense/k8s

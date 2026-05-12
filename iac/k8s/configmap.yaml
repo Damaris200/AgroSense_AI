@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agrosense-config
+  namespace: agrosense
+data:
+  NODE_ENV: "production"
+
+  # Kafka (all services connect to the internal Kafka service)
+  KAFKA_BROKERS: "kafka:29092"
+
+  # Inter-service URLs (API Gateway uses these to proxy requests)
+  AUTH_SERVICE_URL: "http://auth-service:4001"
+  FARM_SERVICE_URL: "http://farm-service:4002"
+  WEATHER_SERVICE_URL: "http://weather-service:3003"
+  SOIL_SERVICE_URL: "http://soil-service:3004"
+  AI_SERVICE_URL: "http://ai-service:4006"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:3006"
+  ANALYTICS_SERVICE_URL: "http://analytics-service:4007"
+
+  # Auth
+  JWT_EXPIRES_IN: "24h"
+  # Replace with your domain or VPS IP for production
+  CORS_ORIGIN: "http://localhost:5173"
+
+  # SMTP (non-secret parts)
+  SMTP_HOST: "smtp.ethereal.email"
+  SMTP_PORT: "587"
+  SMTP_USER: "estel.skiles@ethereal.email"
+  SMTP_FROM: "AgroSense AI <estel.skiles@ethereal.email>"
+
+  # AI
+  OPENAI_MODEL: "ft:gpt-4.1-mini-2025-04-14:personal:farm-recommendation:DcEPwNUN"

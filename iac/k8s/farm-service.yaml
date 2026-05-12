@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: farm-service
+  namespace: agrosense
+  labels:
+    app: farm-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: farm-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: farm-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4002"
+        prometheus.io/path: "/health"
+    spec:
+      containers:
+        - name: farm-service
+          image: damarisateh/agrosense-farm:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4002
+          env:
+            - name: PORT
+              value: "4002"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: NODE_ENV
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              value: "farm-service"
+            - name: KAFKA_GROUP_ID
+              value: "farm-service-group"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: FARM_DATABASE_URL
+          livenessProbe:
+            tcpSocket:
+              port: 4002
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 4002
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: farm-service
+  namespace: agrosense
+spec:
+  selector:
+    app: farm-service
+  ports:
+    - port: 4002
+      targetPort: 4002
+  type: ClusterIP

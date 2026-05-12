@@ -1,0 +1,63 @@
+---
+- name: Update apt cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: safe
+    cache_valid_time: 3600
+
+- name: Install required system packages
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - unzip
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - ufw
+      - htop
+      - jq
+      - netcat-openbsd
+      - python3-pip
+    state: present
+
+- name: Allow SSH through UFW
+  ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+
+- name: Allow HTTP through UFW
+  ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+
+- name: Allow HTTPS through UFW
+  ufw:
+    rule: allow
+    port: "443"
+    proto: tcp
+
+- name: Allow k3s API server through UFW
+  ufw:
+    rule: allow
+    port: "6443"
+    proto: tcp
+
+- name: Enable UFW with default deny-inbound policy
+  ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+
+- name: Set timezone to UTC
+  timezone:
+    name: UTC
+
+- name: Disable swap (required for k3s/Kubernetes)
+  shell: |
+    swapoff -a
+    sed -i '/ swap / s/^/#/' /etc/fstab
+  changed_when: false

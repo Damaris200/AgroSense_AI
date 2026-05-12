@@ -1,0 +1,35 @@
+# Headless service for StatefulSet pod identity
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-headless
+  namespace: agrosense
+spec:
+  clusterIP: None
+  selector:
+    app: kafka
+  ports:
+    - name: plaintext-host
+      port: 9092
+      targetPort: 9092
+    - name: plaintext
+      port: 29092
+      targetPort: 29092
+---
+# Regular ClusterIP — used in KAFKA_BROKERS=kafka:9092 by all services
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: agrosense
+spec:
+  selector:
+    app: kafka
+  ports:
+    - name: plaintext-host
+      port: 9092
+      targetPort: 9092
+    - name: plaintext
+      port: 29092
+      targetPort: 29092
+  type: ClusterIP

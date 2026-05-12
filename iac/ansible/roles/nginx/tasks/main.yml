@@ -1,0 +1,55 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Install certbot and Nginx plugin
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Deploy AgroSense Nginx vhost config
+  template:
+    src: agrosense.conf.j2
+    dest: /etc/nginx/sites-available/agrosense
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nginx
+
+- name: Enable AgroSense site
+  file:
+    src: /etc/nginx/sites-available/agrosense
+    dest: /etc/nginx/sites-enabled/agrosense
+    state: link
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Test Nginx configuration
+  command: nginx -t
+  changed_when: false
+
+- name: Enable and start Nginx
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started
+
+- name: Hint — obtain Let's Encrypt certificate
+  debug:
+    msg: >
+      Run this on the VPS to enable HTTPS:
+      certbot --nginx -d {{ domain }} -d www.{{ domain }} --non-interactive --agree-tos -m admin@{{ domain }}
+
+handlers:
+  - name: reload nginx
+    systemd:
+      name: nginx
+      state: reloaded

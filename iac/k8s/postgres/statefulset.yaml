@@ -1,0 +1,103 @@
+# ConfigMap carries the init SQL mounted at /docker-entrypoint-initdb.d/
+# These scripts run ONCE on a fresh (empty) volume.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: agrosense
+data:
+  01-create-databases.sql: |
+    \c postgres
+    CREATE DATABASE auth_db;
+    CREATE DATABASE weather_db;
+    CREATE DATABASE soil_db;
+    CREATE DATABASE ai_db;
+    CREATE DATABASE notification_db;
+    CREATE DATABASE analytics_db;
+    GRANT ALL PRIVILEGES ON DATABASE auth_db         TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE farm_db         TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE weather_db      TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE soil_db         TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE ai_db           TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE notification_db TO agrosense;
+    GRANT ALL PRIVILEGES ON DATABASE analytics_db    TO agrosense;
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: agrosense
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: agrosense
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: farm_db
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+            - name: POSTGRES_INITDB_ARGS
+              value: "--auth-host=trust --auth-local=trust"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "agrosense", "-d", "postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "agrosense", "-d", "postgres"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: postgres-init-scripts
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
