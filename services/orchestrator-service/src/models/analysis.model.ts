@@ -2,6 +2,7 @@ export interface WeatherSummary {
   temperature: number;
   humidity:    number;
   rainfall:    number;
+  windSpeed:   number;
   description: string;
 }
 

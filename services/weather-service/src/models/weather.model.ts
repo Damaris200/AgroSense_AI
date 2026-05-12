@@ -14,16 +14,22 @@ export const farmSavedEventSchema = z.object({
   savedAt:      z.string().datetime(),
 });
 
-export const openWeatherResponseSchema = z.object({
-  main: z.object({
-    temp:     z.number(),
-    humidity: z.number(),
+export const tomorrowResponseSchema = z.object({
+  data: z.object({
+    time: z.string(),
+    values: z.object({
+      temperature:            z.number(),
+      humidity:               z.number(),
+      precipitationIntensity: z.number().default(0),
+      windSpeed:              z.number().default(0),
+      weatherCode:            z.number(),
+    }),
   }),
-  wind: z.object({
-    speed: z.number(),
+  location: z.object({
+    lat:  z.number(),
+    lon:  z.number(),
+    name: z.string().optional(),
   }),
-  rain:    z.object({ '1h': z.number().optional() }).optional(),
-  weather: z.array(z.object({ description: z.string() })).min(1),
 });
 
 export const weatherFetchedEventSchema = z.object({
@@ -41,6 +47,6 @@ export const weatherFetchedEventSchema = z.object({
   fetchedAt:     z.string().datetime(),
 });
 
-export type FarmSavedEvent      = z.infer<typeof farmSavedEventSchema>;
-export type OpenWeatherResponse = z.infer<typeof openWeatherResponseSchema>;
+export type FarmSavedEvent     = z.infer<typeof farmSavedEventSchema>;
+export type TomorrowResponse   = z.infer<typeof tomorrowResponseSchema>;
 export type WeatherFetchedEvent = z.infer<typeof weatherFetchedEventSchema>;

@@ -24,11 +24,12 @@ function getTransporter(): nodemailer.Transporter {
 }
 
 export function buildRecommendationEmail(event: RecommendationGeneratedEvent): EmailPayload {
+  const displayName   = event.userName?.trim() || 'Farmer';
   const formattedDate = new Date(event.generatedAt).toLocaleDateString('en-GB', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  const subject = `Your AgroSense AI Farm Recommendation is Ready, ${event.userName}`;
+  const subject = `Your AgroSense AI Farm Recommendation is Ready, ${displayName}`;
 
   const html = `
 <!DOCTYPE html>
@@ -51,7 +52,7 @@ export function buildRecommendationEmail(event: RecommendationGeneratedEvent): E
           </tr>
           <tr>
             <td style="padding:40px;">
-              <p style="margin:0 0 16px;color:#1b4332;font-size:18px;font-weight:600;">Hello, ${event.userName}!</p>
+              <p style="margin:0 0 16px;color:#1b4332;font-size:18px;font-weight:600;">Hello, ${displayName}!</p>
               <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;">
                 Your personalized farm analysis is complete. Here is your AI-generated recommendation:
               </p>
