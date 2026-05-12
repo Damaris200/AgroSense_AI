@@ -6,7 +6,7 @@ node_modules/
 # Environment variables - NEVER commit these
 .env
 .env.local
-.env.*.local
+.env.*
 
 # Build outputs
 dist/
@@ -35,3 +35,18 @@ generated/
 # Test coverage
 coverage/
 node_modules
+
+# Terraform — never commit real credentials
+iac/terraform/terraform.tfvars
+iac/terraform/.terraform/
+iac/terraform/.terraform.lock.hcl
+iac/terraform/terraform.tfstate
+iac/terraform/terraform.tfstate.backup
+iac/terraform/*.tfstate*
+
+# Ansible vault (encrypt before committing; raw file must stay local)
+# iac/ansible/group_vars/agrosense_vps/vault.yml
+
+# Local kubeconfig written by Ansible k3s role
+*.yaml.bak
+~/.kube/agrosense-k3s.yaml

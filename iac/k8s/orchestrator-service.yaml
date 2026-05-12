@@ -1,0 +1,80 @@
+# The orchestrator holds per-submission state in a plain in-memory Map.
+# It MUST stay at replicas: 1 — multiple replicas would split state across pods
+# and submissions would never complete (each pod has a different partial view).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator-service
+  namespace: agrosense
+  labels:
+    app: orchestrator-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orchestrator-service
+  strategy:
+    # Recreate (not RollingUpdate) to avoid two instances running simultaneously
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: orchestrator-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4005"
+        prometheus.io/path: "/health"
+    spec:
+      containers:
+        - name: orchestrator-service
+          image: damarisateh/agrosense-orchestrator:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4005
+          env:
+            - name: PORT
+              value: "4005"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: NODE_ENV
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              value: "orchestrator-service"
+            - name: KAFKA_GROUP_ID
+              value: "orchestrator-service-group"
+          livenessProbe:
+            tcpSocket:
+              port: 4005
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 4005
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator-service
+  namespace: agrosense
+spec:
+  selector:
+    app: orchestrator-service
+  ports:
+    - port: 4005
+      targetPort: 4005
+  type: ClusterIP

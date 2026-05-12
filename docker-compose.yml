@@ -1,5 +1,3 @@
-version: '3.9'
-
 networks:
   agrosense-net:
     driver: bridge
@@ -81,6 +79,7 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-auth:latest
     container_name: agrosense-auth
     restart: unless-stopped
     depends_on:
@@ -90,9 +89,9 @@ services:
       NODE_ENV: production
       PORT: 4001
       DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/auth_db
-      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      JWT_SECRET: REPLACE_ME
       JWT_EXPIRES_IN: 24h
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      CORS_ORIGIN: http://localhost:5173
     ports:
       - '4001:4001'
     networks:
@@ -107,6 +106,7 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-api-gateway:latest
     container_name: agrosense-api-gateway
     restart: unless-stopped
     depends_on:
@@ -121,8 +121,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      JWT_SECRET: REPLACE_ME
+      CORS_ORIGIN: http://localhost:5173
       AUTH_SERVICE_URL: http://auth-service:4001
       FARM_SERVICE_URL: http://farm-service:4002
       WEATHER_SERVICE_URL: http://weather-service:3003
@@ -143,6 +143,7 @@ services:
     build:
       context: ./services/farm-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-farm:latest
     container_name: agrosense-farm
     restart: unless-stopped
     depends_on:
@@ -166,6 +167,7 @@ services:
     build:
       context: ./services/weather-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-weather:latest
     container_name: agrosense-weather
     restart: unless-stopped
     depends_on:
@@ -182,7 +184,7 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: weather-service
       KAFKA_GROUP_ID: weather-service-group
-      TOMORROW_API_KEY: ${TOMORROW_API_KEY}
+      TOMORROW_API_KEY: REPLACE_ME
     networks:
       - agrosense-net
 
@@ -190,6 +192,7 @@ services:
     build:
       context: ./services/soil-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-soil:latest
     container_name: agrosense-soil
     restart: unless-stopped
     depends_on:
@@ -213,6 +216,7 @@ services:
     build:
       context: ./services/orchestrator-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-orchestrator:latest
     container_name: agrosense-orchestrator
     restart: unless-stopped
     depends_on:
@@ -231,6 +235,7 @@ services:
     build:
       context: ./services/ai-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-ai:latest
     container_name: agrosense-ai
     restart: unless-stopped
     depends_on:
@@ -248,7 +253,7 @@ services:
       KAFKA_CLIENT_ID: ai-service
       KAFKA_GROUP_ID: ai-service-group
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      OPENAI_MODEL: ft:gpt-4.1-mini-2025-04-14:personal:farm-recommendation:DcEPwNUN
     networks:
       - agrosense-net
 
@@ -256,6 +261,7 @@ services:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-notification:latest
     container_name: agrosense-notification
     restart: unless-stopped
     depends_on:
@@ -272,11 +278,11 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: notification-service
       KAFKA_GROUP_ID: notification-service-group
-      SMTP_HOST: ${SMTP_HOST:-smtp.ethereal.email}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASS: ${SMTP_PASS}
-      SMTP_FROM: ${SMTP_FROM:-AgroSense AI <noreply@agrosense.ai>}
+      SMTP_HOST: smtp.ethereal.email
+      SMTP_PORT: 587
+      SMTP_USER: "estel.skiles@ethereal.email"
+      SMTP_PASS: REPLACE_ME
+      SMTP_FROM: "AgroSense AI <estel.skiles@ethereal.email>"
     networks:
       - agrosense-net
 
@@ -284,6 +290,7 @@ services:
     build:
       context: ./services/analytics-service
       dockerfile: Dockerfile
+    image: damarisateh/agrosense-analytics:latest
     container_name: agrosense-analytics
     restart: unless-stopped
     depends_on:
@@ -310,7 +317,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000}
+        VITE_API_BASE_URL: http://localhost:4000
+    image: damarisateh/agrosense-frontend:latest
     container_name: agrosense-frontend
     restart: unless-stopped
     depends_on:

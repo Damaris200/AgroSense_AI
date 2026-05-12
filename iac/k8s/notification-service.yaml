@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: agrosense
+  labels:
+    app: notification-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: notification-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3006"
+        prometheus.io/path: "/health"
+    spec:
+      containers:
+        - name: notification-service
+          image: damarisateh/agrosense-notification:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3006
+          env:
+            - name: PORT
+              value: "3006"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: NODE_ENV
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              value: "notification-service"
+            - name: KAFKA_GROUP_ID
+              value: "notification-service-group"
+            - name: SMTP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: SMTP_PORT
+            - name: SMTP_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: SMTP_USER
+            - name: SMTP_FROM
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: SMTP_FROM
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: NOTIFICATION_DATABASE_URL
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: SMTP_PASS
+          livenessProbe:
+            tcpSocket:
+              port: 3006
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 3006
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: agrosense
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - port: 3006
+      targetPort: 3006
+  type: ClusterIP

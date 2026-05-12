@@ -1,0 +1,28 @@
+---
+# AgroSense AI — full VPS provisioning playbook
+#
+# Usage:
+#   ansible-playbook -i inventory.ini site.yml --ask-vault-pass
+#
+# Roles applied in order:
+#   1. common     — system updates, essential packages, UFW firewall
+#   2. docker     — Docker Engine (needed to pull/run images locally if required)
+#   3. k3s        — lightweight single-node Kubernetes + NGINX Ingress Controller
+#   4. nginx      — host-level Nginx reverse proxy (ports 80/443 → k3s NodePorts)
+#   5. agrosense  — create K8s secrets from vault, deploy all manifests
+
+- name: Provision AgroSense AI VPS
+  hosts: agrosense_vps
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - group_vars/agrosense_vps/vars.yml
+    - group_vars/agrosense_vps/vault.yml
+
+  roles:
+    - common
+    - docker
+    - k3s
+    - nginx
+    - agrosense

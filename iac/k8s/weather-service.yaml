@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-service
+  namespace: agrosense
+  labels:
+    app: weather-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: weather-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3003"
+        prometheus.io/path: "/health"
+    spec:
+      containers:
+        - name: weather-service
+          image: damarisateh/agrosense-weather:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003
+          env:
+            - name: PORT
+              value: "3003"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: NODE_ENV
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: agrosense-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              value: "weather-service"
+            - name: KAFKA_GROUP_ID
+              value: "weather-service-group"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: WEATHER_DATABASE_URL
+            - name: TOMORROW_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agrosense-secrets
+                  key: TOMORROW_API_KEY
+          livenessProbe:
+            tcpSocket:
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 3003
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-service
+  namespace: agrosense
+spec:
+  selector:
+    app: weather-service
+  ports:
+    - port: 3003
+      targetPort: 3003
+  type: ClusterIP

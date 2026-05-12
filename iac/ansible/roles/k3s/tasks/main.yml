@@ -1,0 +1,80 @@
+---
+- name: Download k3s install script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/install-k3s.sh
+    mode: "0755"
+
+- name: Install k3s (single-node, Traefik disabled — using NGINX Ingress instead)
+  shell: /tmp/install-k3s.sh
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    INSTALL_K3S_EXEC: "server --disable traefik --write-kubeconfig-mode 644"
+  args:
+    creates: /usr/local/bin/k3s
+
+- name: Wait for k3s API server to become reachable
+  wait_for:
+    host: 127.0.0.1
+    port: 6443
+    delay: 10
+    timeout: 90
+
+- name: Wait for node to be Ready
+  shell: kubectl get node --kubeconfig=/etc/rancher/k3s/k3s.yaml -o jsonpath='{.items[0].status.conditions[-1].type}'
+  register: node_status
+  until: node_status.stdout == "Ready"
+  retries: 12
+  delay: 10
+  changed_when: false
+
+- name: Install NGINX Ingress Controller
+  shell: >
+    kubectl apply -f
+    https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: true
+
+- name: Wait for NGINX Ingress Controller pod to be ready
+  shell: >
+    kubectl wait --namespace ingress-nginx
+    --for=condition=ready pod
+    --selector=app.kubernetes.io/component=controller
+    --timeout=120s
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: false
+
+- name: Patch ingress-nginx service to use fixed NodePorts ({{ ingress_http_nodeport }}/{{ ingress_https_nodeport }})
+  shell: |
+    kubectl patch svc ingress-nginx-controller -n ingress-nginx \
+      --kubeconfig=/etc/rancher/k3s/k3s.yaml \
+      -p '{
+        "spec": {
+          "type": "NodePort",
+          "ports": [
+            {"name": "http",  "port": 80,  "nodePort": {{ ingress_http_nodeport }},  "protocol": "TCP"},
+            {"name": "https", "port": 443, "nodePort": {{ ingress_https_nodeport }}, "protocol": "TCP"}
+          ]
+        }
+      }'
+  changed_when: true
+
+- name: Install metrics-server (required for HPA)
+  shell: >
+    kubectl apply -f
+    https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: true
+
+- name: Fetch kubeconfig for local kubectl access
+  slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  register: kubeconfig_raw
+
+- name: Save kubeconfig locally (replaces 127.0.0.1 with VPS IP)
+  copy:
+    content: "{{ kubeconfig_raw.content | b64decode | replace('127.0.0.1', ansible_host) }}"
+    dest: "{{ lookup('env', 'HOME') }}/.kube/agrosense-k3s.yaml"
+    mode: "0600"
+  delegate_to: localhost
+  become: no

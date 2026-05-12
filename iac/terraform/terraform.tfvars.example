@@ -1,0 +1,19 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is in .gitignore — never commit it.
+
+do_token            = "dop_v1_YOUR_DIGITALOCEAN_TOKEN"
+
+# Get your SSH key fingerprint from: doctl compute ssh-key list
+# or the DigitalOcean web console → Settings → Security → SSH Keys
+ssh_key_fingerprint = "aa:bb:cc:dd:..."
+
+# Region options: nyc1 nyc3 ams3 sfo3 sgp1 lon1 fra1 tor1 blr1 syd1
+region              = "nyc3"
+
+# Droplet size — s-4vcpu-8gb is the recommended minimum for this stack
+# Smaller option for testing: s-2vcpu-4gb
+droplet_size        = "s-4vcpu-8gb"
+
+# Optional: set your domain to auto-create DNS A records.
+# Leave empty to skip: domain = ""
+domain              = "agrosense.yourdomain.com"
