@@ -54,7 +54,7 @@ router.get('/', requireAuth as any, async (req: Request, res: Response, next: Ne
   try {
     const userId = req.jwtUser!.sub;
 
-    const [farmsResp, recsResp, notifResp] = await Promise.all([
+    const [farmsResp, recsResp, notifResp] = await Promise.allSettled([
       fetch(`${env.farmServiceUrl}/api/farms?userId=${encodeURIComponent(userId)}`, { headers: { 'x-user-id': userId } }),
       fetch(`${env.aiServiceUrl}/api/recommendations?userId=${encodeURIComponent(userId)}`, { headers: { 'x-user-id': userId } }),
       fetch(`${env.notificationSvcUrl}/api/notifications?userId=${encodeURIComponent(userId)}`, { headers: { 'x-user-id': userId } }),
