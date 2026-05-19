@@ -10,6 +10,61 @@ const navItems = [
   { label: 'Impact', href: '#impact' },
 ];
 
+interface NavAuthButtonsProps {
+  readonly isDark: boolean;
+  readonly isAuthenticated: boolean;
+  readonly logout: () => void;
+}
+
+function NavAuthButtons({ isDark, isAuthenticated, logout }: NavAuthButtonsProps) {
+  if (isAuthenticated) {
+    return (
+      <>
+        <Link
+          to="/dashboard"
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            isDark ? 'text-emerald-100 hover:bg-white/10' : 'text-emerald-800 hover:bg-emerald-50'
+          }`}
+        >
+          Dashboard
+        </Link>
+        <button
+          type="button"
+          onClick={logout}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+            isDark ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-zinc-950 text-white hover:bg-zinc-800'
+          }`}
+          aria-label="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Sign Out</span>
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Link
+        to="/login"
+        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          isDark ? 'text-emerald-100 hover:bg-white/10' : 'text-emerald-800 hover:bg-emerald-50'
+        }`}
+      >
+        Sign In
+      </Link>
+      <Link
+        to="/register"
+        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          isDark ? 'bg-white text-emerald-800 hover:bg-emerald-50' : 'bg-emerald-600 text-black hover:bg-emerald-700'
+        }`}
+      >
+        Get Started
+      </Link>
+    </>
+  );
+}
+
 export function Navbar() {
   const { isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
@@ -75,52 +130,7 @@ export function Navbar() {
             </span>
             <span className="hidden sm:inline">{isDark ? 'Dark' : 'Light'} Mode</span>
           </button>
-          {isAuthenticated ? (
-            <>
-              <Link
-                to="/dashboard"
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isDark ? 'text-emerald-100 hover:bg-white/10' : 'text-emerald-800 hover:bg-emerald-50'
-                }`}
-              >
-                Dashboard
-              </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isDark
-                    ? 'bg-white/10 text-white hover:bg-white/15'
-                    : 'bg-zinc-950 text-white hover:bg-zinc-800'
-                }`}
-                aria-label="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isDark ? 'text-emerald-100 hover:bg-white/10' : 'text-emerald-800 hover:bg-emerald-50'
-                }`}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isDark
-                    ? 'bg-white text-emerald-800 hover:bg-emerald-50'
-                    : 'bg-emerald-600 text-black hover:bg-emerald-700'
-                }`}
-              >
-                Get Started
-              </Link>
-            </>
-          )}
+          <NavAuthButtons isDark={isDark} isAuthenticated={isAuthenticated} logout={logout} />
         </div>
       </nav>
     </header>

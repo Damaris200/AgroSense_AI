@@ -20,14 +20,14 @@ export function ProfilePage() {
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState('');
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
     setSuccess(false);
     setError('');
     try {
       const updated = await updateProfileRequest({ name, phone: phone || undefined, locale });
-      setSession({ user: updated, token: token ?? window.localStorage.getItem('agrosense_token') ?? '' });
+      setSession({ user: updated, token: token ?? globalThis.localStorage.getItem('agrosense_token') ?? '' });
       setSuccess(true);
     } catch (err) {
       setError(extractApiError(err, 'Could not update profile.'));
@@ -50,7 +50,6 @@ export function ProfilePage() {
       />
 
       <div className="mx-auto max-w-lg">
-        {/* Avatar */}
         <div className={`mb-6 flex items-center gap-4 rounded-2xl border p-5 ${cardBg}`}>
           <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700'}`}>
             <UserCircle className="h-8 w-8" />
@@ -64,14 +63,14 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className={`rounded-2xl border p-6 ${cardBg}`}>
           <div className="space-y-4">
             <div>
-              <label className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${labelCl}`}>
+              <label htmlFor="profile-name" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${labelCl}`}>
                 Display name
               </label>
               <input
+                id="profile-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -82,10 +81,11 @@ export function ProfilePage() {
             </div>
 
             <div>
-              <label className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${labelCl}`}>
+              <label htmlFor="profile-phone" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${labelCl}`}>
                 Phone (optional)
               </label>
               <input
+                id="profile-phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}

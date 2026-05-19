@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import {
   farmSavedEventSchema,
-  openWeatherResponseSchema,
+  tomorrowResponseSchema,
   weatherFetchedEventSchema,
 } from '../models/weather.model';
 
@@ -50,34 +50,53 @@ describe('farmSavedEventSchema (weather-service)', () => {
   });
 });
 
-// ── openWeatherResponseSchema ─────────────────────────────────────────────────
+// ── tomorrowResponseSchema ────────────────────────────────────────────────────
 
-const validApiResponse = {
-  main:    { temp: 28.5, humidity: 72 },
-  wind:    { speed: 4.2 },
-  weather: [{ description: 'scattered clouds' }],
+const validTomorrowResponse = {
+  data: {
+    time: '2026-04-21T10:00:00Z',
+    values: {
+      temperature:            28.5,
+      humidity:               72,
+      precipitationIntensity: 2.3,
+      windSpeed:              4.2,
+      weatherCode:            4200,
+    },
+  },
+  location: { lat: 6.4541, lon: 7.5087 },
 };
 
-describe('openWeatherResponseSchema', () => {
-  it('accepts a valid OpenWeather API response', () => {
-    expect(openWeatherResponseSchema.safeParse(validApiResponse).success).toBe(true);
+describe('tomorrowResponseSchema', () => {
+  it('accepts a valid Tomorrow.io API response', () => {
+    expect(tomorrowResponseSchema.safeParse(validTomorrowResponse).success).toBe(true);
   });
 
-  it('accepts a response with optional rain field', () => {
-    const result = openWeatherResponseSchema.safeParse({ ...validApiResponse, rain: { '1h': 2.3 } });
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects missing main.temp', () => {
-    const result = openWeatherResponseSchema.safeParse({
-      ...validApiResponse,
-      main: { humidity: 72 },
+  it('defaults precipitationIntensity to 0 when absent', () => {
+    const { precipitationIntensity: _, ...values } = validTomorrowResponse.data.values;
+    const result = tomorrowResponseSchema.safeParse({
+      ...validTomorrowResponse,
+      data: { ...validTomorrowResponse.data, values },
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.data.values.precipitationIntensity).toBe(0);
   });
 
-  it('rejects empty weather array', () => {
-    const result = openWeatherResponseSchema.safeParse({ ...validApiResponse, weather: [] });
+  it('defaults windSpeed to 0 when absent', () => {
+    const { windSpeed: _, ...values } = validTomorrowResponse.data.values;
+    const result = tomorrowResponseSchema.safeParse({
+      ...validTomorrowResponse,
+      data: { ...validTomorrowResponse.data, values },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.data.values.windSpeed).toBe(0);
+  });
+
+  it('rejects missing temperature', () => {
+    const { temperature: _, ...values } = validTomorrowResponse.data.values;
+    const result = tomorrowResponseSchema.safeParse({
+      ...validTomorrowResponse,
+      data: { ...validTomorrowResponse.data, values },
+    });
     expect(result.success).toBe(false);
   });
 });

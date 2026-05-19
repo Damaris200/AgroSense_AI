@@ -37,7 +37,7 @@ interface ParsedWeather {
   description: string;
 }
 
-function parseTomorrowResponse(raw: TomorrowResponse): ParsedWeather {
+export function parseTomorrowResponse(raw: TomorrowResponse): ParsedWeather {
   const v = raw.data.values;
   return {
     temperature: v.temperature,

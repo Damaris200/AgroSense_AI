@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface PageHeaderProps {
-  title:    string;
-  subtitle?: string;
-  action?:  ReactNode;
+  readonly title: string;
+  readonly subtitle?: string;
+  readonly action?: ReactNode;
 }
 
 export function PageHeader({ title, subtitle, action }: PageHeaderProps) {

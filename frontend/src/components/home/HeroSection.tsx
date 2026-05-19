@@ -54,7 +54,7 @@ export function HeroSection() {
 
           <div className="space-y-5">
             <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl">
-              AgroSense AI
+              {'AgroSense AI'}
               <span className="block text-emerald-200">Smart Decisions for Every Farm</span>
             </h1>
             <p className="max-w-2xl text-base leading-8 text-emerald-50/85 sm:text-lg">

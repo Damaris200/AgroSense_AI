@@ -7,7 +7,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { getMyRecommendations, type Recommendation } from '../../services/recommendation.service';
 import { extractApiError } from '../../services/auth.service';
 
-function RecommendationCard({ rec, isDark }: { rec: Recommendation; isDark: boolean }) {
+interface RecommendationCardProps {
+  readonly rec: Recommendation;
+  readonly isDark: boolean;
+}
+
+function RecommendationCard({ rec, isDark }: RecommendationCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const date = new Date(rec.generatedAt).toLocaleString('en-GB', {
@@ -98,60 +103,70 @@ export function FarmerRecommendationsPage() {
 
   useEffect(() => { void load(); }, []);
 
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div
+        className={`flex items-start gap-3 rounded-2xl border p-5 ${
+          isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'
+        }`}
+      >
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+        <div>
+          <p className="font-semibold">Unable to load recommendations</p>
+          <p className="mt-0.5 text-sm opacity-80">{error}</p>
+          <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  } else if (recs.length === 0) {
+    content = (
+      <div
+        className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${
+          isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+        }`}
+      >
+        <div
+          className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${
+            isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'
+          }`}
+        >
+          <Wheat className="h-8 w-8 text-emerald-500" />
+        </div>
+        <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+          No recommendations yet
+        </p>
+        <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          Submit a farm on the My Farms page to trigger weather and soil analysis. Your AI
+          recommendation will appear here once processing is complete.
+        </p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="space-y-4">
+        {recs.map((rec) => (
+          <RecommendationCard key={rec.id} rec={rec} isDark={isDark} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout>
       <PageHeader
         title="AI Recommendations"
         subtitle="Personalised crop advice generated from your farm's weather and soil analysis."
       />
-
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-        </div>
-      ) : error ? (
-        <div
-          className={`flex items-start gap-3 rounded-2xl border p-5 ${
-            isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'
-          }`}
-        >
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
-            <p className="font-semibold">Unable to load recommendations</p>
-            <p className="mt-0.5 text-sm opacity-80">{error}</p>
-            <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
-              Retry
-            </button>
-          </div>
-        </div>
-      ) : recs.length === 0 ? (
-        <div
-          className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${
-            isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-          }`}
-        >
-          <div
-            className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${
-              isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'
-            }`}
-          >
-            <Wheat className="h-8 w-8 text-emerald-500" />
-          </div>
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-            No recommendations yet
-          </p>
-          <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-            Submit a farm on the My Farms page to trigger weather and soil analysis. Your AI
-            recommendation will appear here once processing is complete.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {recs.map((rec) => (
-            <RecommendationCard key={rec.id} rec={rec} isDark={isDark} />
-          ))}
-        </div>
-      )}
+      {content}
     </DashboardLayout>
   );
 }

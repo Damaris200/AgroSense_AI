@@ -13,7 +13,12 @@ const channelIcon: Record<string, React.ReactNode> = {
   push:  <Bell className="h-4 w-4" />,
 };
 
-function NotificationRow({ notif, isDark }: { notif: Notification; isDark: boolean }) {
+interface NotificationRowProps {
+  readonly notif: Notification;
+  readonly isDark: boolean;
+}
+
+function NotificationRow({ notif, isDark }: NotificationRowProps) {
   const date = new Date(notif.sentAt).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
@@ -70,65 +75,75 @@ export function FarmerNotificationsPage() {
 
   useEffect(() => { void load(); }, []);
 
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div
+        className={`flex items-start gap-3 rounded-2xl border p-5 ${
+          isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'
+        }`}
+      >
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+        <div>
+          <p className="font-semibold">Unable to load notifications</p>
+          <p className="mt-0.5 text-sm opacity-80">{error}</p>
+          <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  } else if (notifications.length === 0) {
+    content = (
+      <div
+        className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${
+          isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+        }`}
+      >
+        <div
+          className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${
+            isDark ? 'bg-blue-900/30' : 'bg-blue-50'
+          }`}
+        >
+          <Bell className="h-8 w-8 text-blue-400" />
+        </div>
+        <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+          No notifications yet
+        </p>
+        <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          Email alerts appear here once your first farm analysis generates a recommendation.
+        </p>
+      </div>
+    );
+  } else {
+    content = (
+      <div
+        className={`rounded-2xl border ${
+          isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
+        }`}
+      >
+        <ul className={`divide-y ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
+          {notifications.map((notif) => (
+            <NotificationRow key={notif.id} notif={notif} isDark={isDark} />
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout>
       <PageHeader
         title="Notification History"
         subtitle="All alerts and advisories sent to you by AgroSense AI."
       />
-
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-        </div>
-      ) : error ? (
-        <div
-          className={`flex items-start gap-3 rounded-2xl border p-5 ${
-            isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'
-          }`}
-        >
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
-            <p className="font-semibold">Unable to load notifications</p>
-            <p className="mt-0.5 text-sm opacity-80">{error}</p>
-            <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
-              Retry
-            </button>
-          </div>
-        </div>
-      ) : notifications.length === 0 ? (
-        <div
-          className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${
-            isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-          }`}
-        >
-          <div
-            className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${
-              isDark ? 'bg-blue-900/30' : 'bg-blue-50'
-            }`}
-          >
-            <Bell className="h-8 w-8 text-blue-400" />
-          </div>
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-            No notifications yet
-          </p>
-          <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-            Email alerts appear here once your first farm analysis generates a recommendation.
-          </p>
-        </div>
-      ) : (
-        <div
-          className={`rounded-2xl border ${
-            isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-          }`}
-        >
-          <ul className={`divide-y ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
-            {notifications.map((notif) => (
-              <NotificationRow key={notif.id} notif={notif} isDark={isDark} />
-            ))}
-          </ul>
-        </div>
-      )}
+      {content}
     </DashboardLayout>
   );
 }

@@ -88,7 +88,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4001
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/auth_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/auth_db"
       JWT_SECRET: REPLACE_ME
       JWT_EXPIRES_IN: 24h
       CORS_ORIGIN: http://localhost:5173
@@ -156,7 +156,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4002
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/farm_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/farm_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: farm-service
       KAFKA_GROUP_ID: farm-service-group
@@ -180,7 +180,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3003
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/weather_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/weather_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: weather-service
       KAFKA_GROUP_ID: weather-service-group
@@ -205,7 +205,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3004
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/soil_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/soil_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: soil-service
       KAFKA_GROUP_ID: soil-service-group
@@ -248,7 +248,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4006
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/ai_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/ai_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: ai-service
       KAFKA_GROUP_ID: ai-service-group
@@ -274,7 +274,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3006
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/notification_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/notification_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: notification-service
       KAFKA_GROUP_ID: notification-service-group
@@ -303,7 +303,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4007
-      DATABASE_URL: postgresql://agrosense:agrosense_dev@postgres:5432/analytics_db
+      DATABASE_URL: "postgresql://agrosense:${POSTGRES_PASSWORD:-agrosense_dev}@postgres:5432/analytics_db"
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: analytics-service
       KAFKA_GROUP_ID: analytics-service-group

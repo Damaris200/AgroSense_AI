@@ -2,11 +2,11 @@ import type { ReactNode } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface StatCardProps {
-  label:    string;
-  value:    string | number;
-  icon:     ReactNode;
-  accent?:  'emerald' | 'blue' | 'amber' | 'red';
-  sub?:     string;
+  readonly label: string;
+  readonly value: string | number;
+  readonly icon: ReactNode;
+  readonly accent?: 'emerald' | 'blue' | 'amber' | 'red';
+  readonly sub?: string;
 }
 
 const accentMap = {

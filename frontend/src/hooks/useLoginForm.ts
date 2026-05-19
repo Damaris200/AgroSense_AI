@@ -21,7 +21,7 @@ export const loginSchema = z.object({
     .string()
     .trim()
     .min(1, 'Email is required')
-    .email('Enter a valid email address'),
+    .email({ message: 'Enter a valid email address' }),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters'),
@@ -53,7 +53,7 @@ export function useLoginForm() {
       setSession(session);
 
       if (isPasskeySupported() && !hasPasskeyCredential()) {
-        const shouldEnable = window.confirm(
+        const shouldEnable = globalThis.confirm(
           'Enable passkey sign-in on this device? This lets you sign in with fingerprint/face next time.',
         );
 

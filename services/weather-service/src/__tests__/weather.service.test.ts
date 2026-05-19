@@ -1,45 +1,62 @@
 import { describe, it, expect } from 'bun:test';
-import { parseOpenWeatherResponse, buildWeatherFetchedEvent } from '../services/weather.service';
+import { parseTomorrowResponse, buildWeatherFetchedEvent } from '../services/weather.service';
+import type { TomorrowResponse } from '../models/weather.model';
 
-// ── parseOpenWeatherResponse ──────────────────────────────────────────────────
+// ── parseTomorrowResponse ─────────────────────────────────────────────────────
 
-describe('parseOpenWeatherResponse', () => {
-  const apiResponse = {
-    main:    { temp: 28.5, humidity: 72 },
-    wind:    { speed: 4.2 },
-    weather: [{ description: 'light rain' }],
-    rain:    { '1h': 3.0 },
+describe('parseTomorrowResponse', () => {
+  const raw: TomorrowResponse = {
+    data: {
+      time: '2026-04-21T10:00:00Z',
+      values: {
+        temperature:            28.5,
+        humidity:               72,
+        precipitationIntensity: 3.0,
+        windSpeed:              4.2,
+        weatherCode:            4200,
+      },
+    },
+    location: { lat: 6.4541, lon: 7.5087 },
   };
 
-  it('extracts temperature from main.temp', () => {
-    const result = parseOpenWeatherResponse(apiResponse);
-    expect(result.temperature).toBe(28.5);
+  it('extracts temperature', () => {
+    expect(parseTomorrowResponse(raw).temperature).toBe(28.5);
   });
 
-  it('extracts humidity from main.humidity', () => {
-    const result = parseOpenWeatherResponse(apiResponse);
-    expect(result.humidity).toBe(72);
+  it('extracts humidity clamped to [0, 100]', () => {
+    expect(parseTomorrowResponse(raw).humidity).toBe(72);
   });
 
-  it('extracts rainfall from rain["1h"]', () => {
-    const result = parseOpenWeatherResponse(apiResponse);
-    expect(result.rainfall).toBe(3.0);
+  it('clamps humidity above 100 to 100', () => {
+    const over = { ...raw, data: { ...raw.data, values: { ...raw.data.values, humidity: 110 } } };
+    expect(parseTomorrowResponse(over).humidity).toBe(100);
   });
 
-  it('defaults rainfall to 0 when rain field is absent', () => {
-    const { rain: _, ...noRain } = apiResponse;
-    const result = parseOpenWeatherResponse(noRain);
-    expect(result.rainfall).toBe(0);
+  it('clamps humidity below 0 to 0', () => {
+    const under = { ...raw, data: { ...raw.data, values: { ...raw.data.values, humidity: -5 } } };
+    expect(parseTomorrowResponse(under).humidity).toBe(0);
   });
 
-  it('extracts wind speed from wind.speed', () => {
-    const result = parseOpenWeatherResponse(apiResponse);
-    expect(result.windSpeed).toBe(4.2);
+  it('extracts rainfall from precipitationIntensity', () => {
+    expect(parseTomorrowResponse(raw).rainfall).toBe(3.0);
   });
 
-  it('extracts description from first weather entry', () => {
-    const result = parseOpenWeatherResponse(apiResponse);
-    expect(result.description).toBe('light rain');
+  it('extracts windSpeed', () => {
+    expect(parseTomorrowResponse(raw).windSpeed).toBe(4.2);
+  });
+
+  it('maps weatherCode 4200 to "light rain"', () => {
+    expect(parseTomorrowResponse(raw).description).toBe('light rain');
+  });
+
+  it('defaults description to "unknown" for unrecognised weatherCode', () => {
+    const unknown = { ...raw, data: { ...raw.data, values: { ...raw.data.values, weatherCode: 9999 } } };
+    expect(parseTomorrowResponse(unknown).description).toBe('unknown');
+  });
+
+  it('maps weatherCode 1000 to "clear, sunny"', () => {
+    const sunny = { ...raw, data: { ...raw.data, values: { ...raw.data.values, weatherCode: 1000 } } };
+    expect(parseTomorrowResponse(sunny).description).toBe('clear, sunny');
   });
 });
 
@@ -86,5 +103,11 @@ describe('buildWeatherFetchedEvent', () => {
   it('preserves submissionId for orchestrator correlation', () => {
     const event = buildWeatherFetchedEvent(farmEvent, weatherRecord);
     expect(event.submissionId).toBe(farmEvent.submissionId);
+  });
+
+  it('defaults userEmail and userName to empty string when absent', () => {
+    const event = buildWeatherFetchedEvent(farmEvent, weatherRecord);
+    expect(event.userEmail).toBe('');
+    expect(event.userName).toBe('');
   });
 });

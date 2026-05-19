@@ -1,5 +1,5 @@
 interface PasswordStrengthProps {
-  value: string;
+  readonly value: string;
 }
 
 function scorePassword(value: string) {
@@ -18,12 +18,14 @@ const labels = ['Enter a password', 'Weak', 'Fair', 'Good', 'Strong'];
 export function PasswordStrength({ value }: PasswordStrengthProps) {
   const score = scorePassword(value);
 
+  const goodColor = score <= 2 ? 'bg-amber-500' : 'bg-emerald-500';
+  const color = score <= 1 ? 'bg-rose-500' : goodColor;
+
   return (
     <div className="mt-3">
       <div className="flex gap-2">
         {[0, 1, 2, 3].map((idx) => {
           const active = idx < score;
-          const color = score <= 1 ? 'bg-rose-500' : score <= 2 ? 'bg-amber-500' : 'bg-emerald-500';
 
           return (
             <span
