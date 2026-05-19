@@ -22,13 +22,13 @@ export const registerSchema = z.object({
     .string()
     .trim()
     .min(1, 'Email is required')
-    .email('Enter a valid email address'),
+    .email({ message: 'Enter a valid email address' }),
   phone: z
     .string()
     .trim()
     .optional()
     .refine(
-      (value) => !value || phonePattern.test(value.replace(/[\s-]/g, '')),
+      (value) => !value || phonePattern.test(value.replaceAll(/[\s-]/gu, '')),
       { message: 'Use international format e.g. +2348012345678' },
     ),
   locale: z.enum(['en', 'fr']),
@@ -44,7 +44,7 @@ export type RegisterFormValues = z.infer<typeof registerSchema>;
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function normalizePhone(phone?: string) {
-  return phone?.replace(/[\s-]/g, '') || undefined;
+  return phone?.replaceAll(/[\s-]/gu, '') || undefined;
 }
 
 function mapRegisterError(error: unknown): string {

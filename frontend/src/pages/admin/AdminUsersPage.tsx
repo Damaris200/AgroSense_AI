@@ -13,6 +13,49 @@ const roleBadge = {
   admin:      { text: 'Admin',      cls: 'bg-red-100 text-red-700',      darkCls: 'bg-red-900/40 text-red-300' },
 };
 
+interface UserRowProps {
+  readonly user: AdminUser;
+  readonly isDark: boolean;
+  readonly onToggle: (id: string, current: boolean) => void;
+}
+
+function UserRow({ user, isDark, onToggle }: UserRowProps) {
+  const rb = roleBadge[user.role];
+  const statusCls = user.isActive
+    ? (isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+    : (isDark ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-100 text-zinc-500');
+  const toggleCls = user.isActive
+    ? (isDark ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-500 hover:bg-red-100')
+    : (isDark ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100');
+
+  return (
+    <tr className={`transition ${isDark ? 'hover:bg-zinc-800/40' : 'hover:bg-zinc-50'}`}>
+      <td className={`px-4 py-3 font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>{user.name}</td>
+      <td className={`px-4 py-3 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.email}</td>
+      <td className="px-4 py-3">
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isDark ? rb.darkCls : rb.cls}`}>{rb.text}</span>
+      </td>
+      <td className={`px-4 py-3 uppercase text-xs font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.locale}</td>
+      <td className={`px-4 py-3 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.createdAt}</td>
+      <td className="px-4 py-3">
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusCls}`}>
+          {user.isActive ? 'Active' : 'Inactive'}
+        </span>
+      </td>
+      <td className="px-4 py-3">
+        <button
+          type="button"
+          onClick={() => onToggle(user.id, user.isActive)}
+          title={user.isActive ? 'Deactivate user' : 'Activate user'}
+          className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${toggleCls}`}
+        >
+          {user.isActive ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
+        </button>
+      </td>
+    </tr>
+  );
+}
+
 export function AdminUsersPage() {
   const { isDark } = useTheme();
   const [query, setQuery] = useState('');
@@ -50,13 +93,34 @@ export function AdminUsersPage() {
 
   useEffect(() => { void loadUsers(); }, []);
 
+  let tableBody: React.ReactNode;
+  if (loading) {
+    tableBody = (
+      <tr>
+        <td colSpan={7} className="py-10 text-center">
+          <Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-500" />
+        </td>
+      </tr>
+    );
+  } else if (filtered.length === 0) {
+    tableBody = (
+      <tr>
+        <td colSpan={7} className={`py-10 text-center text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No users found.</td>
+      </tr>
+    );
+  } else {
+    tableBody = filtered.map((user) => (
+      <UserRow key={user.id} user={user} isDark={isDark} onToggle={toggleActive} />
+    ));
+  }
+
   return (
     <DashboardLayout>
       <PageHeader title="User Management" subtitle="View and manage all registered users." />
 
       <div className="mb-4">
         <div className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 ${isDark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-200 bg-white'}`}>
-          <Search className={`h-4 w-4 flex-shrink-0 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`} />
+          <Search className={`h-4 w-4 shrink-0 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -78,7 +142,7 @@ export function AdminUsersPage() {
 
       <div className={`overflow-hidden rounded-2xl border ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px] text-sm">
+          <table className="w-full min-w-150 text-sm">
             <thead>
               <tr className={isDark ? 'bg-zinc-800/60' : 'bg-zinc-50'}>
                 {['Name', 'Email', 'Role', 'Locale', 'Joined', 'Status', ''].map((h) => (
@@ -87,47 +151,7 @@ export function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="py-10 text-center">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-500" />
-                  </td>
-                </tr>
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className={`py-10 text-center text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No users found.</td>
-                </tr>
-              ) : (
-                filtered.map((user) => {
-                  const rb = roleBadge[user.role];
-                  return (
-                    <tr key={user.id} className={`transition ${isDark ? 'hover:bg-zinc-800/40' : 'hover:bg-zinc-50'}`}>
-                      <td className={`px-4 py-3 font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>{user.name}</td>
-                      <td className={`px-4 py-3 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.email}</td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isDark ? rb.darkCls : rb.cls}`}>{rb.text}</span>
-                      </td>
-                      <td className={`px-4 py-3 uppercase text-xs font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.locale}</td>
-                      <td className={`px-4 py-3 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user.createdAt}</td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${user.isActive ? (isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700') : (isDark ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-100 text-zinc-500')}`}>
-                          {user.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleActive(user.id, user.isActive)}
-                          title={user.isActive ? 'Deactivate user' : 'Activate user'}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${user.isActive ? (isDark ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-500 hover:bg-red-100') : (isDark ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100')}`}
-                        >
-                          {user.isActive ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+              {tableBody}
             </tbody>
           </table>
         </div>

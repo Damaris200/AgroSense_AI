@@ -34,6 +34,38 @@ export function AdminOverviewPage() {
 
   useEffect(() => { void loadOverview(); }, []);
 
+  const recentEvents = overview?.recentEvents ?? [];
+
+  let eventsContent: React.ReactNode;
+  if (loading) {
+    eventsContent = (
+      <li className="flex items-center justify-center py-6">
+        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+      </li>
+    );
+  } else if (recentEvents.length === 0) {
+    eventsContent = (
+      <li className={`rounded-xl px-3 py-2.5 text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+        No recent events.
+      </li>
+    );
+  } else {
+    eventsContent = recentEvents.map((evt) => {
+      const date = new Date(evt.loggedAt).toLocaleString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+      return (
+        <li key={evt.id} className={`rounded-xl px-3 py-2.5 ${isDark ? 'bg-zinc-800/60' : 'bg-zinc-50'}`}>
+          <div className="flex items-center justify-between gap-2">
+            <code className={`text-xs font-mono ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>{evt.eventType}</code>
+            <span className={`text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</span>
+          </div>
+          <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>submissionId: {evt.submissionId}</p>
+        </li>
+      );
+    });
+  }
+
   return (
     <DashboardLayout>
       <PageHeader title="Admin Overview" subtitle="System-wide metrics and service health." />
@@ -85,30 +117,7 @@ export function AdminOverviewPage() {
         <div className={`rounded-2xl border p-5 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
           <h2 className={`mb-4 font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>Recent Kafka Events</h2>
           <ul className="space-y-2">
-            {loading ? (
-              <li className="flex items-center justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
-              </li>
-            ) : (overview?.recentEvents ?? []).length === 0 ? (
-              <li className={`rounded-xl px-3 py-2.5 text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                No recent events.
-              </li>
-            ) : (
-              (overview?.recentEvents ?? []).map((evt) => {
-                const date = new Date(evt.loggedAt).toLocaleString('en-GB', {
-                  day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                });
-                return (
-                  <li key={evt.id} className={`rounded-xl px-3 py-2.5 ${isDark ? 'bg-zinc-800/60' : 'bg-zinc-50'}`}>
-                    <div className="flex items-center justify-between gap-2">
-                      <code className={`text-xs font-mono ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>{evt.eventType}</code>
-                      <span className={`text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</span>
-                    </div>
-                    <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>submissionId: {evt.submissionId}</p>
-                  </li>
-                );
-              })
-            )}
+            {eventsContent}
           </ul>
         </div>
       </div>

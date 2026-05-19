@@ -8,7 +8,7 @@ import { getMyFarms, type Farm } from '../../services/farm.service';
 import { getWeatherForFarm, type WeatherRecord } from '../../services/weather.service';
 import { extractApiError } from '../../services/auth.service';
 
-function WeatherCard({ record, isDark }: { record: WeatherRecord; isDark: boolean }) {
+function WeatherCard({ record, isDark }: { readonly record: WeatherRecord; readonly isDark: boolean }) {
   const date = new Date(record.fetchedAt).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
@@ -59,7 +59,7 @@ export function FarmerWeatherPage() {
     try {
       const data = await getMyFarms();
       setFarms(data);
-      if (data.length > 0) setSelectedId(data[0]!.id);
+      if (data.length > 0) setSelectedId(data[0]?.id ?? '');
     } catch (err) {
       setError(extractApiError(err, 'Could not load farms.'));
     } finally {
@@ -94,6 +94,42 @@ export function FarmerWeatherPage() {
     ? 'border-zinc-700 bg-zinc-800 text-white focus:border-emerald-500'
     : 'border-zinc-200 bg-white text-zinc-900 focus:border-emerald-500';
 
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className={`flex items-start gap-3 rounded-2xl border p-5 ${isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  } else if (records.length === 0) {
+    content = (
+      <div className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${cardBg}`}>
+        <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${isDark ? 'bg-sky-900/30' : 'bg-sky-50'}`}>
+          <CloudRain className="h-8 w-8 text-sky-500" />
+        </div>
+        <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>No weather data yet</p>
+        <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          Weather data is fetched automatically when you submit a farm.
+        </p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="space-y-4">
+        {records.map((r) => (
+          <WeatherCard key={r.id} record={r} isDark={isDark} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout>
       <PageHeader
@@ -103,10 +139,11 @@ export function FarmerWeatherPage() {
 
       {farms.length > 0 && (
         <div className="mb-6">
-          <label className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          <label htmlFor="weather-farm-select" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
             Select farm
           </label>
           <select
+            id="weather-farm-select"
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
             className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition ${selectCl}`}
@@ -118,32 +155,7 @@ export function FarmerWeatherPage() {
         </div>
       )}
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-        </div>
-      ) : error ? (
-        <div className={`flex items-start gap-3 rounded-2xl border p-5 ${isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <p className="text-sm">{error}</p>
-        </div>
-      ) : records.length === 0 ? (
-        <div className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${cardBg}`}>
-          <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${isDark ? 'bg-sky-900/30' : 'bg-sky-50'}`}>
-            <CloudRain className="h-8 w-8 text-sky-500" />
-          </div>
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>No weather data yet</p>
-          <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-            Weather data is fetched automatically when you submit a farm.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {records.map((r) => (
-            <WeatherCard key={r.id} record={r} isDark={isDark} />
-          ))}
-        </div>
-      )}
+      {content}
     </DashboardLayout>
   );
 }

@@ -1,0 +1,6 @@
+[test]
+# Runs setup.ts before any test file so JWT_SECRET is set before env.ts loads
+preload = ["./src/__tests__/setup.ts"]
+coverage = true
+coverageReporter = ["lcov", "text"]
+coverageDir = "./coverage"

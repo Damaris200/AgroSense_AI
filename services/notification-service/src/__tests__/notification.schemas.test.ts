@@ -2,6 +2,7 @@ import { describe, it, expect } from 'bun:test';
 import { recommendationGeneratedEventSchema } from '../models/notification.model';
 
 const validEvent = {
+  submissionId:   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   farmId:         '22222222-2222-4222-8222-222222222222',
   userId:         '33333333-3333-4333-8333-333333333333',
   userEmail:      'anya@farm.com',
@@ -15,25 +16,30 @@ describe('recommendationGeneratedEventSchema', () => {
     expect(recommendationGeneratedEventSchema.safeParse(validEvent).success).toBe(true);
   });
 
-  it('rejects whitespace-only userName', () => {
-    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, userName: '   ' });
+  it('accepts anonymous userId', () => {
+    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, userId: 'anonymous' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects missing submissionId', () => {
+    const { submissionId: _, ...rest } = validEvent;
+    expect(recommendationGeneratedEventSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it('rejects non-uuid submissionId', () => {
+    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, submissionId: 'bad-id' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-uuid farmId', () => {
+    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, farmId: 'bad-id' });
     expect(result.success).toBe(false);
   });
 
   it('rejects whitespace-only recommendation', () => {
     const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, recommendation: '   ' });
     expect(result.success).toBe(false);
-  });
-
-  it('rejects an invalid email', () => {
-    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, userEmail: 'not-an-email' });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0].path).toContain('userEmail');
-  });
-
-  it('rejects non-uuid farmId', () => {
-    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, farmId: 'bad-id' });
-    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].path).toContain('recommendation');
   });
 
   it('rejects empty recommendation text', () => {
@@ -42,13 +48,22 @@ describe('recommendationGeneratedEventSchema', () => {
     expect(result.error?.issues[0].path).toContain('recommendation');
   });
 
-  it('rejects empty userName', () => {
-    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, userName: '' });
+  it('rejects invalid datetime in generatedAt', () => {
+    const result = recommendationGeneratedEventSchema.safeParse({ ...validEvent, generatedAt: 'not-a-date' });
     expect(result.success).toBe(false);
   });
 
-  it('rejects missing fields', () => {
+  it('defaults userEmail to empty string when omitted', () => {
     const { userEmail: _, ...rest } = validEvent;
-    expect(recommendationGeneratedEventSchema.safeParse(rest).success).toBe(false);
+    const result = recommendationGeneratedEventSchema.safeParse(rest);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.userEmail).toBe('');
+  });
+
+  it('defaults userName to empty string when omitted', () => {
+    const { userName: _, ...rest } = validEvent;
+    const result = recommendationGeneratedEventSchema.safeParse(rest);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.userName).toBe('');
   });
 });

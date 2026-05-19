@@ -11,7 +11,7 @@ import {
 } from '../../services/farm.service';
 import { extractApiError } from '../../services/auth.service';
 
-function StatusBadge({ isDark }: { isDark: boolean }) {
+function StatusBadge({ isDark }: { readonly isDark: boolean }) {
   return (
     <span
       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -24,9 +24,9 @@ function StatusBadge({ isDark }: { isDark: boolean }) {
 }
 
 interface ModalProps {
-  onClose:  () => void;
-  onSaved:  () => void;
-  isDark:   boolean;
+  readonly onClose:  () => void;
+  readonly onSaved:  () => void;
+  readonly isDark:   boolean;
 }
 
 function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
@@ -42,7 +42,7 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
   }`;
   const labelCls = `mb-1 block text-xs font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`;
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setSubmitting(true);
@@ -65,7 +65,14 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal"
+        onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
+      />
       <div
         className={`relative z-10 w-full max-w-md rounded-2xl border p-6 shadow-2xl ${
           isDark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-100 bg-white'
@@ -115,25 +122,25 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
             )}
 
             <div>
-              <label className={labelCls}>Farm Name</label>
-              <input required className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Field" />
+              <label htmlFor="farm-name" className={labelCls}>Farm Name</label>
+              <input id="farm-name" required className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Field" />
             </div>
             <div>
-              <label className={labelCls}>Location / Village</label>
-              <input required className={inputCls} value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} placeholder="e.g. Enugu, Nigeria" />
+              <label htmlFor="farm-location" className={labelCls}>Location / Village</label>
+              <input id="farm-location" required className={inputCls} value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} placeholder="e.g. Enugu, Nigeria" />
             </div>
             <div>
-              <label className={labelCls}>Crop Type</label>
-              <input required className={inputCls} value={form.cropType} onChange={e => setForm(f => ({ ...f, cropType: e.target.value }))} placeholder="e.g. Maize" />
+              <label htmlFor="farm-crop-type" className={labelCls}>Crop Type</label>
+              <input id="farm-crop-type" required className={inputCls} value={form.cropType} onChange={e => setForm(f => ({ ...f, cropType: e.target.value }))} placeholder="e.g. Maize" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={labelCls}>GPS Latitude</label>
-                <input required type="number" step="any" className={inputCls} value={form.gpsLat} onChange={e => setForm(f => ({ ...f, gpsLat: e.target.value }))} placeholder="6.4541" />
+                <label htmlFor="farm-gps-lat" className={labelCls}>GPS Latitude</label>
+                <input id="farm-gps-lat" required type="number" step="any" className={inputCls} value={form.gpsLat} onChange={e => setForm(f => ({ ...f, gpsLat: e.target.value }))} placeholder="6.4541" />
               </div>
               <div>
-                <label className={labelCls}>GPS Longitude</label>
-                <input required type="number" step="any" className={inputCls} value={form.gpsLng} onChange={e => setForm(f => ({ ...f, gpsLng: e.target.value }))} placeholder="7.5087" />
+                <label htmlFor="farm-gps-lng" className={labelCls}>GPS Longitude</label>
+                <input id="farm-gps-lng" required type="number" step="any" className={inputCls} value={form.gpsLng} onChange={e => setForm(f => ({ ...f, gpsLng: e.target.value }))} placeholder="7.5087" />
               </div>
             </div>
 
@@ -162,7 +169,7 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
   );
 }
 
-function FarmCard({ farm, isDark }: { farm: Farm; isDark: boolean }) {
+function FarmCard({ farm, isDark }: { readonly farm: Farm; readonly isDark: boolean }) {
   return (
     <div
       className={`rounded-2xl border p-5 transition hover:shadow-md ${
@@ -221,6 +228,55 @@ export function FarmerFarmsPage() {
 
   useEffect(() => { void load(); }, []);
 
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className={`flex items-start gap-3 rounded-2xl border p-5 ${isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+        <div>
+          <p className="font-semibold">Unable to load farms</p>
+          <p className="mt-0.5 text-sm opacity-80">{error}</p>
+          <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  } else if (farms.length === 0) {
+    content = (
+      <div className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
+        <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
+          <Sprout className="h-8 w-8 text-emerald-500" />
+        </div>
+        <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>No farms yet</p>
+        <p className={`mt-1 text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+          Submit your first farm to get AI-powered crop recommendations.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+          <Plus className="h-4 w-4" /> Submit a Farm
+        </button>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {farms.map((farm) => (
+          <FarmCard key={farm.id} farm={farm} isDark={isDark} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout>
       <PageHeader
@@ -238,45 +294,7 @@ export function FarmerFarmsPage() {
         }
       />
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-        </div>
-      ) : error ? (
-        <div className={`flex items-start gap-3 rounded-2xl border p-5 ${isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
-            <p className="font-semibold">Unable to load farms</p>
-            <p className="mt-0.5 text-sm opacity-80">{error}</p>
-            <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
-              Retry
-            </button>
-          </div>
-        </div>
-      ) : farms.length === 0 ? (
-        <div className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
-          <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-            <Sprout className="h-8 w-8 text-emerald-500" />
-          </div>
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>No farms yet</p>
-          <p className={`mt-1 text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-            Submit your first farm to get AI-powered crop recommendations.
-          </p>
-          <button
-            type="button"
-            onClick={() => setShowModal(true)}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            <Plus className="h-4 w-4" /> Submit a Farm
-          </button>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {farms.map((farm) => (
-            <FarmCard key={farm.id} farm={farm} isDark={isDark} />
-          ))}
-        </div>
-      )}
+      {content}
 
       {showModal && (
         <FarmSubmitModal

@@ -17,9 +17,9 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  if (typeof window === 'undefined') return config;
+  if (typeof globalThis.window === 'undefined') return config;
 
-  const token = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token = globalThis.localStorage.getItem(TOKEN_STORAGE_KEY);
   if (!token) return config;
 
   config.headers = config.headers ?? {};
@@ -30,7 +30,7 @@ api.interceptors.request.use((config) => {
 export function extractApiError(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const message = (error.response?.data as { error?: string } | undefined)?.error;
-    return message ?? error.message ?? fallback;
+    return message ?? (error.message || fallback);
   }
   if (error instanceof Error) return error.message;
   return fallback;

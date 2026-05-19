@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
 ];
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -124,7 +124,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/50"
+            role="button"
+            tabIndex={0}
+            aria-label="Close sidebar"
+            onClick={() => setSidebarOpen(false)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') setSidebarOpen(false); }}
+          />
           <div className="absolute left-0 top-0 h-full w-56 z-50">{sidebar}</div>
         </div>
       )}

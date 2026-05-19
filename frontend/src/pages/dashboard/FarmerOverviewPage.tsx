@@ -26,6 +26,12 @@ const typeBgDark = {
   notification:   'bg-amber-900/30',
 };
 
+function getGreeting(hour: number): string {
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export function FarmerOverviewPage() {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -33,8 +39,7 @@ export function FarmerOverviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greeting = getGreeting(new Date().getHours());
 
   async function loadOverview() {
     setLoading(true);
@@ -49,6 +54,37 @@ export function FarmerOverviewPage() {
   }
 
   useEffect(() => { void loadOverview(); }, []);
+
+  let activityContent: React.ReactNode;
+  if (loading) {
+    activityContent = (
+      <li className="flex items-center justify-center py-6">
+        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+      </li>
+    );
+  } else if ((overview?.recentActivity ?? []).length === 0) {
+    activityContent = (
+      <li className={`text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No activity yet.</li>
+    );
+  } else {
+    activityContent = overview?.recentActivity.map((item) => {
+      const date = new Date(item.timestamp).toLocaleString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+      const activityType = item.type as keyof typeof typeIcon;
+      return (
+        <li key={item.id} className="flex items-start gap-3">
+          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[activityType] : typeBg[activityType]}`}>
+            {typeIcon[activityType]}
+          </div>
+          <div className="min-w-0">
+            <p className={`text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{item.text}</p>
+            <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</p>
+          </div>
+        </li>
+      );
+    });
+  }
 
   return (
     <DashboardLayout>
@@ -75,38 +111,13 @@ export function FarmerOverviewPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
-        {/* recent activity */}
         <div className={`rounded-2xl border p-5 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
           <h2 className={`mb-4 font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>Recent Activity</h2>
           <ul className="space-y-3">
-            {loading ? (
-              <li className="flex items-center justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
-              </li>
-            ) : (overview?.recentActivity ?? []).length === 0 ? (
-              <li className={`text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No activity yet.</li>
-            ) : (
-              overview?.recentActivity.map((item) => {
-                const date = new Date(item.timestamp).toLocaleString('en-GB', {
-                  day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                });
-                return (
-                  <li key={item.id} className="flex items-start gap-3">
-                    <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[item.type as keyof typeof typeBgDark] : typeBg[item.type as keyof typeof typeBg]}`}>
-                      {typeIcon[item.type as keyof typeof typeIcon]}
-                    </div>
-                    <div className="min-w-0">
-                      <p className={`text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{item.text}</p>
-                      <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</p>
-                    </div>
-                  </li>
-                );
-              })
-            )}
+            {activityContent}
           </ul>
         </div>
 
-        {/* quick actions */}
         <div className={`rounded-2xl border p-5 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
           <h2 className={`mb-4 font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>Quick Actions</h2>
           <div className="space-y-2">

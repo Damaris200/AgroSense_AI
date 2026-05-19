@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import { Leaf, Radar, ShieldCheck, Sparkles, Wheat } from 'lucide-react';
 
 interface AuthSplitLayoutProps {
-  formTitle: string;
-  formDescription: string;
-  panelTitle: string;
-  panelDescription: string;
-  panelHighlights: string[];
-  footerLink: ReactNode;
-  children: ReactNode;
+  readonly formTitle: string;
+  readonly formDescription: string;
+  readonly panelTitle: string;
+  readonly panelDescription: string;
+  readonly panelHighlights: string[];
+  readonly footerLink: ReactNode;
+  readonly children: ReactNode;
 }
 
 const panelStats = [

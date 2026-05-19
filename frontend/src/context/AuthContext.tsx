@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { TOKEN_STORAGE_KEY, getMeRequest } from '../services/auth.service';
 import type { AuthResponse, AuthUser } from '../types/auth';
@@ -15,41 +15,41 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const clearSession = () => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  const clearSession = useCallback(() => {
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis.localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const setSession = ({ user: nextUser, token: nextToken }: AuthResponse) => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
+  const setSession = useCallback(({ user: nextUser, token: nextToken }: AuthResponse) => {
+    if (typeof globalThis.window !== 'undefined') {
+      globalThis.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
     }
     setToken(nextToken);
     setUser(nextUser);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearSession();
-  };
+  }, [clearSession]);
 
   useEffect(() => {
     let isMounted = true;
 
     const initializeAuth = async () => {
-      if (typeof window === 'undefined') {
+      if (typeof globalThis.window === 'undefined') {
         if (isMounted) setIsLoading(false);
         return;
       }
 
-      const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+      const storedToken = globalThis.localStorage.getItem(TOKEN_STORAGE_KEY);
 
       if (!storedToken) {
         if (isMounted) setIsLoading(false);
@@ -70,19 +70,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     void initializeAuth();
     return () => { isMounted = false; };
-  }, []);
+  }, [clearSession]);
+
+  const contextValue = useMemo(
+    () => ({
+      user,
+      token,
+      isAuthenticated: Boolean(user && token),
+      isLoading,
+      setSession,
+      logout,
+    }),
+    [user, token, isLoading, setSession, logout],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated: Boolean(user && token),
-        isLoading,
-        setSession,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

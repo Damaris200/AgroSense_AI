@@ -1,5 +1,5 @@
 import { NodeSSH } from "node-ssh";
-import path from "path";
+import path from "node:path";
 
 const ssh = new NodeSSH();
 
