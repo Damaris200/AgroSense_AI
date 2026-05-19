@@ -252,7 +252,7 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKA_CLIENT_ID: ai-service
       KAFKA_GROUP_ID: ai-service-group
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
       OPENAI_MODEL: ft:gpt-4.1-mini-2025-04-14:personal:farm-recommendation:DcEPwNUN
     networks:
       - agrosense-net
