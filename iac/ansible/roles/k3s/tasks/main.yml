@@ -59,6 +59,22 @@
       }'
   changed_when: true
 
+- name: Install cert-manager (required for Let's Encrypt TLS)
+  shell: >
+    kubectl apply -f
+    https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: true
+
+- name: Wait for cert-manager to be ready
+  shell: >
+    kubectl wait --namespace cert-manager
+    --for=condition=ready pod
+    --selector=app.kubernetes.io/instance=cert-manager
+    --timeout=120s
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: false
+
 - name: Install metrics-server (required for HPA)
   shell: >
     kubectl apply -f
