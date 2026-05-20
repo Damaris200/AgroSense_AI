@@ -1,0 +1,14 @@
+git:latest
+workflow-aggregator:latest
+blueocean:latest
+docker-workflow:latest
+docker-plugin:latest
+ssh-agent:latest
+credentials-binding:latest
+sonar:latest
+junit:latest
+pipeline-stage-view:latest
+github:latest
+build-timeout:latest
+timestamper:latest
+ws-cleanup:latest
