@@ -45,6 +45,20 @@ resource "digitalocean_firewall" "agrosense" {
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
+  # Jenkins web UI
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "8080"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  # SonarQube web UI
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "9000"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
   # Allow all outbound traffic
   outbound_rule {
     protocol              = "tcp"

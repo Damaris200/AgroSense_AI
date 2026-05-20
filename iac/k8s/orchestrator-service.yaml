@@ -9,7 +9,7 @@ metadata:
   labels:
     app: orchestrator-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: orchestrator-service

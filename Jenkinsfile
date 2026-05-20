@@ -11,6 +11,8 @@ pipeline {
     VPS_HOST         = credentials('agrosense-vps-host')
     KUBECONFIG_REMOTE = '/etc/rancher/k3s/k3s.yaml'
     K8S_NAMESPACE    = 'agrosense'
+    // Jenkins credentials: kind=Secret text, ID=sonarqube-token
+    SONAR_TOKEN      = credentials('sonarqube-token')
   }
 
   options {
@@ -65,13 +67,14 @@ pipeline {
     }
 
     // ── 4. Tests (services that have test suites) ──────────────────────────
+    // --coverage-reporter=lcov produces coverage/lcov.info consumed by SonarQube
 
     stage('Test') {
       parallel {
         stage('auth-service') {
           steps {
             dir('services/auth-service') {
-              sh 'bun test --coverage'
+              sh 'bun test --coverage --coverage-reporter=lcov'
             }
           }
           post {
@@ -81,28 +84,53 @@ pipeline {
           }
         }
         stage('weather-service') {
-          steps { dir('services/weather-service') { sh 'bun test --coverage' } }
+          steps { dir('services/weather-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
         }
         stage('soil-service') {
-          steps { dir('services/soil-service') { sh 'bun test --coverage' } }
+          steps { dir('services/soil-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
         }
         stage('notification-service') {
-          steps { dir('services/notification-service') { sh 'bun test --coverage' } }
+          steps { dir('services/notification-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
         }
         stage('api-gateway') {
-          steps { dir('services/api-gateway') { sh 'bun test --coverage' } }
+          steps { dir('services/api-gateway') { sh 'bun test --coverage --coverage-reporter=lcov' } }
         }
       }
     }
 
-    // ── 5. Build & Push Docker images (all services in parallel) ──────────
+    // ── 5. SonarQube Analysis ──────────────────────────────────────────────
+    // Requires: SonarQube Scanner plugin + "SonarQube" server configured in Jenkins
+    // Requires: "SonarScanner" tool configured in Global Tool Configuration
 
-    stage('Build & Push') {
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          sh "${tool 'SonarScanner'}/bin/sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
+        }
+      }
+    }
+
+    // ── 6. Quality Gate (fail the build if SonarQube issues are found) ─────
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
+
+    // ── 7. Build & Push Docker images (all services in parallel) ──────────
+
+    stage('Docker Login') {
       steps {
         script {
           sh "echo '${DOCKER_CREDS_PSW}' | docker login -u '${DOCKER_CREDS_USR}' --password-stdin"
         }
       }
+    }
+
+    stage('Build & Push') {
       parallel {
         stage('auth-service') {
           steps {
@@ -189,12 +217,11 @@ pipeline {
       }
     }
 
-    // ── 6. Deploy to Kubernetes (main branch only) ─────────────────────────
+    // ── 8. Deploy to Kubernetes (main branch only) ─────────────────────────
 
     stage('Deploy to K8s') {
       when { branch 'main' }
       steps {
-        // SSH into VPS, force-pull latest images, rolling-restart all deployments
         sshagent(credentials: ['agrosense-vps-key']) {
           sh """
             ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} '
@@ -232,7 +259,6 @@ pipeline {
       echo 'Pipeline failed — check the stage logs above.'
     }
     always {
-      // Clean up dangling Docker images on the Jenkins agent to save disk space
       sh 'docker image prune -f || true'
     }
   }
