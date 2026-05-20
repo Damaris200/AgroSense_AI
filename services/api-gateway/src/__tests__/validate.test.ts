@@ -6,7 +6,7 @@ import { validateBody } from '../middleware/validate';
 const schema = z
   .object({
     name: z.string().min(1, 'name is required'),
-    age:  z.number({ error: 'age must be a number' }),
+    age:  z.number({ invalid_type_error: 'age must be a number' }),
   })
   .strict();
 

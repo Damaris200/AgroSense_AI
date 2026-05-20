@@ -44,9 +44,8 @@ function buildRecentActivity(params: {
     });
   }
 
-  return activity
-    .sort((a, b) => toTime(b.timestamp) - toTime(a.timestamp))
-    .slice(0, 6);
+  const sorted = [...activity].sort((a, b) => toTime(b.timestamp) - toTime(a.timestamp));
+  return sorted.slice(0, 6);
 }
 
 // GET /api/overview — user dashboard aggregates
@@ -60,9 +59,15 @@ router.get('/', requireAuth as any, async (req: Request, res: Response, next: Ne
       fetch(`${env.notificationSvcUrl}/api/notifications?userId=${encodeURIComponent(userId)}`, { headers: { 'x-user-id': userId } }),
     ]);
 
-    const farmsJson = await farmsResp.json() as { data?: Array<{ id: string; name: string; cropType: string; location: string; createdAt: string }> };
-    const recsJson = await recsResp.json() as { data?: Array<{ id: string; content: string; generatedAt: string }> };
-    const notifJson = await notifResp.json() as { data?: Array<{ id: string; message: string; channel: string; sentAt: string }> };
+    const farmsJson = farmsResp.status === 'fulfilled'
+      ? await farmsResp.value.json() as { data?: Array<{ id: string; name: string; cropType: string; location: string; createdAt: string }> }
+      : { data: undefined };
+    const recsJson = recsResp.status === 'fulfilled'
+      ? await recsResp.value.json() as { data?: Array<{ id: string; content: string; generatedAt: string }> }
+      : { data: undefined };
+    const notifJson = notifResp.status === 'fulfilled'
+      ? await notifResp.value.json() as { data?: Array<{ id: string; message: string; channel: string; sentAt: string }> }
+      : { data: undefined };
 
     const farms = farmsJson.data ?? [];
     const recommendations = recsJson.data ?? [];
