@@ -137,13 +137,30 @@ pipeline {
     }
 
     // ── 5. SonarQube Analysis ──────────────────────────────────────────────
-    // Requires: SonarQube Scanner plugin + "SonarQube" server configured in Jenkins
-    // Requires: "SonarScanner" tool configured in Global Tool Configuration
+    // Uses the official sonar-scanner-cli Docker image — no Jenkins tool install required.
+    // withSonarQubeEnv injects SONAR_HOST_URL; SONAR_TOKEN comes from the credential binding.
 
+    // Jenkins-native scanner avoids Docker-in-Docker bind-mount issues.
+    // Requires: Manage Jenkins → Tools → SonarQube Scanner, name = "SonarScanner"
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-          sh "${tool 'SonarScanner'}/bin/sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
+          script {
+            def scannerHome = tool 'SonarScanner'
+            sh """
+              ${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=agrosense-ai \
+                -Dsonar.projectName=AgroSense-AI \
+                -Dsonar.sources=. \
+                -Dsonar.exclusions='**/node_modules/**,**/dist/**,**/.prisma/**,**/coverage/**,**/prisma/migrations/**' \
+                -Dsonar.javascript.lcov.reportPaths=\
+services/auth-service/coverage/lcov.info,\
+services/weather-service/coverage/lcov.info,\
+services/soil-service/coverage/lcov.info,\
+services/notification-service/coverage/lcov.info,\
+services/api-gateway/coverage/lcov.info
+            """
+          }
         }
       }
     }
