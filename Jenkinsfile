@@ -76,26 +76,62 @@ pipeline {
         stage('auth-service') {
           steps {
             dir('services/auth-service') {
-              sh 'bun test --coverage --coverage-reporter=lcov'
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
             }
           }
           post {
             always {
-              junit allowEmptyResults: true, testResults: 'services/auth-service/coverage/**/*.xml'
+              junit allowEmptyResults: true, testResults: 'services/auth-service/junit.xml'
             }
           }
         }
         stage('weather-service') {
-          steps { dir('services/weather-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
+          steps {
+            dir('services/weather-service') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/weather-service/junit.xml'
+            }
+          }
         }
         stage('soil-service') {
-          steps { dir('services/soil-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
+          steps {
+            dir('services/soil-service') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/soil-service/junit.xml'
+            }
+          }
         }
         stage('notification-service') {
-          steps { dir('services/notification-service') { sh 'bun test --coverage --coverage-reporter=lcov' } }
+          steps {
+            dir('services/notification-service') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/notification-service/junit.xml'
+            }
+          }
         }
         stage('api-gateway') {
-          steps { dir('services/api-gateway') { sh 'bun test --coverage --coverage-reporter=lcov' } }
+          steps {
+            dir('services/api-gateway') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/api-gateway/junit.xml'
+            }
+          }
         }
       }
     }
