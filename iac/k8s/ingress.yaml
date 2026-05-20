@@ -1,8 +1,3 @@
-# Requires NGINX Ingress Controller to be installed in the cluster.
-# Install: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
-#
-# Replace agrosense.example.com with your actual domain.
-# For TLS: install cert-manager and uncomment the tls + cert-manager annotation blocks.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -12,12 +7,11 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    # Uncomment for automatic TLS via Let's Encrypt + cert-manager:
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   rules:
-    - host: agrosense.example.com   # <-- Replace with your domain
+    - host: healthcarebridge.me
       http:
         paths:
           - path: /api
@@ -34,15 +28,7 @@ spec:
                 name: frontend
                 port:
                   number: 80
-  # Uncomment when cert-manager is configured:
-  # tls:
-  #   - hosts:
-  #       - agrosense.example.com
-  #     secretName: agrosense-tls
----
-# NodePort service exposes the ingress on ports accessible from the host.
-# Nginx on the VPS proxies port 80 → NodePort 30080 and 443 → 30443.
-# This is patched onto the ingress-nginx controller service after installation:
-#
-#   kubectl patch svc ingress-nginx-controller -n ingress-nginx \
-#     -p '{"spec":{"type":"NodePort","ports":[{"name":"http","nodePort":30080,"port":80},{"name":"https","nodePort":30443,"port":443}]}}'
+  tls:
+    - hosts:
+        - healthcarebridge.me
+      secretName: healthcarebridge-tls

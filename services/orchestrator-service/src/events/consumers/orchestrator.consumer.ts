@@ -80,6 +80,7 @@ export async function startOrchestratorConsumer(): Promise<void> {
 
         if (isReady(data.submissionId)) {
           const s = getState(data.submissionId)!;
+          if (!s.weather || !s.soil) return;
           await publishAnalysisReady({
             submissionId: s.submissionId,
             farmId:       s.farmId,

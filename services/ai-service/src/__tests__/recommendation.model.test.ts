@@ -49,12 +49,15 @@ describe('AnalysisReadyEvent shape', () => {
 describe('RecommendationGeneratedEvent shape', () => {
   const validEvent: RecommendationGeneratedEvent = {
     submissionId: '11111111-1111-4111-8111-111111111111',
-    farmId: '22222222-2222-4222-8222-222222222222',
-    cropType: 'maize',
-    location: 'Yaounde, Cameroon',
+    farmId:       '22222222-2222-4222-8222-222222222222',
+    userId:       '33333333-3333-4333-8333-333333333333',
+    userEmail:    '',
+    userName:     '',
+    cropType:     'maize',
+    location:     'Yaounde, Cameroon',
     recommendation: 'Current conditions are favorable for maize cultivation.',
-    model: 'gpt-4.1-mini',
-    generatedAt: new Date().toISOString(),
+    model:          'gpt-4.1-mini',
+    generatedAt:    new Date().toISOString(),
   };
 
   it('has a non-empty recommendation', () => {
