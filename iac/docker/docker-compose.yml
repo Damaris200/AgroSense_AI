@@ -14,8 +14,6 @@ services:
       - jenkins_home:/var/jenkins_home
       # Give Jenkins access to the host Docker daemon so it can build images
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     networks:
       - ci
 
