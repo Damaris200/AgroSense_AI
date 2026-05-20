@@ -35,6 +35,8 @@ export function buildSoilAnalyzedEvent(
     submissionId: farmEvent.submissionId,
     farmId:       farmEvent.farmId,
     userId:       farmEvent.userId,
+    userEmail:    farmEvent.userEmail ?? '',
+    userName:     farmEvent.userName  ?? '',
     soilDataId:   soilRecord.id,
     ph:           soilRecord.ph,
     moisture:     soilRecord.moisture,
