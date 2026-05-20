@@ -21,6 +21,7 @@ const WEATHER = {
   temperature: 28,
   humidity: 75,
   rainfall: 12,
+  windSpeed: 5,
   description: 'partly cloudy',
 };
 
