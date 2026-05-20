@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="bun test" tests="17" assertions="30" failures="0" skipped="0" time="0.093519">
+  <testsuite name="src\__tests__\auth.service.test.ts" file="src\__tests__\auth.service.test.ts" tests="11" assertions="19" failures="0" skipped="0" time="0" hostname="">
+    <testsuite name="registerSchema" file="src\__tests__\auth.service.test.ts" line="6" tests="7" assertions="12" failures="0" skipped="0" time="0" hostname="">
+      <testcase name="accepts a valid payload" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="7" assertions="1" />
+      <testcase name="rejects a name shorter than 2 chars" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="17" assertions="2" />
+      <testcase name="rejects an invalid email" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="28" assertions="2" />
+      <testcase name="rejects a password shorter than 8 chars" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="39" assertions="2" />
+      <testcase name="rejects an unsupported locale" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="50" assertions="2" />
+      <testcase name="accepts an optional phone number" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="61" assertions="1" />
+      <testcase name="accepts both locales: en and fr" classname="registerSchema" time="0" file="src\__tests__\auth.service.test.ts" line="72" assertions="2" />
+    </testsuite>
+    <testsuite name="loginSchema" file="src\__tests__\auth.service.test.ts" line="82" tests="4" assertions="7" failures="0" skipped="0" time="0" hostname="">
+      <testcase name="accepts valid credentials" classname="loginSchema" time="0" file="src\__tests__\auth.service.test.ts" line="83" assertions="1" />
+      <testcase name="rejects an empty password" classname="loginSchema" time="0" file="src\__tests__\auth.service.test.ts" line="88" assertions="2" />
+      <testcase name="rejects an invalid email" classname="loginSchema" time="0" file="src\__tests__\auth.service.test.ts" line="94" assertions="2" />
+      <testcase name="rejects missing fields" classname="loginSchema" time="0" file="src\__tests__\auth.service.test.ts" line="100" assertions="2" />
+    </testsuite>
+  </testsuite>
+  <testsuite name="src\__tests__\errors.test.ts" file="src\__tests__\errors.test.ts" tests="6" assertions="11" failures="0" skipped="0" time="0" hostname="">
+    <testsuite name="AppError subclasses" file="src\__tests__\errors.test.ts" line="11" tests="6" assertions="11" failures="0" skipped="0" time="0" hostname="">
+      <testcase name="ValidationError has status 400" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="12" assertions="3" />
+      <testcase name="UnauthorizedError has status 401" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="19" assertions="1" />
+      <testcase name="ForbiddenError has status 403" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="24" assertions="1" />
+      <testcase name="NotFoundError has status 404" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="29" assertions="2" />
+      <testcase name="ConflictError has status 409" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="35" assertions="1" />
+      <testcase name="instanceof checks work correctly" classname="AppError subclasses" time="0" file="src\__tests__\errors.test.ts" line="40" assertions="3" />
+    </testsuite>
+  </testsuite>
+</testsuites>
