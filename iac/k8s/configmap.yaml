@@ -21,7 +21,7 @@ data:
   # Auth
   JWT_EXPIRES_IN: "24h"
   # Replace with your domain or VPS IP for production
-  CORS_ORIGIN: "http://localhost:5173"
+  CORS_ORIGIN: "https://healthcarebridge.me"
 
   # SMTP (non-secret parts)
   SMTP_HOST: "smtp.ethereal.email"

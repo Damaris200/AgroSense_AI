@@ -32,3 +32,4 @@ resources:
   # Routing & scaling
   - ingress.yaml
   - hpa.yaml
+  - cert-manager.yaml

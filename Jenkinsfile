@@ -35,15 +35,17 @@ pipeline {
 
     stage('Install Dependencies') {
       parallel {
-        stage('auth-service')          { steps { dir('services/auth-service')          { sh 'bun install --frozen-lockfile' } } }
+        // Prisma services: install then generate the Prisma client so tsc can find the types
+        stage('auth-service')          { steps { dir('services/auth-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('farm-service')          { steps { dir('services/farm-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('weather-service')       { steps { dir('services/weather-service')       { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('soil-service')          { steps { dir('services/soil-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('ai-service')            { steps { dir('services/ai-service')            { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('notification-service')  { steps { dir('services/notification-service')  { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('analytics-service')     { steps { dir('services/analytics-service')     { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        // Non-Prisma services: install only
         stage('api-gateway')           { steps { dir('services/api-gateway')           { sh 'bun install --frozen-lockfile' } } }
-        stage('farm-service')          { steps { dir('services/farm-service')          { sh 'bun install --frozen-lockfile' } } }
-        stage('weather-service')       { steps { dir('services/weather-service')       { sh 'bun install --frozen-lockfile' } } }
-        stage('soil-service')          { steps { dir('services/soil-service')          { sh 'bun install --frozen-lockfile' } } }
         stage('orchestrator-service')  { steps { dir('services/orchestrator-service')  { sh 'bun install --frozen-lockfile' } } }
-        stage('ai-service')            { steps { dir('services/ai-service')            { sh 'bun install --frozen-lockfile' } } }
-        stage('notification-service')  { steps { dir('services/notification-service')  { sh 'bun install --frozen-lockfile' } } }
-        stage('analytics-service')     { steps { dir('services/analytics-service')     { sh 'bun install --frozen-lockfile' } } }
         stage('frontend')              { steps { dir('frontend')                        { sh 'bun install --frozen-lockfile' } } }
       }
     }
