@@ -1,6 +1,5 @@
 import { tomorrowResponseSchema } from '../models/weather.model';
 import type { FarmSavedEvent, TomorrowResponse, WeatherFetchedEvent } from '../models/weather.model';
-import { env } from '../config/env';
 
 // Tomorrow.io weather code → human-readable description
 const WEATHER_CODE_MAP: Record<number, string> = {
@@ -49,6 +48,7 @@ export function parseTomorrowResponse(raw: TomorrowResponse): ParsedWeather {
 }
 
 async function fetchFromTomorrow(lat: number, lng: number): Promise<ParsedWeather> {
+  const { env } = await import('../config/env');
   const url =
     `https://api.tomorrow.io/v4/weather/realtime?location=${lat},${lng}&apikey=${env.tomorrowApiKey}&units=metric`;
 
