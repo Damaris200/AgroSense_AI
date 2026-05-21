@@ -15,7 +15,7 @@ const THEME_STORAGE_KEY = 'agrosense_theme';
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): ThemeMode {
-  if (typeof globalThis.window === 'undefined') {
+  if (globalThis.window === undefined) {
     return 'light';
   }
 
@@ -28,10 +28,10 @@ function getInitialTheme(): ThemeMode {
 }
 
 export function ThemeProvider({ children }: { readonly children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(getInitialTheme);
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
 
   useEffect(() => {
-    if (typeof globalThis.window === 'undefined') {
+    if (globalThis.window === undefined) {
       return;
     }
 
@@ -44,8 +44,8 @@ export function ThemeProvider({ children }: { readonly children: ReactNode }) {
     () => ({
       theme,
       isDark: theme === 'dark',
-      toggleTheme: () => setThemeState((current) => (current === 'dark' ? 'light' : 'dark')),
-      setTheme: (nextTheme: ThemeMode) => setThemeState(nextTheme),
+      toggleTheme: () => setTheme((current) => (current === 'dark' ? 'light' : 'dark')),
+      setTheme: (nextTheme: ThemeMode) => setTheme(nextTheme),
     }),
     [theme],
   );

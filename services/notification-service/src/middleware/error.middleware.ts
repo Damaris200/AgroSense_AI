@@ -6,9 +6,8 @@ export function handleError(err: unknown): Response {
     return Response.json({ success: false, error: err.message }, { status: err.statusCode });
   }
 
-  const message = env.nodeEnv === 'production'
-    ? 'Internal server error'
-    : (err instanceof Error ? err.message : String(err));
+  const devMessage = err instanceof Error ? err.message : String(err);
+  const message = env.nodeEnv === 'production' ? 'Internal server error' : devMessage;
 
   return Response.json({ success: false, error: message }, { status: 500 });
 }

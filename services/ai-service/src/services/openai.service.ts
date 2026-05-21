@@ -33,9 +33,9 @@ export async function generateRecommendation(data: RecommendationInput): Promise
     return generateMockRecommendation(data);
   }
 
-  const windLine = data.weather.windSpeed !== undefined
-    ? `, wind ${data.weather.windSpeed.toFixed(1)} m/s`
-    : '';
+  const windLine = data.weather.windSpeed === undefined
+    ? ""
+    : `, wind ${data.weather.windSpeed.toFixed(1)} m/s`;
 
   const prompt =
 `You are an expert agricultural advisor helping small-scale farmers in Africa.
@@ -72,7 +72,7 @@ Use simple, actionable language.`;
 }
 
 function generateMockRecommendation(data: RecommendationInput): string {
-  const phOk      = data.soil.pH >= 5.5 && data.soil.pH <= 7.0;
+  const phOk      = data.soil.pH >= 5.5 && data.soil.pH <= 7;
   const tempOk    = data.weather.temperature >= 18 && data.weather.temperature <= 35;
   const lowN      = data.soil.nitrogen < 100;
   const highRain  = data.weather.rainfall > 20;

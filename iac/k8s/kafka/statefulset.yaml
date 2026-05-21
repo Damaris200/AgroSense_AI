@@ -17,6 +17,7 @@ spec:
         app: kafka
     spec:
       terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.6.0
@@ -62,9 +63,11 @@ spec:
             requests:
               memory: "512Mi"
               cpu: "250m"
+              ephemeral-storage: "512Mi"
             limits:
               memory: "1Gi"
               cpu: "500m"
+              ephemeral-storage: "2Gi"
   volumeClaimTemplates:
     - metadata:
         name: kafka-data

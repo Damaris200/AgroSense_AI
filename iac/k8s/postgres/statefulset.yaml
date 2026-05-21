@@ -43,6 +43,7 @@ spec:
         prometheus.io/scrape: "false"
     spec:
       terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
       containers:
         - name: postgres
           image: postgres:16-alpine
@@ -86,9 +87,11 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "250m"
+              ephemeral-storage: "1Gi"
             limits:
               memory: "1Gi"
               cpu: "500m"
+              ephemeral-storage: "2Gi"
       volumes:
         - name: init-scripts
           configMap:

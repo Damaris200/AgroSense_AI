@@ -1,5 +1,5 @@
 import { AlertCircle, Bell, Filter, Loader2, Mail } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -38,6 +38,51 @@ const inactiveFilterCls = {
   light: 'border-zinc-200 text-zinc-600 hover:bg-zinc-50',
   dark:  'border-zinc-700 text-zinc-400 hover:bg-zinc-800',
 };
+
+export function getFilterButtonClass(filter: FilterValue, status: FilterValue, isDark: boolean): string {
+  if (status === 'all') {
+    const allFilterActiveCls = isDark
+      ? 'border-emerald-700 bg-emerald-900/40 text-emerald-300'
+      : 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    const allFilterInactiveCls = isDark ? inactiveFilterCls.dark : inactiveFilterCls.light;
+    return filter === 'all' ? allFilterActiveCls : allFilterInactiveCls;
+  }
+
+  const filterStyle = statusFilterButton[status];
+  const activeCls = isDark ? filterStyle.dark : filterStyle.light;
+  const inactiveCls = isDark ? inactiveFilterCls.dark : inactiveFilterCls.light;
+  return filter === status ? activeCls : inactiveCls;
+}
+
+function renderTableBody(
+  loading: boolean,
+  filtered: AdminNotification[],
+  isDark: boolean,
+): ReactNode {
+  if (loading) {
+    return (
+      <tr>
+        <td colSpan={5} className="py-10 text-center">
+          <Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-500" />
+        </td>
+      </tr>
+    );
+  }
+
+  if (filtered.length === 0) {
+    return (
+      <tr>
+        <td colSpan={5} className={`py-10 text-center text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          No notifications found.
+        </td>
+      </tr>
+    );
+  }
+
+  return filtered.map((notif) => (
+    <NotifRow key={notif.id} notif={notif} isDark={isDark} />
+  ));
+}
 
 interface NotifRowProps {
   readonly notif: AdminNotification;
@@ -102,34 +147,9 @@ export function AdminNotificationsPage() {
 
   useEffect(() => { void loadNotifications(); }, []);
 
-  const allFilterActiveCls = isDark
-    ? 'border-emerald-700 bg-emerald-900/40 text-emerald-300'
-    : 'border-emerald-200 bg-emerald-50 text-emerald-700';
-  const allFilterInactiveCls = isDark ? inactiveFilterCls.dark : inactiveFilterCls.light;
-  const allFilterCls = filter === 'all' ? allFilterActiveCls : allFilterInactiveCls;
+  const allFilterCls = getFilterButtonClass(filter, 'all', isDark);
 
-  let tableBody: React.ReactNode;
-  if (loading) {
-    tableBody = (
-      <tr>
-        <td colSpan={5} className="py-10 text-center">
-          <Loader2 className="mx-auto h-5 w-5 animate-spin text-emerald-500" />
-        </td>
-      </tr>
-    );
-  } else if (filtered.length === 0) {
-    tableBody = (
-      <tr>
-        <td colSpan={5} className={`py-10 text-center text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-          No notifications found.
-        </td>
-      </tr>
-    );
-  } else {
-    tableBody = filtered.map((notif) => (
-      <NotifRow key={notif.id} notif={notif} isDark={isDark} />
-    ));
-  }
+  const tableBody = renderTableBody(loading, filtered, isDark);
 
   return (
     <DashboardLayout>
@@ -174,10 +194,7 @@ export function AdminNotificationsPage() {
           All
         </button>
         {(['sent', 'failed', 'pending'] as const).map((status) => {
-          const filterStyle = statusFilterButton[status];
-          const activeCls = isDark ? filterStyle.dark : filterStyle.light;
-          const inactiveCls = isDark ? inactiveFilterCls.dark : inactiveFilterCls.light;
-          const btnCls = filter === status ? activeCls : inactiveCls;
+          const btnCls = getFilterButtonClass(filter, status, isDark);
 
           return (
             <button

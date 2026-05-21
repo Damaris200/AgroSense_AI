@@ -1,16 +1,19 @@
-FROM jenkins/jenkins:lts-jdk21
+# Use the slim LTS image to reduce surface area for vulnerabilities
+FROM jenkins/jenkins:lts-jdk21-slim
 
 USER root
 
 # Install system deps + Docker CLI + bun + kubectl in a single layer
-RUN apt-get update && apt-get install -y \
-        curl unzip ca-certificates gnupg lsb-release openssh-client \
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get install -y --no-install-recommends \
+    curl unzip ca-certificates gnupg lsb-release openssh-client \
     && curl -fsSL https://download.docker.com/linux/debian/gpg \
-        | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+    | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
-        https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
-        > /etc/apt/sources.list.d/docker.list \
-    && apt-get update && apt-get install -y docker-ce-cli \
+    https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+    > /etc/apt/sources.list.d/docker.list \
+    && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli \
     && curl -fsSL https://bun.sh/install | bash \
     && ln -sf /root/.bun/bin/bun /usr/local/bin/bun \
     && ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx \

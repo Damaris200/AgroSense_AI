@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const clearSession = useCallback(() => {
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
     setToken(null);
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   }, []);
 
   const setSession = useCallback(({ user: nextUser, token: nextToken }: AuthResponse) => {
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       globalThis.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
     }
     setToken(nextToken);
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     let isMounted = true;
 
     const initializeAuth = async () => {
-      if (typeof globalThis.window === 'undefined') {
+      if (globalThis.window === undefined) {
         if (isMounted) setIsLoading(false);
         return;
       }

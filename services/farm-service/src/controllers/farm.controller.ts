@@ -16,7 +16,12 @@ export async function listFarms(req: Request, res: Response, next: NextFunction)
 
 export async function getFarm(req: Request, res: Response, next: NextFunction) {
   try {
-    const farm = await getFarmById(req.params.id! as string);
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id) {
+      res.status(400).json({ success: false, error: 'Missing farm id' });
+      return;
+    }
+    const farm = await getFarmById(id);
     if (!farm) {
       res.status(404).json({ success: false, error: 'Farm not found' });
       return;

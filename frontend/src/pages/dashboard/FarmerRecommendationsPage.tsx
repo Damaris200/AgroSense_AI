@@ -1,5 +1,5 @@
 import { AlertCircle, ChevronDown, ChevronUp, Loader2, Wheat } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -103,7 +103,7 @@ export function FarmerRecommendationsPage() {
 
   useEffect(() => { void load(); }, []);
 
-  let content: React.ReactNode;
+  let content: ReactNode;
   if (loading) {
     content = (
       <div className="flex items-center justify-center py-20">

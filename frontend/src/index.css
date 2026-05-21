@@ -1,12 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-display: "Sora", sans-serif;
   --font-body: "Manrope", sans-serif;
-}
 
-:root {
   font-family: var(--font-body);
   color: #111827;
   background: #ffffff;
