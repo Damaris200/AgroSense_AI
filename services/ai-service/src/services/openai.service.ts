@@ -61,7 +61,7 @@ Use simple, actionable language.`;
       max_tokens: 300,
     });
 
-    return response.choices[0]?.message?.content?.trim() || generateMockRecommendation(data);
+    return response.choices[0]?.message?.content?.trim() ?? generateMockRecommendation(data);
   } catch (err: any) {
     if (err?.status === 429 || err?.status === 402) {
       console.warn("[ai-service] OpenAI quota exceeded — using mock recommendation");

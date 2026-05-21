@@ -1,15 +1,15 @@
 import { AlertCircle, Loader2, MapPin, Plus, Sprout, X } from 'lucide-react';
 import { useEffect, useState, type ReactNode, type SyntheticEvent } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
 import {
   getMyFarms,
   submitFarm,
   type Farm,
-} from '../../services/farm.service';
-import { extractApiError } from '../../services/auth.service';
+} from '@/services/farm.service';
+import { extractApiError } from '@/services/auth.service';
 
 function StatusBadge({ isDark }: { readonly isDark: boolean }) {
   return (

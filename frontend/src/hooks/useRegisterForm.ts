@@ -4,9 +4,9 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { useAuth } from '../context/AuthContext';
-import { api, extractApiError, type ApiEnvelope } from '../services/auth.service';
-import type { AuthResponse, AuthUser } from '../types/auth';
+import { useAuth } from '@/context/AuthContext';
+import { api, extractApiError, type ApiEnvelope } from '@/services/auth.service';
+import type { AuthResponse, AuthUser } from '@/types/auth';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 

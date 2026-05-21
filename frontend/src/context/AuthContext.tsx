@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { TOKEN_STORAGE_KEY, getMeRequest } from '../services/auth.service';
-import type { AuthResponse, AuthUser } from '../types/auth';
+import { TOKEN_STORAGE_KEY, getMeRequest } from '@/services/auth.service';
+import type { AuthResponse, AuthUser } from '@/types/auth';
 
 interface AuthContextValue {
   user: AuthUser | null;

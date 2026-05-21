@@ -11,7 +11,7 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ setSession: vi.fn(), logout: vi.fn() }),
 }));
 
-import { loginSchema } from '../hooks/useLoginForm';
+import { loginSchema } from '@/hooks/useLoginForm';
 
 describe('loginSchema', () => {
   it('accepts valid credentials', () => {

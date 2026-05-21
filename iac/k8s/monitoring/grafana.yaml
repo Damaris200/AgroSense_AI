@@ -44,6 +44,7 @@ spec:
       labels:
         app: grafana
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: grafana
           image: grafana/grafana:10.4.0
@@ -86,9 +87,11 @@ spec:
             requests:
               memory: "128Mi"
               cpu: "100m"
+              ephemeral-storage: "1Gi"
             limits:
               memory: "256Mi"
               cpu: "200m"
+              ephemeral-storage: "2Gi"
       volumes:
         - name: datasources
           configMap:

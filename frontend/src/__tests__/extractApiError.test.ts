@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import axios from 'axios';
-import { extractApiError } from '../services/auth.service';
+import { extractApiError } from '@/services/auth.service';
 
 describe('extractApiError', () => {
   it('returns fallback for a plain string', () => {

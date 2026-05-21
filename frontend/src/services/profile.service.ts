@@ -1,5 +1,5 @@
 import { api, type ApiEnvelope } from './auth.service';
-import type { AuthUser } from '../types/auth';
+import type { AuthUser } from '@/types/auth';
 
 export interface UpdateProfilePayload {
   name?: string;

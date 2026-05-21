@@ -1,7 +1,7 @@
 import { ArrowRight, BadgeCheck, Bot, Languages, Sprout, Wheat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 export function HeroSection() {
   const { isDark } = useTheme();

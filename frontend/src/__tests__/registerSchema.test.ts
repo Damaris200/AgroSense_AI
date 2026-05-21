@@ -4,7 +4,7 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ setSession: vi.fn(), logout: vi.fn() }),
 }));
 
-import { registerSchema } from '../hooks/useRegisterForm';
+import { registerSchema } from '@/hooks/useRegisterForm';
 
 describe('registerSchema', () => {
   const valid = {

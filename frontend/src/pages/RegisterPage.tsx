@@ -1,10 +1,10 @@
 import { AlertCircle, Eye, EyeOff, Languages, LoaderCircle, LockKeyhole, Mail, Phone, UserRound } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
-import { PasswordStrength } from '../components/auth/PasswordStrength';
-import { AuthSplitLayout } from '../components/layout/AuthSplitLayout';
-import { useAuth } from '../context/AuthContext';
-import { useRegisterForm } from '../hooks/useRegisterForm';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
+import { AuthSplitLayout } from '@/components/layout/AuthSplitLayout';
+import { useAuth } from '@/context/AuthContext';
+import { useRegisterForm } from '@/hooks/useRegisterForm';
 
 export function RegisterPage() {
   const { isAuthenticated } = useAuth();

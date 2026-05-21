@@ -4,15 +4,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { useAuth } from '../context/AuthContext';
-import { api, extractApiError, type ApiEnvelope } from '../services/auth.service';
-import type { AuthResponse } from '../types/auth';
+import { useAuth } from '@/context/AuthContext';
+import { api, extractApiError, type ApiEnvelope } from '@/services/auth.service';
+import type { AuthResponse } from '@/types/auth';
 import {
   enablePasskeyForSession,
   hasPasskeyCredential,
   isPasskeySupported,
   signInWithPasskey,
-} from '../utils/passkey';
+} from '@/utils/passkey';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 

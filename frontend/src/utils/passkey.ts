@@ -1,4 +1,4 @@
-import type { AuthResponse } from '../types/auth';
+import type { AuthResponse } from '@/types/auth';
 
 const PASSKEY_CREDENTIAL_ID_KEY = 'agrosense_passkey_credential_id';
 const PASSKEY_SESSION_KEY = 'agrosense_passkey_session';

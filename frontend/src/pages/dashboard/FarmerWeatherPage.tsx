@@ -1,12 +1,12 @@
 import { AlertCircle, CloudRain, Droplets, Loader2, Thermometer, Wind } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
-import { getMyFarms, type Farm } from '../../services/farm.service';
-import { getWeatherForFarm, type WeatherRecord } from '../../services/weather.service';
-import { extractApiError } from '../../services/auth.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
+import { getMyFarms, type Farm } from '@/services/farm.service';
+import { getWeatherForFarm, type WeatherRecord } from '@/services/weather.service';
+import { extractApiError } from '@/services/auth.service';
 
 function WeatherCard({ record, isDark }: { readonly record: WeatherRecord; readonly isDark: boolean }) {
   const date = new Date(record.fetchedAt).toLocaleString('en-GB', {

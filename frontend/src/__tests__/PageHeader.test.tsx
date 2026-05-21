@@ -5,7 +5,7 @@ vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({ isDark: false }),
 }));
 
-import { PageHeader } from '../components/dashboard/PageHeader';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 
 describe('PageHeader', () => {
   it('renders the title', () => {

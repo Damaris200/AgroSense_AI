@@ -1,11 +1,11 @@
 import { AlertCircle, ChevronDown, ChevronUp, Loader2, Wheat } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
-import { getMyRecommendations, type Recommendation } from '../../services/recommendation.service';
-import { extractApiError } from '../../services/auth.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
+import { getMyRecommendations, type Recommendation } from '@/services/recommendation.service';
+import { extractApiError } from '@/services/auth.service';
 
 interface RecommendationCardProps {
   readonly rec: Recommendation;

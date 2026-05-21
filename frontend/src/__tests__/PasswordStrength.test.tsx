@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { PasswordStrength } from '../components/auth/PasswordStrength';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
 
 describe('PasswordStrength', () => {
   it('shows "Enter a password" when value is empty', () => {
