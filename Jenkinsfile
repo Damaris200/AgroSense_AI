@@ -158,11 +158,15 @@ pipeline {
     }
 
     // ── 6. Quality Gate (fail the build if SonarQube issues are found) ─────
+    // catchError: if the sonarqube-token lacks CE task permission (HTTP 401),
+    // mark the stage UNSTABLE rather than aborting the whole pipeline.
 
     stage('Quality Gate') {
       steps {
         timeout(time: 5, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: false
+          catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+            waitForQualityGate abortPipeline: false
+          }
         }
       }
     }
