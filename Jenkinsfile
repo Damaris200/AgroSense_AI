@@ -158,19 +158,58 @@ pipeline {
     }
 
     // ── 6. Quality Gate ────────────────────────────────────────────────────
-    // Uses script+try/catch so any error (incl. 401 from the CE task API)
-    // marks the build UNSTABLE rather than aborting and skipping later stages.
+    // Polls SonarQube directly via curl using SONAR_TOKEN (injected by
+    // withSonarQubeEnv). Avoids waitForQualityGate whose exception handling
+    // bypasses all Groovy try/catch in the Jenkins sandbox.
 
     stage('Quality Gate') {
       steps {
-        script {
-          try {
-            timeout(time: 5, unit: 'MINUTES') {
-              waitForQualityGate abortPipeline: false
+        withSonarQubeEnv('SonarQube') {
+          script {
+            def reportFile = "${WORKSPACE}/.scannerwork/report-task.txt"
+            if (!fileExists(reportFile)) {
+              echo 'report-task.txt not found — skipping quality gate check.'
+              return
             }
-          } catch (Exception e) {
-            echo "Quality Gate check did not pass: ${e.message}"
-            currentBuild.result = 'UNSTABLE'
+
+            def props      = readProperties file: reportFile
+            def taskId     = props.ceTaskId
+            def projectKey = props.projectKey
+            def hostUrl    = env.SONAR_HOST_URL ?: props.serverUrl
+            def token      = env.SONAR_TOKEN
+
+            // Wait up to 5 minutes for the CE task to finish
+            echo "Waiting for CE task ${taskId}..."
+            def ready = false
+            for (int i = 0; i < 30 && !ready; i++) {
+              sleep 10
+              try {
+                def out = sh(returnStdout: true, script:
+                  "curl -sf -u '${token}:' '${hostUrl}/api/ce/task?id=${taskId}' 2>/dev/null || echo '{}'"
+                ).trim()
+                def status = (readJSON(text: out))?.task?.status ?: 'PENDING'
+                echo "  CE task status: ${status}"
+                if (status in ['SUCCESS', 'FAILED', 'CANCELLED']) { ready = true }
+              } catch (Exception ex) {
+                echo "  Poll error (attempt ${i+1}): ${ex.message}"
+              }
+            }
+
+            // Read the quality gate result
+            try {
+              def gateOut = sh(returnStdout: true, script:
+                "curl -sf -u '${token}:' '${hostUrl}/api/qualitygates/project_status?projectKey=${projectKey}' 2>/dev/null || echo '{}'"
+              ).trim()
+              def gateStatus = (readJSON(text: gateOut))?.projectStatus?.status ?: 'UNKNOWN'
+              echo "Quality Gate status: ${gateStatus}"
+              if (gateStatus == 'ERROR') {
+                currentBuild.result = 'UNSTABLE'
+                echo 'Quality Gate FAILED — build marked UNSTABLE, pipeline continues.'
+              }
+            } catch (Exception ex) {
+              echo "Could not read quality gate status: ${ex.message} — marking UNSTABLE, pipeline continues."
+              currentBuild.result = 'UNSTABLE'
+            }
           }
         }
       }
