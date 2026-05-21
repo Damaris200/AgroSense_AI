@@ -6,7 +6,7 @@ vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({ isDark: false }),
 }));
 
-import { StatCard } from '../components/dashboard/StatCard';
+import { StatCard } from '@/components/dashboard/StatCard';
 
 describe('StatCard (light mode)', () => {
   it('renders the label text', () => {

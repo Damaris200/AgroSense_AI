@@ -1,10 +1,10 @@
-import { CtaBanner } from '../components/home/CtaBanner';
-import { FeaturesSection } from '../components/home/FeaturesSection';
-import { HeroSection } from '../components/home/HeroSection';
-import { HowItWorksSection } from '../components/home/HowItWorksSection';
-import { Navbar } from '../components/home/Navbar';
-import { SiteFooter } from '../components/home/SiteFooter';
-import { useTheme } from '../context/ThemeContext';
+import { CtaBanner } from '@/components/home/CtaBanner';
+import { FeaturesSection } from '@/components/home/FeaturesSection';
+import { HeroSection } from '@/components/home/HeroSection';
+import { HowItWorksSection } from '@/components/home/HowItWorksSection';
+import { Navbar } from '@/components/home/Navbar';
+import { SiteFooter } from '@/components/home/SiteFooter';
+import { useTheme } from '@/context/ThemeContext';
 
 export function HomePage() {
   const { isDark } = useTheme();

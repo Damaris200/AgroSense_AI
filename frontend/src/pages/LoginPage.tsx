@@ -1,9 +1,9 @@
 import { AlertCircle, Eye, EyeOff, Fingerprint, LoaderCircle, Mail, LockKeyhole } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
-import { AuthSplitLayout } from '../components/layout/AuthSplitLayout';
-import { useAuth } from '../context/AuthContext';
-import { useLoginForm } from '../hooks/useLoginForm';
+import { AuthSplitLayout } from '@/components/layout/AuthSplitLayout';
+import { useAuth } from '@/context/AuthContext';
+import { useLoginForm } from '@/hooks/useLoginForm';
 
 export function LoginPage() {
   const { isAuthenticated } = useAuth();

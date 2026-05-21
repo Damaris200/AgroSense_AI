@@ -2,13 +2,13 @@ import { AlertCircle, Bell, Leaf, Loader2, Sprout, Wheat } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { StatCard } from '../../components/dashboard/StatCard';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { extractApiError } from '../../services/auth.service';
-import { getUserOverview, type UserOverview } from '../../services/admin.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { extractApiError } from '@/services/auth.service';
+import { getUserOverview, type UserOverview } from '@/services/admin.service';
 
 const typeIcon = {
   recommendation: <Wheat className="h-4 w-4 text-emerald-600" />,

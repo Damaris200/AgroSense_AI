@@ -1,11 +1,11 @@
 import { AlertCircle, Loader2, Search, UserCheck, UserX } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
-import { extractApiError } from '../../services/auth.service';
-import { getAdminUsers, setAdminUserActive, type AdminUser } from '../../services/admin.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
+import { extractApiError } from '@/services/auth.service';
+import { getAdminUsers, setAdminUserActive, type AdminUser } from '@/services/admin.service';
 
 const roleBadge = {
   farmer:     { text: 'Farmer',     cls: 'bg-blue-100 text-blue-700',    darkCls: 'bg-blue-900/40 text-blue-300' },

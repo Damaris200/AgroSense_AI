@@ -1,12 +1,12 @@
 import { Activity, AlertCircle, Bell, Leaf, Loader2, Users } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { StatCard } from '../../components/dashboard/StatCard';
-import { useTheme } from '../../context/ThemeContext';
-import { extractApiError } from '../../services/auth.service';
-import { getAdminOverview, type AdminOverview } from '../../services/admin.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { useTheme } from '@/context/ThemeContext';
+import { extractApiError } from '@/services/auth.service';
+import { getAdminOverview, type AdminOverview } from '@/services/admin.service';
 
 const statusStyles = {
   healthy:  { badge: 'bg-emerald-100 text-emerald-700', darkBadge: 'bg-emerald-900/40 text-emerald-300', dot: 'bg-emerald-500' },

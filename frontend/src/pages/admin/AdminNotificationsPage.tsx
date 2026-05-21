@@ -1,11 +1,11 @@
 import { AlertCircle, Bell, Filter, Loader2, Mail } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
-import { extractApiError } from '../../services/auth.service';
-import { getAdminNotifications, type AdminNotification } from '../../services/admin.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
+import { extractApiError } from '@/services/auth.service';
+import { getAdminNotifications, type AdminNotification } from '@/services/admin.service';
 
 const channelIcon = {
   email: <Mail className="h-4 w-4" />,

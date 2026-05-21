@@ -1,12 +1,12 @@
 import { AlertCircle, FlaskConical, Loader2 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useTheme } from '../../context/ThemeContext';
-import { getMyFarms, type Farm } from '../../services/farm.service';
-import { getSoilForFarm, type SoilRecord } from '../../services/soil.service';
-import { extractApiError } from '../../services/auth.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useTheme } from '@/context/ThemeContext';
+import { getMyFarms, type Farm } from '@/services/farm.service';
+import { getSoilForFarm, type SoilRecord } from '@/services/soil.service';
+import { extractApiError } from '@/services/auth.service';
 
 function SoilBar({ label, value, max, unit, color, isDark }: {
   readonly label: string; readonly value: number; readonly max: number; readonly unit: string; readonly color: string; readonly isDark: boolean;

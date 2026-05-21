@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AuthResponse, AuthUser } from '../types/auth';
+import type { AuthResponse, AuthUser } from '@/types/auth';
 
 export const TOKEN_STORAGE_KEY = 'agrosense_token';
 

@@ -1,12 +1,12 @@
 import { AlertCircle, CheckCircle2, Loader2, UserCircle } from 'lucide-react';
 import { useState, type SyntheticEvent } from 'react';
 
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { PageHeader } from '../../components/dashboard/PageHeader';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { updateProfileRequest } from '../../services/profile.service';
-import { extractApiError } from '../../services/auth.service';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { updateProfileRequest } from '@/services/profile.service';
+import { extractApiError } from '@/services/auth.service';
 
 export function ProfilePage() {
   const { isDark } = useTheme();
