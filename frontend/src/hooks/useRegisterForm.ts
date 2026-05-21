@@ -19,7 +19,9 @@ export const registerSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name is too long'),
   email: z
-    .email('Enter a valid email address').trim().min(5, 'Email must be at least 5 characters').max(255, 'Email is too long'),
+    .string()
+    .trim()
+    .pipe(z.email('Enter a valid email address').min(5, 'Email must be at least 5 characters').max(255, 'Email is too long')),
   phone: z
     .string()
     .trim()
