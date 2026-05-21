@@ -149,16 +149,7 @@ pipeline {
             def scannerHome = tool 'SonarScanner'
             sh """
               ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=agrosense-ai \
-                -Dsonar.projectName=AgroSense-AI \
-                -Dsonar.sources=. \
-                -Dsonar.exclusions='**/node_modules/**,**/dist/**,**/.prisma/**,**/coverage/**,**/prisma/migrations/**' \
-                -Dsonar.javascript.lcov.reportPaths=\
-services/auth-service/coverage/lcov.info,\
-services/weather-service/coverage/lcov.info,\
-services/soil-service/coverage/lcov.info,\
-services/notification-service/coverage/lcov.info,\
-services/api-gateway/coverage/lcov.info
+                -Dsonar.projectBaseDir=${WORKSPACE}
             """
           }
         }
