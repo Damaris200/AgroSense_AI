@@ -24,9 +24,10 @@ spec:
         prometheus.io/port: "4007"
         prometheus.io/path: "/health"
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: analytics-service
-          image: damarisateh/agrosense-analytics:latest
+          image: damarisateh/agrosense-analytics:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 4007
@@ -66,9 +67,11 @@ spec:
             requests:
               memory: "128Mi"
               cpu: "100m"
+              ephemeral-storage: "256Mi"
             limits:
               memory: "256Mi"
               cpu: "200m"
+              ephemeral-storage: "512Mi"
 ---
 apiVersion: v1
 kind: Service

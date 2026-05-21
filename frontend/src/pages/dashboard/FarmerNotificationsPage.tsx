@@ -1,13 +1,28 @@
 import { AlertCircle, Bell, Loader2, Mail } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
+import { useEffect, useState, type ReactNode } from 'react';
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
 import { useTheme } from '../../context/ThemeContext';
 import { getMyNotifications, type Notification } from '../../services/notification.service';
 import { extractApiError } from '../../services/auth.service';
 
-const channelIcon: Record<string, React.ReactNode> = {
+async function loadNotifications(
+  setNotifications: (n: Notification[]) => void,
+  setLoading: (v: boolean) => void,
+  setError: (e: string) => void,
+): Promise<void> {
+  setLoading(true);
+  setError('');
+  try {
+    setNotifications(await getMyNotifications());
+  } catch (err) {
+    setError(extractApiError(err, 'Could not load notifications.'));
+  } finally {
+    setLoading(false);
+  }
+}
+
+const channelIcon: Record<string, ReactNode> = {
   email: <Mail className="h-4 w-4" />,
   sms:   <Bell className="h-4 w-4" />,
   push:  <Bell className="h-4 w-4" />,
@@ -55,35 +70,29 @@ function NotificationRow({ notif, isDark }: NotificationRowProps) {
   );
 }
 
-export function FarmerNotificationsPage() {
-  const { isDark } = useTheme();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState('');
+function renderContent(
+  loading: boolean,
+  error: string,
+  notifications: Notification[],
+  isDark: boolean,
+  onRetry: () => void,
+): ReactNode {
+  const cardCls    = isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white';
+  const iconBgCls  = isDark ? 'bg-blue-900/30'              : 'bg-blue-50';
+  const headCls    = isDark ? 'text-white'                   : 'text-zinc-900';
+  const bodyCls    = isDark ? 'text-zinc-400'                : 'text-zinc-500';
+  const dividerCls = isDark ? 'divide-zinc-800'              : 'divide-zinc-100';
 
-  async function load() {
-    setLoading(true);
-    setError('');
-    try {
-      setNotifications(await getMyNotifications());
-    } catch (err) {
-      setError(extractApiError(err, 'Could not load notifications.'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { void load(); }, []);
-
-  let content: React.ReactNode;
   if (loading) {
-    content = (
+    return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     );
-  } else if (error) {
-    content = (
+  }
+
+  if (error) {
+    return (
       <div
         className={`flex items-start gap-3 rounded-2xl border p-5 ${
           isDark ? 'border-rose-900/40 bg-rose-900/20 text-rose-300' : 'border-rose-200 bg-rose-50 text-rose-700'
@@ -93,49 +102,48 @@ export function FarmerNotificationsPage() {
         <div>
           <p className="font-semibold">Unable to load notifications</p>
           <p className="mt-0.5 text-sm opacity-80">{error}</p>
-          <button type="button" onClick={load} className="mt-2 text-sm font-semibold underline">
+          <button type="button" onClick={onRetry} className="mt-2 text-sm font-semibold underline">
             Retry
           </button>
         </div>
       </div>
     );
-  } else if (notifications.length === 0) {
-    content = (
-      <div
-        className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${
-          isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-        }`}
-      >
-        <div
-          className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${
-            isDark ? 'bg-blue-900/30' : 'bg-blue-50'
-          }`}
-        >
+  }
+
+  if (notifications.length === 0) {
+    return (
+      <div className={`flex flex-col items-center justify-center rounded-2xl border py-20 text-center ${cardCls}`}>
+        <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${iconBgCls}`}>
           <Bell className="h-8 w-8 text-blue-400" />
         </div>
-        <p className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-          No notifications yet
-        </p>
-        <p className={`mt-1 max-w-xs text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+        <p className={`font-semibold ${headCls}`}>No notifications yet</p>
+        <p className={`mt-1 max-w-xs text-sm ${bodyCls}`}>
           Email alerts appear here once your first farm analysis generates a recommendation.
         </p>
       </div>
     );
-  } else {
-    content = (
-      <div
-        className={`rounded-2xl border ${
-          isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'
-        }`}
-      >
-        <ul className={`divide-y ${isDark ? 'divide-zinc-800' : 'divide-zinc-100'}`}>
-          {notifications.map((notif) => (
-            <NotificationRow key={notif.id} notif={notif} isDark={isDark} />
-          ))}
-        </ul>
-      </div>
-    );
   }
+
+  return (
+    <div className={`rounded-2xl border ${cardCls}`}>
+      <ul className={`divide-y ${dividerCls}`}>
+        {notifications.map((notif) => (
+          <NotificationRow key={notif.id} notif={notif} isDark={isDark} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function FarmerNotificationsPage() {
+  const { isDark } = useTheme();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState('');
+
+  const load = () => void loadNotifications(setNotifications, setLoading, setError);
+
+  useEffect(() => { load(); }, []);
 
   return (
     <DashboardLayout>
@@ -143,7 +151,7 @@ export function FarmerNotificationsPage() {
         title="Notification History"
         subtitle="All alerts and advisories sent to you by AgroSense AI."
       />
-      {content}
+      {renderContent(loading, error, notifications, isDark, load)}
     </DashboardLayout>
   );
 }

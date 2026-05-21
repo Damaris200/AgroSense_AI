@@ -72,7 +72,7 @@ export async function getUserStats(_req: AuthRequest, res: Response, next: NextF
 export async function updateUserActive(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const { isActive } = req.body as { isActive: boolean };
-    const user = await authService.setUserActive(req.params.id!, Boolean(isActive));
+    const user = await authService.setUserActive(req.params.id, Boolean(isActive));
     ok(res, { user });
   } catch (err) {
     next(err);

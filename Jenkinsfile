@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    IMAGE_TAG        = "v1.0.${BUILD_NUMBER}"
     DOCKER_HUB_USER = 'damarisateh'
     // Jenkins credentials: kind=Username+Password, ID=dockerhub-credentials
     DOCKER_CREDS     = credentials('dockerhub-credentials')
@@ -180,84 +181,84 @@ pipeline {
       parallel {
         stage('auth-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-auth:latest         ./services/auth-service
-              docker push                damarisateh/agrosense-auth:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-auth:${IMAGE_TAG}         ./services/auth-service
+              docker push                damarisateh/agrosense-auth:${IMAGE_TAG}
+            """
           }
         }
         stage('api-gateway') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-api-gateway:latest  ./services/api-gateway
-              docker push                damarisateh/agrosense-api-gateway:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-api-gateway:${IMAGE_TAG}  ./services/api-gateway
+              docker push                damarisateh/agrosense-api-gateway:${IMAGE_TAG}
+            """
           }
         }
         stage('farm-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-farm:latest         ./services/farm-service
-              docker push                damarisateh/agrosense-farm:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-farm:${IMAGE_TAG}         ./services/farm-service
+              docker push                damarisateh/agrosense-farm:${IMAGE_TAG}
+            """
           }
         }
         stage('weather-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-weather:latest      ./services/weather-service
-              docker push                damarisateh/agrosense-weather:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-weather:${IMAGE_TAG}      ./services/weather-service
+              docker push                damarisateh/agrosense-weather:${IMAGE_TAG}
+            """
           }
         }
         stage('soil-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-soil:latest         ./services/soil-service
-              docker push                damarisateh/agrosense-soil:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-soil:${IMAGE_TAG}         ./services/soil-service
+              docker push                damarisateh/agrosense-soil:${IMAGE_TAG}
+            """
           }
         }
         stage('orchestrator-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-orchestrator:latest ./services/orchestrator-service
-              docker push                damarisateh/agrosense-orchestrator:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-orchestrator:${IMAGE_TAG} ./services/orchestrator-service
+              docker push                damarisateh/agrosense-orchestrator:${IMAGE_TAG}
+            """
           }
         }
         stage('ai-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-ai:latest           ./services/ai-service
-              docker push                damarisateh/agrosense-ai:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-ai:${IMAGE_TAG}           ./services/ai-service
+              docker push                damarisateh/agrosense-ai:${IMAGE_TAG}
+            """
           }
         }
         stage('notification-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-notification:latest ./services/notification-service
-              docker push                damarisateh/agrosense-notification:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-notification:${IMAGE_TAG} ./services/notification-service
+              docker push                damarisateh/agrosense-notification:${IMAGE_TAG}
+            """
           }
         }
         stage('analytics-service') {
           steps {
-            sh '''
-              docker build -t damarisateh/agrosense-analytics:latest    ./services/analytics-service
-              docker push                damarisateh/agrosense-analytics:latest
-            '''
+            sh """
+              docker build -t damarisateh/agrosense-analytics:${IMAGE_TAG}    ./services/analytics-service
+              docker push                damarisateh/agrosense-analytics:${IMAGE_TAG}
+            """
           }
         }
         stage('frontend') {
           steps {
-            sh '''
+            sh """
               docker build \
                 --build-arg VITE_API_BASE_URL=http://${VPS_HOST}:4000 \
-                -t damarisateh/agrosense-frontend:latest ./frontend
-              docker push damarisateh/agrosense-frontend:latest
-            '''
+                -t damarisateh/agrosense-frontend:${IMAGE_TAG} ./frontend
+              docker push damarisateh/agrosense-frontend:${IMAGE_TAG}
+            """
           }
         }
       }
@@ -273,16 +274,20 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} '
               set -e
 
-              # Apply any manifest changes from this push
+              # Apply any non-image manifest changes from this push
               kubectl apply -k /opt/agrosense/k8s/ --kubeconfig=${KUBECONFIG_REMOTE}
 
-              # Rolling restart forces Kubernetes to pull the new :latest images
-              kubectl rollout restart deployment \
-                api-gateway auth-service farm-service weather-service \
-                soil-service orchestrator-service ai-service \
-                notification-service analytics-service frontend \
-                -n ${K8S_NAMESPACE} \
-                --kubeconfig=${KUBECONFIG_REMOTE}
+              # Update each deployment to the exact image tag built in this pipeline run
+              kubectl set image deployment/auth-service        auth-service=damarisateh/agrosense-auth:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/api-gateway         api-gateway=damarisateh/agrosense-api-gateway:${IMAGE_TAG}     -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/farm-service        farm-service=damarisateh/agrosense-farm:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/weather-service     weather-service=damarisateh/agrosense-weather:${IMAGE_TAG}     -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/soil-service        soil-service=damarisateh/agrosense-soil:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/orchestrator-service orchestrator-service=damarisateh/agrosense-orchestrator:${IMAGE_TAG} -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/ai-service          ai-service=damarisateh/agrosense-ai:${IMAGE_TAG}               -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/notification-service notification-service=damarisateh/agrosense-notification:${IMAGE_TAG} -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/analytics-service   analytics-service=damarisateh/agrosense-analytics:${IMAGE_TAG} -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
+              kubectl set image deployment/frontend             frontend=damarisateh/agrosense-frontend:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
 
               # Wait for the two most critical services to complete their rollout
               kubectl rollout status deployment/api-gateway  -n ${K8S_NAMESPACE} --timeout=300s --kubeconfig=${KUBECONFIG_REMOTE}

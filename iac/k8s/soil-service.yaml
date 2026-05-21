@@ -24,9 +24,10 @@ spec:
         prometheus.io/port: "3004"
         prometheus.io/path: "/health"
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: soil-service
-          image: damarisateh/agrosense-soil:latest
+          image: damarisateh/agrosense-soil:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 3004
@@ -66,9 +67,11 @@ spec:
             requests:
               memory: "128Mi"
               cpu: "100m"
+              ephemeral-storage: "256Mi"
             limits:
               memory: "256Mi"
               cpu: "200m"
+              ephemeral-storage: "512Mi"
 ---
 apiVersion: v1
 kind: Service

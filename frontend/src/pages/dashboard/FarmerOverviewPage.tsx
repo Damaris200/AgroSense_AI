@@ -1,5 +1,5 @@
 import { AlertCircle, Bell, Leaf, Loader2, Sprout, Wheat } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
@@ -32,6 +32,44 @@ function getGreeting(hour: number): string {
   return 'Good evening';
 }
 
+function renderActivityContent(
+  loading: boolean,
+  overview: UserOverview | null,
+  isDark: boolean,
+): ReactNode {
+  if (loading) {
+    return (
+      <li className="flex items-center justify-center py-6">
+        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+      </li>
+    );
+  }
+
+  if ((overview?.recentActivity ?? []).length === 0) {
+    return (
+      <li className={`text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No activity yet.</li>
+    );
+  }
+
+  return overview?.recentActivity.map((item) => {
+    const date = new Date(item.timestamp).toLocaleString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    const activityType = item.type;
+    return (
+      <li key={item.id} className="flex items-start gap-3">
+        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[activityType] : typeBg[activityType]}`}>
+          {typeIcon[activityType]}
+        </div>
+        <div className="min-w-0">
+          <p className={`text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{item.text}</p>
+          <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</p>
+        </div>
+      </li>
+    );
+  });
+}
+
 export function FarmerOverviewPage() {
   const { user } = useAuth();
   const { isDark } = useTheme();
@@ -55,36 +93,7 @@ export function FarmerOverviewPage() {
 
   useEffect(() => { void loadOverview(); }, []);
 
-  let activityContent: React.ReactNode;
-  if (loading) {
-    activityContent = (
-      <li className="flex items-center justify-center py-6">
-        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
-      </li>
-    );
-  } else if ((overview?.recentActivity ?? []).length === 0) {
-    activityContent = (
-      <li className={`text-sm ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>No activity yet.</li>
-    );
-  } else {
-    activityContent = overview?.recentActivity.map((item) => {
-      const date = new Date(item.timestamp).toLocaleString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-      });
-      const activityType = item.type as keyof typeof typeIcon;
-      return (
-        <li key={item.id} className="flex items-start gap-3">
-          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${isDark ? typeBgDark[activityType] : typeBg[activityType]}`}>
-            {typeIcon[activityType]}
-          </div>
-          <div className="min-w-0">
-            <p className={`text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{item.text}</p>
-            <p className={`mt-0.5 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{date}</p>
-          </div>
-        </li>
-      );
-    });
-  }
+  const activityContent = renderActivityContent(loading, overview, isDark);
 
   return (
     <DashboardLayout>

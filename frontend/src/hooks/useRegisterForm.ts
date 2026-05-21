@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { useAuth } from '../context/AuthContext';
 import { api, extractApiError, type ApiEnvelope } from '../services/auth.service';
-import type { AuthResponse, AuthUser, Locale } from '../types/auth';
+import type { AuthResponse, AuthUser } from '../types/auth';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -19,10 +19,7 @@ export const registerSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name is too long'),
   email: z
-    .string()
-    .trim()
-    .min(1, 'Email is required')
-    .email({ message: 'Enter a valid email address' }),
+    .email('Enter a valid email address').trim().min(5, 'Email must be at least 5 characters').max(255, 'Email is too long'),
   phone: z
     .string()
     .trim()
@@ -44,7 +41,7 @@ export type RegisterFormValues = z.infer<typeof registerSchema>;
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function normalizePhone(phone?: string) {
-  return phone?.replaceAll(/[\s-]/gu, '') || undefined;
+  return phone?.replaceAll(/[\s-]/gu, '') ?? undefined;
 }
 
 function mapRegisterError(error: unknown): string {
@@ -74,7 +71,7 @@ export function useRegisterForm() {
   const onSubmit = form.handleSubmit(async (values) => {
     setApiError('');
     try {
-      const payload = { ...values, phone: normalizePhone(values.phone), locale: values.locale as Locale };
+      const payload = { ...values, phone: normalizePhone(values.phone), locale: values.locale };
 
       const registerRes = await api.post<ApiEnvelope<{ user: AuthUser; token?: string }>>(
         '/api/auth/register',

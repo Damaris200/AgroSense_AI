@@ -1,5 +1,5 @@
 import { AlertCircle, CloudRain, Droplets, Loader2, Thermometer, Wind } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -94,7 +94,7 @@ export function FarmerWeatherPage() {
     ? 'border-zinc-700 bg-zinc-800 text-white focus:border-emerald-500'
     : 'border-zinc-200 bg-white text-zinc-900 focus:border-emerald-500';
 
-  let content: React.ReactNode;
+  let content: ReactNode;
   if (loading) {
     content = (
       <div className="flex items-center justify-center py-20">

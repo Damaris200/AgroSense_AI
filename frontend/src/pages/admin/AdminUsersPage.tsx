@@ -1,5 +1,5 @@
 import { AlertCircle, Loader2, Search, UserCheck, UserX } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -21,12 +21,14 @@ interface UserRowProps {
 
 function UserRow({ user, isDark, onToggle }: UserRowProps) {
   const rb = roleBadge[user.role];
-  const statusCls = user.isActive
-    ? (isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
-    : (isDark ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-100 text-zinc-500');
-  const toggleCls = user.isActive
-    ? (isDark ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-500 hover:bg-red-100')
-    : (isDark ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100');
+  
+  const activeStatusCls = isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700';
+  const inactiveStatusCls = isDark ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-100 text-zinc-500';
+  const statusCls = user.isActive ? activeStatusCls : inactiveStatusCls;
+  
+  const activeToggleCls = isDark ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-500 hover:bg-red-100';
+  const inactiveToggleCls = isDark ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100';
+  const toggleCls = user.isActive ? activeToggleCls : inactiveToggleCls;
 
   return (
     <tr className={`transition ${isDark ? 'hover:bg-zinc-800/40' : 'hover:bg-zinc-50'}`}>
@@ -93,7 +95,7 @@ export function AdminUsersPage() {
 
   useEffect(() => { void loadUsers(); }, []);
 
-  let tableBody: React.ReactNode;
+  let tableBody: ReactNode;
   if (loading) {
     tableBody = (
       <tr>

@@ -20,9 +20,10 @@ spec:
       labels:
         app: frontend
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: frontend
-          image: damarisateh/agrosense-frontend:latest
+          image: damarisateh/agrosense-frontend:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -42,9 +43,11 @@ spec:
             requests:
               memory: "64Mi"
               cpu: "50m"
+              ephemeral-storage: "128Mi"
             limits:
               memory: "128Mi"
               cpu: "100m"
+              ephemeral-storage: "256Mi"
 ---
 apiVersion: v1
 kind: Service

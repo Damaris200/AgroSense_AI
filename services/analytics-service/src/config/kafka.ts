@@ -1,4 +1,4 @@
-import { Kafka, Partitioners, logLevel } from "kafkajs";
+import { Kafka, logLevel } from "kafkajs";
 
 const brokers = (process.env.KAFKA_BROKERS ?? "localhost:9092").split(",");
 

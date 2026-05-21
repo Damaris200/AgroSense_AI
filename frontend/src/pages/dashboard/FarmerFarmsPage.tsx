@@ -1,5 +1,5 @@
 import { AlertCircle, Loader2, MapPin, Plus, Sprout, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode, type SyntheticEvent } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -42,7 +42,7 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
   }`;
   const labelCls = `mb-1 block text-xs font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`;
 
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setSubmitting(true);
@@ -65,13 +65,11 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
+      <button
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        role="button"
-        tabIndex={0}
+        type="button"
         aria-label="Close modal"
         onClick={onClose}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
       <div
         className={`relative z-10 w-full max-w-md rounded-2xl border p-6 shadow-2xl ${
@@ -228,7 +226,7 @@ export function FarmerFarmsPage() {
 
   useEffect(() => { void load(); }, []);
 
-  let content: React.ReactNode;
+  let content: ReactNode;
   if (loading) {
     content = (
       <div className="flex items-center justify-center py-20">

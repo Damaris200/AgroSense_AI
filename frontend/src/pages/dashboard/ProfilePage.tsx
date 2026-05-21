@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, Loader2, UserCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -20,7 +20,7 @@ export function ProfilePage() {
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState('');
 
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
     setSuccess(false);

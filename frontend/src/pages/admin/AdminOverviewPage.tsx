@@ -1,5 +1,5 @@
 import { Activity, AlertCircle, Bell, Leaf, Loader2, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { PageHeader } from '../../components/dashboard/PageHeader';
@@ -36,7 +36,7 @@ export function AdminOverviewPage() {
 
   const recentEvents = overview?.recentEvents ?? [];
 
-  let eventsContent: React.ReactNode;
+  let eventsContent: ReactNode;
   if (loading) {
     eventsContent = (
       <li className="flex items-center justify-center py-6">
