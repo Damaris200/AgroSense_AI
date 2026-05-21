@@ -55,7 +55,6 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
         gpsLng:   Number(form.gpsLng),
       });
       setSubmitted(true);
-      onSaved();
     } catch (err) {
       setError(extractApiError(err, 'Submission failed. Please try again.'));
     } finally {
@@ -104,7 +103,7 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
             </p>
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => { onSaved(); onClose(); }}
               className="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               Done
@@ -298,7 +297,7 @@ export function FarmerFarmsPage() {
         <FarmSubmitModal
           isDark={isDark}
           onClose={() => setShowModal(false)}
-          onSaved={() => { setShowModal(false); void load(); }}
+          onSaved={() => { void load(); }}
         />
       )}
     </DashboardLayout>

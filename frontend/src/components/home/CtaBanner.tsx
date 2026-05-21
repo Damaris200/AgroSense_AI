@@ -15,7 +15,7 @@ export function CtaBanner() {
     >
       <div className="mx-auto w-full max-w-6xl px-4 lg:px-8">
         <div
-          className={`rounded-[2rem] border p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-colors sm:p-10 lg:p-14 ${
+          className={`rounded-4xl border p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-colors sm:p-10 lg:p-14 ${
             isDark ? 'border-white/10 bg-white/5' : 'border-emerald-100 bg-white'
           }`}
         >
@@ -43,10 +43,10 @@ export function CtaBanner() {
             </div>
 
             <div
-              className={`rounded-[2rem] p-8 text-white ${
+              className={`rounded-4xl p-8 text-white ${
                 isDark
-                  ? 'bg-gradient-to-br from-zinc-900 via-emerald-950 to-green-900'
-                  : 'bg-gradient-to-br from-emerald-900 via-green-800 to-lime-900'
+                  ? 'bg-linear-to-br from-zinc-900 via-emerald-950 to-green-900'
+                  : 'bg-linear-to-br from-emerald-900 via-green-800 to-lime-900'
               }`}
             >
               <p className="text-sm uppercase tracking-[0.24em] text-emerald-200">Why it matters</p>

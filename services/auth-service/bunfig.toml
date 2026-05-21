@@ -1,0 +1,6 @@
+[test]
+# Runs setup.ts before any test file so required env vars are set before env.ts loads
+preload = ["./src/__tests__/setup.ts"]
+coverage = true
+coverageReporter = ["lcov", "text"]
+coverageDir = "./coverage"

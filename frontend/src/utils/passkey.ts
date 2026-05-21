@@ -1,62 +1,36 @@
 import type { AuthResponse } from '@/types/auth';
 
-const PASSKEY_CREDENTIAL_ID_KEY = 'agrosense_passkey_credential_id';
-const PASSKEY_SESSION_KEY = 'agrosense_passkey_session';
-
-function ensureBrowser(): void {
-  if (typeof window === 'undefined') {
-    throw new Error('Passkey sign-in is only available in the browser.');
-  }
-}
-
-function toBase64Url(bytes: Uint8Array): string {
-  const binary = String.fromCharCode(...bytes);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}
-
-function fromBase64Url(value: string): ArrayBuffer {
-  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer.slice(0);
-}
-
-function randomChallenge(length = 32): ArrayBuffer {
-  const challenge = new Uint8Array(length);
-  crypto.getRandomValues(challenge);
-  return challenge.buffer.slice(0);
-}
-
-function textBytes(value: string): ArrayBuffer {
-  return new TextEncoder().encode(value).buffer.slice(0);
-}
+const CREDENTIAL_ID_KEY = 'agrosense_passkey_credential_id';
+const SESSION_KEY       = 'agrosense_passkey_session';
 
 export function isPasskeySupported(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.isSecureContext && 'PublicKeyCredential' in window && !!navigator.credentials;
+  return (
+    globalThis.isSecureContext === true &&
+    typeof (globalThis as Record<string, unknown>).PublicKeyCredential !== 'undefined'
+  );
 }
 
 export function hasPasskeyCredential(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!window.localStorage.getItem(PASSKEY_CREDENTIAL_ID_KEY) && !!window.localStorage.getItem(PASSKEY_SESSION_KEY);
+  return (
+    localStorage.getItem(CREDENTIAL_ID_KEY) !== null &&
+    localStorage.getItem(SESSION_KEY) !== null
+  );
 }
 
-export async function enablePasskeyForSession(session: AuthResponse): Promise<{ enabled: boolean; message: string }> {
-  ensureBrowser();
-
+export async function enablePasskeyForSession(
+  session: AuthResponse,
+): Promise<{ enabled: boolean; message: string }> {
   if (!isPasskeySupported()) {
-    return { enabled: false, message: 'Passkeys are not supported on this browser/device.' };
+    return { enabled: false, message: 'Passkeys are not supported on this device.' };
   }
 
   try {
     const credential = await navigator.credentials.create({
       publicKey: {
-        challenge: randomChallenge(),
-        rp: { name: 'AgroSense AI' },
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'AgroSense AI', id: globalThis.location.hostname },
         user: {
-          id: textBytes(session.user.id).slice(0, 64),
+          id: new TextEncoder().encode(session.user.id),
           name: session.user.email,
           displayName: session.user.name,
         },
@@ -64,64 +38,57 @@ export async function enablePasskeyForSession(session: AuthResponse): Promise<{ 
           { type: 'public-key', alg: -7 },
           { type: 'public-key', alg: -257 },
         ],
-        timeout: 60000,
-        attestation: 'none',
         authenticatorSelection: {
-          residentKey: 'preferred',
+          authenticatorAttachment: 'platform',
           userVerification: 'required',
+          residentKey: 'required',
         },
+        timeout: 60000,
       },
     });
 
-    if (!credential || !(credential instanceof PublicKeyCredential)) {
-      return { enabled: false, message: 'Passkey setup was cancelled.' };
+    if (!credential) {
+      return { enabled: false, message: 'Passkey creation was cancelled.' };
     }
 
-    const credentialId = toBase64Url(new Uint8Array(credential.rawId));
-    window.localStorage.setItem(PASSKEY_CREDENTIAL_ID_KEY, credentialId);
-    window.localStorage.setItem(PASSKEY_SESSION_KEY, JSON.stringify(session));
+    const credentialId = btoa(
+      String.fromCharCode(...new Uint8Array((credential as PublicKeyCredential).rawId)),
+    );
 
-    return { enabled: true, message: 'Passkey enabled on this device.' };
+    localStorage.setItem(CREDENTIAL_ID_KEY, credentialId);
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ token: session.token }));
+
+    return { enabled: true, message: 'Passkey enabled successfully.' };
   } catch {
-    return { enabled: false, message: 'Unable to enable passkey on this device.' };
+    return { enabled: false, message: 'Failed to create passkey. Try again later.' };
   }
 }
 
 export async function signInWithPasskey(): Promise<AuthResponse> {
-  ensureBrowser();
-
   if (!isPasskeySupported()) {
-    throw new Error('Passkeys are not supported on this browser/device.');
+    throw new Error('Passkeys are not supported on this device.');
   }
 
-  const storedCredentialId = window.localStorage.getItem(PASSKEY_CREDENTIAL_ID_KEY);
-  const storedSession = window.localStorage.getItem(PASSKEY_SESSION_KEY);
-
-  if (!storedCredentialId || !storedSession) {
-    throw new Error('No passkey is configured on this device yet. Sign in with email first.');
+  const storedSession = localStorage.getItem(SESSION_KEY);
+  if (!storedSession) {
+    throw new Error('No passkey registered on this device.');
   }
 
-  const assertion = await navigator.credentials.get({
+  const credential = await navigator.credentials.get({
     publicKey: {
-      challenge: randomChallenge(),
-      timeout: 60000,
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
       userVerification: 'required',
-      allowCredentials: [
-        {
-          id: fromBase64Url(storedCredentialId),
-          type: 'public-key',
-        },
-      ],
+      timeout: 60000,
     },
   });
 
-  if (!assertion || !(assertion instanceof PublicKeyCredential)) {
-    throw new Error('Passkey sign-in was cancelled.');
+  if (!credential) {
+    throw new Error('Passkey authentication was cancelled.');
   }
 
-  try {
-    return JSON.parse(storedSession) as AuthResponse;
-  } catch {
-    throw new Error('Stored passkey session is invalid. Sign in with email again.');
-  }
+  const session = JSON.parse(storedSession) as { token: string };
+  return {
+    user: {} as AuthResponse['user'],
+    token: session.token,
+  };
 }
