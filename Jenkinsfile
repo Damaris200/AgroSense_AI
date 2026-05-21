@@ -172,11 +172,11 @@ pipeline {
               return
             }
 
-            def props      = readProperties file: reportFile
-            def taskId     = props.ceTaskId
-            def projectKey = props.projectKey
-            def hostUrl    = env.SONAR_HOST_URL ?: props.serverUrl
-            def token      = env.SONAR_TOKEN
+            // Parse report-task.txt with sh grep — no Pipeline Utility Steps plugin needed
+            def taskId     = sh(returnStdout: true, script: "grep -m1 '^ceTaskId='     '${reportFile}' | cut -d= -f2-").trim()
+            def projectKey = sh(returnStdout: true, script: "grep -m1 '^projectKey='   '${reportFile}' | cut -d= -f2-").trim()
+            def serverUrl  = sh(returnStdout: true, script: "grep -m1 '^serverUrl='    '${reportFile}' | cut -d= -f2-").trim()
+            def hostUrl    = env.SONAR_HOST_URL ?: serverUrl
 
             // Wait up to 5 minutes for the CE task to finish
             echo "Waiting for CE task ${taskId}..."
@@ -184,10 +184,11 @@ pipeline {
             for (int i = 0; i < 30 && !ready; i++) {
               sleep 10
               try {
-                def out = sh(returnStdout: true, script:
-                  "curl -sf -u '${token}:' '${hostUrl}/api/ce/task?id=${taskId}' 2>/dev/null || echo '{}'"
-                ).trim()
-                def status = (readJSON(text: out))?.task?.status ?: 'PENDING'
+                def status = sh(returnStdout: true, script: """
+                  curl -sf -u "\$SONAR_TOKEN:" "${hostUrl}/api/ce/task?id=${taskId}" 2>/dev/null \
+                    | python3 -c "import sys,json; print(json.load(sys.stdin).get('task',{}).get('status','PENDING'))" \
+                    || echo PENDING
+                """).trim()
                 echo "  CE task status: ${status}"
                 if (status in ['SUCCESS', 'FAILED', 'CANCELLED']) { ready = true }
               } catch (Exception ex) {
@@ -197,17 +198,18 @@ pipeline {
 
             // Read the quality gate result
             try {
-              def gateOut = sh(returnStdout: true, script:
-                "curl -sf -u '${token}:' '${hostUrl}/api/qualitygates/project_status?projectKey=${projectKey}' 2>/dev/null || echo '{}'"
-              ).trim()
-              def gateStatus = (readJSON(text: gateOut))?.projectStatus?.status ?: 'UNKNOWN'
+              def gateStatus = sh(returnStdout: true, script: """
+                curl -sf -u "\$SONAR_TOKEN:" "${hostUrl}/api/qualitygates/project_status?projectKey=${projectKey}" 2>/dev/null \
+                  | python3 -c "import sys,json; print(json.load(sys.stdin).get('projectStatus',{}).get('status','UNKNOWN'))" \
+                  || echo UNKNOWN
+              """).trim()
               echo "Quality Gate status: ${gateStatus}"
               if (gateStatus == 'ERROR') {
                 currentBuild.result = 'UNSTABLE'
                 echo 'Quality Gate FAILED — build marked UNSTABLE, pipeline continues.'
               }
             } catch (Exception ex) {
-              echo "Could not read quality gate status: ${ex.message} — marking UNSTABLE, pipeline continues."
+              echo "Could not read quality gate: ${ex.message} — marking UNSTABLE, pipeline continues."
               currentBuild.result = 'UNSTABLE'
             }
           }
