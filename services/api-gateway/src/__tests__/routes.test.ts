@@ -46,21 +46,23 @@ function upstreamMock(
   mockResponse: unknown,
   mockStatus = 200,
 ): FetchFn {
-  return async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
+  const fn = async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
     if (url.toString().includes(`127.0.0.1:${localPort}`)) {
       return realFetch(url as string, init);
     }
     return jsonResponse(mockResponse, mockStatus);
   };
+  return fn as unknown as FetchFn;
 }
 
 function upstreamThrowMock(localPort: number, realFetch: FetchFn): FetchFn {
-  return async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
+  const fn = async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
     if (url.toString().includes(`127.0.0.1:${localPort}`)) {
       return realFetch(url as string, init);
     }
     throw new Error('Service unavailable');
   };
+  return fn as unknown as FetchFn;
 }
 
 // ── Weather route ─────────────────────────────────────────────────────────────
@@ -292,7 +294,7 @@ describe('GET /api/overview', () => {
   it('returns activity sorted by most recent when upstream has data', async () => {
     const token = await signJwt({ sub: 'user-1', role: 'farmer', email: 'a@b.com' });
     let callCount = 0;
-    globalThis.fetch = async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
       if (url.toString().includes(`127.0.0.1:${port}`)) return originalFetch(url as string, init);
       callCount++;
       const urlStr = url.toString();
@@ -303,7 +305,7 @@ describe('GET /api/overview', () => {
         return jsonResponse({ success: true, data: [{ id: 'r1', content: 'Apply more fertilizer', generatedAt: '2024-01-02T00:00:00Z' }] });
       }
       return jsonResponse({ success: true, data: [] });
-    };
+    }) as unknown as FetchFn;
 
     const res  = await fetch(`http://127.0.0.1:${port}/api/overview`, {
       headers: { Authorization: `Bearer ${token}` },

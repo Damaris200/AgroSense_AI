@@ -74,12 +74,15 @@ import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
 import { AdminNotificationsPage } from '@/pages/admin/AdminNotificationsPage';
 
 const baseUser = {
-  id: 'user-1',
-  name: 'Farmer Jane',
-  email: 'farmer@example.com',
-  role: 'farmer',
-  phone: '+2348012345678',
-  locale: 'en',
+  id:        'user-1',
+  name:      'Farmer Jane',
+  email:     'farmer@example.com',
+  role:      'farmer'  as const,
+  phone:     '+2348012345678',
+  locale:    'en'      as const,
+  isActive:  true,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
 beforeEach(() => {

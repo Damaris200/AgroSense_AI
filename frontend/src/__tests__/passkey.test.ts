@@ -24,12 +24,12 @@ describe('isPasskeySupported', () => {
 
   it('returns false when PublicKeyCredential is absent', () => {
     defineSecureContext(true);
-    const original = (window as Record<string, unknown>).PublicKeyCredential;
-    delete (window as Record<string, unknown>).PublicKeyCredential;
+    const original = (window as unknown as Record<string, unknown>).PublicKeyCredential;
+    delete (window as unknown as Record<string, unknown>).PublicKeyCredential;
 
     expect(isPasskeySupported()).toBe(false);
 
-    (window as Record<string, unknown>).PublicKeyCredential = original;
+    (window as unknown as Record<string, unknown>).PublicKeyCredential = original;
   });
 
   it('returns a boolean in a normal secure jsdom context', () => {

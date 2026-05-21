@@ -4,7 +4,7 @@ import { signAuthToken } from '../services/auth.service';
 
 const TEST_USER = {
   id:    '11111111-1111-4111-8111-111111111111',
-  role:  'farmer',
+  role:  'farmer' as const,
   email: 'anya@farm.com',
 };
 
@@ -37,8 +37,8 @@ describe('signAuthToken', () => {
   });
 
   it('generates different tokens for different users', () => {
-    const token1 = signAuthToken({ id: 'aaa', role: 'farmer', email: 'a@b.com' });
-    const token2 = signAuthToken({ id: 'bbb', role: 'admin',  email: 'c@d.com' });
+    const token1 = signAuthToken({ id: 'aaa', role: 'farmer' as const, email: 'a@b.com' });
+    const token2 = signAuthToken({ id: 'bbb', role: 'admin'  as const, email: 'c@d.com' });
     expect(token1).not.toBe(token2);
   });
 
