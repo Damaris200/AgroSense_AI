@@ -44,8 +44,8 @@ iac/terraform/terraform.tfstate
 iac/terraform/terraform.tfstate.backup
 iac/terraform/*.tfstate*
 
-# Ansible vault (encrypt before committing; raw file must stay local)
-# iac/ansible/group_vars/agrosense_vps/vault.yml
+# Ansible vault — raw file must stay local, never commit unencrypted
+iac/ansible/group_vars/agrosense_vps/vault.yml
 
 # Local kubeconfig written by Ansible k3s role
 *.yaml.bak
