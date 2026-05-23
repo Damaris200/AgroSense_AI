@@ -16,4 +16,4 @@ droplet_size        = "s-4vcpu-8gb"
 
 # Optional: set your domain to auto-create DNS A records.
 # Leave empty to skip: domain = ""
-domain              = "agrosense.yourdomain.com"
+domain              = "healthcarebridge.me"

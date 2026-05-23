@@ -8,7 +8,8 @@
       "Bash(grep -E \"\\(\\\\| % Funcs|\\\\| % Lines|All files|src\\\\\\\\\\\\\\\\\\)\")",
       "Bash(Select-String \"All files|coverage\")",
       "Bash(for svc in auth-service weather-service soil-service notification-service; do *)",
-      "Read(//c/Users/anyah/OneDrive/Documents/AgroSense_AI/AgroSense_AI/**)"
+      "Read(//c/Users/anyah/OneDrive/Documents/AgroSense_AI/AgroSense_AI/**)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
