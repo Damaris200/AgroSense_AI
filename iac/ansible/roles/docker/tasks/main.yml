@@ -14,10 +14,18 @@
     state: directory
     mode: "0755"
 
-- name: Remove old Docker GPG key if present
+- name: Remove old Docker GPG key files if present
   file:
-    path: /etc/apt/keyrings/docker.asc
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /etc/apt/keyrings/docker.asc
+
+- name: Remove legacy Docker key from old apt keyring
+  shell: |
+    apt-key list 2>/dev/null | grep -B1 "Docker" | grep -o '[0-9A-F]\{8\}$' \
+    | xargs -r apt-key del 2>/dev/null || true
+  changed_when: false
 
 - name: Download Docker GPG key
   shell: |
