@@ -47,9 +47,3 @@
     msg: >
       Run this on the VPS to enable HTTPS:
       certbot --nginx -d {{ domain }} -d www.{{ domain }} --non-interactive --agree-tos -m admin@{{ domain }}
-
-handlers:
-  - name: reload nginx
-    systemd:
-      name: nginx
-      state: reloaded
