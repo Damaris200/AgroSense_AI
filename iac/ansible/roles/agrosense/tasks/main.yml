@@ -11,7 +11,7 @@
     dest: "{{ k8s_manifests_dest }}/"
     delete: yes
     rsync_opts:
-      - "--exclude=secrets.yaml"   # secrets are created imperatively from vault
+      - "--exclude=secrets.yaml" # secrets are created imperatively from vault
 
 - name: Create agrosense namespace
   shell: >
@@ -29,29 +29,42 @@
     | kubectl apply -f - --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: true
 
-# Create the agrosense-secrets K8s Secret imperatively from Ansible vault values.
-# Using --dry-run=client -o yaml | kubectl apply ensures idempotency.
-- name: Create agrosense-secrets from vault
+# Create the agrosense-secrets K8s Secret from an env file to avoid shell quoting issues.
+- name: Write agrosense-secrets env file
+  copy:
+    dest: /tmp/agrosense-secrets.env
+    mode: "0600"
+    content: |
+      POSTGRES_PASSWORD={{ vault_db_password }}
+      JWT_SECRET={{ vault_jwt_secret }}
+      OPENAI_API_KEY={{ vault_openai_api_key }}
+      TOMORROW_API_KEY={{ vault_tomorrow_api_key }}
+      SMTP_PASS={{ vault_smtp_pass }}
+      AUTH_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/auth_db
+      FARM_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/farm_db
+      WEATHER_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/weather_db
+      SOIL_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/soil_db
+      AI_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/ai_db
+      NOTIFICATION_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/notification_db
+      ANALYTICS_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/analytics_db
+  no_log: true
+
+- name: Create agrosense-secrets from env file
   shell: |
     kubectl create secret generic agrosense-secrets \
       --namespace={{ app_namespace }} \
-      --from-literal=POSTGRES_PASSWORD="{{ vault_db_password }}" \
-      --from-literal=JWT_SECRET="{{ vault_jwt_secret }}" \
-      --from-literal=OPENAI_API_KEY="{{ vault_openai_api_key }}" \
-      --from-literal=TOMORROW_API_KEY="{{ vault_tomorrow_api_key }}" \
-      --from-literal=SMTP_PASS="{{ vault_smtp_pass }}" \
-      --from-literal=AUTH_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/auth_db" \
-      --from-literal=FARM_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/farm_db" \
-      --from-literal=WEATHER_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/weather_db" \
-      --from-literal=SOIL_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/soil_db" \
-      --from-literal=AI_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/ai_db" \
-      --from-literal=NOTIFICATION_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/notification_db" \
-      --from-literal=ANALYTICS_DATABASE_URL="postgresql://agrosense:{{ vault_db_password }}@postgres:5432/analytics_db" \
+      --from-env-file=/tmp/agrosense-secrets.env \
       --kubeconfig=/etc/rancher/k3s/k3s.yaml \
       --dry-run=client -o yaml \
     | kubectl apply -f - --kubeconfig=/etc/rancher/k3s/k3s.yaml
   no_log: true
   changed_when: true
+
+- name: Remove agrosense-secrets env file
+  file:
+    path: /tmp/agrosense-secrets.env
+    state: absent
+  no_log: true
 
 - name: Create grafana-admin secret in monitoring namespace
   shell: |
