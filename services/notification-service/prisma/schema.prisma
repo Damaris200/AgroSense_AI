@@ -3,16 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Notification {
-  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId  String   @map("user_id") @db.Uuid   // cross-DB ref to auth_db.users — no FK enforced
-  farmId  String   @map("farm_id") @db.Uuid   // cross-DB ref to farm_db.farms — no FK enforced
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String   @map("user_id")
+  farmId  String   @map("farm_id")
   message String
-  channel String   // e.g. "email" | "sms" | "push"
+  channel String
   sentAt  DateTime @default(now()) @map("sent_at")
 
   @@map("notifications")
+  @@index([userId])
+  @@index([farmId])
 }

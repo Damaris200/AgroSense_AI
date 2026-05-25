@@ -3,17 +3,20 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Recommendation {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  farmId       String   @map("farm_id") @db.Uuid
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  farmId       String   @map("farm_id")
   userId       String   @default("anonymous") @map("user_id")
-  submissionId String   @map("submission_id") @db.Uuid
+  submissionId String   @map("submission_id")
   content      String
   model        String
   generatedAt  DateTime @default(now()) @map("generated_at")
 
   @@map("recommendations")
+  @@index([farmId])
+  @@index([submissionId])
 }

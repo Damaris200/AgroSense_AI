@@ -21,8 +21,8 @@ resources:
   - secrets.yaml
 
   # Infrastructure
-  - postgres/statefulset.yaml
-  - postgres/service.yaml
+  # Postgres + MongoDB are managed externally (Neon + MongoDB Atlas).
+  # Only Kafka is self-hosted on this cluster.
   - kafka/kraft-configmap.yaml
   - kafka/statefulset.yaml
   - kafka/service.yaml

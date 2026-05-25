@@ -38,7 +38,7 @@ export const weatherFetchedEventSchema = z.object({
   userId:        z.union([z.string().uuid(), z.literal('anonymous')]),
   userEmail:     z.string().optional().default(''),
   userName:      z.string().optional().default(''),
-  weatherDataId: z.string().uuid(),
+  weatherDataId: z.string().min(1),
   temperature:   z.number(),
   humidity:      z.number().min(0).max(100),
   rainfall:      z.number().min(0),

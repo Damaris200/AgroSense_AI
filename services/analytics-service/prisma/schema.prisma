@@ -3,15 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model EventLog {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   eventType    String   @map("event_type")
-  submissionId String   @map("submission_id") @db.Uuid // Kafka event correlation ID
+  submissionId String   @map("submission_id")
   payloadJson  Json     @map("payload_json")
   loggedAt     DateTime @default(now()) @map("logged_at")
 
   @@map("event_logs")
+  @@index([submissionId])
+  @@index([eventType])
 }

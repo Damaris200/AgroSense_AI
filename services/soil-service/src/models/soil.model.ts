@@ -20,7 +20,7 @@ export const soilAnalyzedEventSchema = z.object({
   userId:       z.union([z.string().uuid(), z.literal('anonymous')]),
   userEmail:    z.string().optional().default(''),
   userName:     z.string().optional().default(''),
-  soilDataId:   z.string().uuid(),
+  soilDataId:   z.string().min(1),
   ph:           z.number().min(0).max(14),
   moisture:     z.number().min(0).max(100),
   nitrogen:     z.number().min(0),

@@ -1,7 +1,7 @@
 # Copy this file to terraform.tfvars and fill in your values.
 # terraform.tfvars is in .gitignore — never commit it.
 
-do_token            = "dop_v1_YOUR_DIGITALOCEAN_TOKEN"
+do_token            = ""
 
 # Get your SSH key fingerprint from: doctl compute ssh-key list
 # or the DigitalOcean web console → Settings → Security → SSH Keys

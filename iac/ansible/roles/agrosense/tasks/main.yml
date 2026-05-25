@@ -43,24 +43,24 @@
     --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: false
 
-# Create the agrosense-secrets K8s Secret from an env file to avoid shell quoting issues.
+# Create the agrosense-secrets K8s Secret from an env file.
+# Database URLs point at managed providers (Neon + MongoDB Atlas), not a local PG.
 - name: Write agrosense-secrets env file
   copy:
     dest: /tmp/agrosense-secrets.env
     mode: "0600"
     content: |
-      POSTGRES_PASSWORD={{ vault_db_password }}
       JWT_SECRET={{ vault_jwt_secret }}
       OPENAI_API_KEY={{ vault_openai_api_key }}
       TOMORROW_API_KEY={{ vault_tomorrow_api_key }}
       SMTP_PASS={{ vault_smtp_pass }}
-      AUTH_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/auth_db
-      FARM_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/farm_db
-      WEATHER_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/weather_db
-      SOIL_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/soil_db
-      AI_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/ai_db
-      NOTIFICATION_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/notification_db
-      ANALYTICS_DATABASE_URL=postgresql://agrosense:{{ vault_db_password }}@postgres:5432/analytics_db
+      AUTH_DATABASE_URL={{ vault_neon_auth_database_url }}
+      FARM_DATABASE_URL={{ vault_neon_farm_database_url }}
+      WEATHER_DATABASE_URL={{ vault_mongodb_weather_url }}
+      SOIL_DATABASE_URL={{ vault_mongodb_soil_url }}
+      AI_DATABASE_URL={{ vault_mongodb_ai_url }}
+      NOTIFICATION_DATABASE_URL={{ vault_mongodb_notification_url }}
+      ANALYTICS_DATABASE_URL={{ vault_mongodb_analytics_url }}
   no_log: true
 
 - name: Create agrosense-secrets from env file
@@ -113,7 +113,6 @@
     kubectl apply \
       --kubeconfig=/etc/rancher/k3s/k3s.yaml \
       -f {{ k8s_manifests_dest }}/configmap.yaml \
-      -f {{ k8s_manifests_dest }}/postgres/ \
       -f {{ k8s_manifests_dest }}/kafka/ \
       -f {{ k8s_manifests_dest }}/auth-service.yaml \
       -f {{ k8s_manifests_dest }}/api-gateway.yaml \

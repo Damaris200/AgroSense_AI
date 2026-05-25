@@ -6,20 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Infrastructure
 ```bash
-# Start only infra (Postgres, Kafka, Zookeeper)
-docker compose up -d postgres kafka zookeeper
+# Start only infra (just Kafka — databases are managed externally)
+docker compose up -d kafka
 
 # Start everything
 docker compose up -d
 
-# Reset everything — wipes volumes so Postgres init scripts re-run
+# Reset everything — wipes Kafka volume only; managed DBs are untouched
 docker compose down -v && docker compose up -d
-
-# Verify all 7 databases were created
-docker exec agrosense-postgres psql -U agrosense -c "\l"
 ```
 
-> **Critical:** Postgres init scripts (`infrastructure/postgres/init/`) only run on an **empty** volume. If you change them, you must `down -v` first.
+> **Critical:** Self-hosted Postgres has been removed. Relational data lives on **Neon** (free tier) and document data on **MongoDB Atlas M0** (free tier). Connection strings come from `.env` for local dev and from `agrosense-secrets` (created imperatively by Ansible from `vault.yml`) in production.
 
 ### Service development (run from inside each service directory)
 ```bash
@@ -31,10 +28,15 @@ bun test --coverage  # explicit coverage report
 
 ### Prisma (per service)
 ```bash
+# Relational services (auth, farm) — Postgres on Neon
 bun run prisma:migrate          # create + apply a new migration (dev)
 bun run prisma:migrate:deploy   # apply existing migrations (prod/docker)
+
+# Document services (weather, soil, ai, notification, analytics) — MongoDB Atlas
+bun run prisma:push             # push schema to MongoDB (no migrations on Mongo)
+
+# All services
 bun run prisma:generate         # regenerate Prisma client
-bun run prisma:studio           # open Prisma Studio GUI
 ```
 
 ### Frontend (from `frontend/`)
@@ -42,11 +44,6 @@ bun run prisma:studio           # open Prisma Studio GUI
 bun run dev     # Vite dev server (port 5173)
 bun run build   # production build
 bun run lint    # ESLint
-```
-
-### Cross-service infra tests (requires Docker running)
-```bash
-RUN_INFRA_TESTS=1 bun test tests/infrastructure
 ```
 
 ### Single test file
@@ -85,8 +82,22 @@ React frontend  →  API Gateway (4000)
 
 ### Hard rules encoded in the codebase
 1. The **API Gateway is the only HTTP entry point** for clients. All downstream services communicate via Kafka only.
-2. **No service reads another service's database.** Each service owns exactly one Postgres database.
-3. **New Kafka events must be schema-defined first** — add to `docs/EVENTS.md` and `shared/types/` before writing producer/consumer code.
+2. **No service reads another service's database.** Each service owns exactly one logical database (Postgres on Neon for `auth`/`farm`; MongoDB on Atlas for the others).
+3. **New Kafka events must be schema-defined first** — add the Zod schema to the consuming service's `src/models/` before writing producer/consumer code.
+
+### Polyglot persistence (free-tier managed)
+
+| Service        | Storage           | Why                                    |
+|----------------|-------------------|----------------------------------------|
+| auth           | **Neon Postgres** | Unique email constraint, ACID matters  |
+| farm           | **Neon Postgres** | Relational, queried by `userId`        |
+| weather        | **MongoDB Atlas** | Append-only sensor document            |
+| soil           | **MongoDB Atlas** | Append-only sensor document            |
+| ai             | **MongoDB Atlas** | LLM recommendation document            |
+| notification   | **MongoDB Atlas** | Append-only message log                |
+| analytics      | **MongoDB Atlas** | Pure event log with JSON payload       |
+
+Both providers' free tiers allow multiple logical databases inside a single project/cluster. Each service still owns its own logical DB.
 
 ### Orchestrator state
 The orchestrator holds workflow state in a **plain in-memory `Map`** (`src/state/analysis.state.ts`). It waits for both `weather.fetched` and `soil.analyzed` for the same `submissionId`, then emits `analysis.ready`. This state is **lost on restart** — submissions in-flight during a restart will not complete.
@@ -110,7 +121,7 @@ src/
 
 ### Key technology decisions
 - **Runtime:** Bun (TypeScript) — all services and the monorepo root use Bun
-- **ORM:** Prisma with `@prisma/adapter-pg` (each service has its own `prisma/` folder)
+- **ORM:** Prisma 6.19 (each service has its own `prisma/schema.prisma`; `provider = "postgresql"` for auth/farm, `provider = "mongodb"` for the document services). Pinned to 6.x because Prisma 7 does not yet support MongoDB.
 - **Messaging:** KafkaJS connecting to `kafka:29092` (internal Docker network); `localhost:9092` from outside Docker
 - **AI model:** Fine-tuned `ft:gpt-4.1-mini-2025-04-14:personal:farm-recommendation:DcEPwNUN` via OpenAI SDK (not Gemini — README is outdated)
 - **Weather:** Tomorrow.io API (not OpenWeather — README is outdated)
@@ -130,16 +141,23 @@ src/
 | AI Service         | 4006      |
 | Notification       | 3006      |
 | Analytics          | 4007      |
-| Postgres           | **5433** (maps to internal 5432) |
 | Kafka              | 9092      |
 
-### Postgres credentials (local/Docker)
-```
-host: localhost:5433
-user: agrosense
-password: agrosense_dev
-databases: auth_db, farm_db, weather_db, soil_db, ai_db, notification_db, analytics_db
-```
+### Database credentials
+
+There are no longer any local database credentials — connections are managed by Neon and MongoDB Atlas. Each service reads its own `DATABASE_URL` env var:
+
+| Service       | Env var injected from .env / Secret |
+|---------------|-------------------------------------|
+| auth          | `NEON_AUTH_DATABASE_URL`            |
+| farm          | `NEON_FARM_DATABASE_URL`            |
+| weather       | `MONGODB_WEATHER_URL`               |
+| soil          | `MONGODB_SOIL_URL`                  |
+| ai            | `MONGODB_AI_URL`                    |
+| notification  | `MONGODB_NOTIFICATION_URL`          |
+| analytics     | `MONGODB_ANALYTICS_URL`             |
+
+Inside each container, the value is exposed simply as `DATABASE_URL`.
 
 ## Infrastructure as Code (`iac/`)
 
@@ -159,7 +177,7 @@ terraform output droplet_ip                    # copy into Ansible inventory
 ```bash
 cd iac/ansible
 # 1. Paste VPS IP into inventory.ini
-# 2. Fill in vault.yml with real API keys, then encrypt:
+# 2. Fill in vault.yml with Neon + Mongo URIs and API keys, then encrypt:
 ansible-vault encrypt group_vars/agrosense_vps/vault.yml
 
 # 3. Run the full playbook (installs Docker, k3s, NGINX, deploys everything)
@@ -196,7 +214,7 @@ kubectl get pods -n monitoring
 
 - **Secrets** (`iac/k8s/secrets.yaml`): Never apply this file directly in production — let Ansible create the secret imperatively from vault values so credentials stay out of git.
 - **Orchestrator** runs with `replicas: 1` and `strategy: Recreate` — its in-memory state Map must never have two instances running simultaneously.
-- **Kafka + Postgres** use StatefulSets with PVCs for persistent storage; Zookeeper uses a Deployment.
+- **Databases are external** — no Postgres StatefulSet/PVC anymore. Kafka is the only stateful workload still on-cluster.
 - **HPA** scales api-gateway (2–5), auth-service (2–4), ai-service (2–4), and farm-service (2–4) based on CPU. Requires metrics-server (installed by Ansible k3s role).
 - **Ingress** routes `/api` → api-gateway and `/` → frontend. NGINX Ingress Controller runs on NodePorts 30080/30443; host Nginx proxies 80/443 to those ports.
 - **Monitoring** (namespace `monitoring`): Prometheus scrapes pods via `prometheus.io/scrape: "true"` annotation; Grafana available at `/grafana/` (default login: admin/agrosense_grafana).

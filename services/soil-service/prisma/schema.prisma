@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model SoilData {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  farmId      String   @map("farm_id") @db.Uuid   // cross-DB ref to farm_db.farms — no FK enforced
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  farmId      String   @map("farm_id")
   ph          Float
   moisture    Float
   nitrogen    Float
@@ -17,4 +18,5 @@ model SoilData {
   analyzedAt  DateTime @default(now()) @map("analyzed_at")
 
   @@map("soil_data")
+  @@index([farmId])
 }
