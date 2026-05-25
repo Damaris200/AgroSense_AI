@@ -12,8 +12,7 @@ resources:
   # Infrastructure
   - postgres/statefulset.yaml
   - postgres/service.yaml
-  - zookeeper/deployment.yaml
-  - zookeeper/service.yaml
+  - kafka/kraft-configmap.yaml
   - kafka/statefulset.yaml
   - kafka/service.yaml
 
