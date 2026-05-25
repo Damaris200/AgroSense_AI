@@ -12,8 +12,10 @@ pipeline {
     VPS_HOST         = credentials('agrosense-vps-host')
     KUBECONFIG_REMOTE = '/etc/rancher/k3s/k3s.yaml'
     K8S_NAMESPACE    = 'agrosense'
-    // Jenkins credentials: kind=Secret text, ID=sonarqube-token
-    SONAR_TOKEN      = credentials('sonarqube-token')
+    // Jenkins credentials: kind=Secret text, ID=sonarcloud-token
+    // Value = the User Token generated at sonarcloud.io → My Account → Security
+    SONAR_TOKEN      = credentials('sonarcloud-token')
+    SONAR_HOST_URL   = 'https://sonarcloud.io'
   }
 
   options {
@@ -137,81 +139,90 @@ pipeline {
       }
     }
 
-    // ── 5. SonarQube Analysis ──────────────────────────────────────────────
-    // Uses the official sonar-scanner-cli Docker image — no Jenkins tool install required.
-    // withSonarQubeEnv injects SONAR_HOST_URL; SONAR_TOKEN comes from the credential binding.
-
-    // Jenkins-native scanner avoids Docker-in-Docker bind-mount issues.
-    // Requires: Manage Jenkins → Tools → SonarQube Scanner, name = "SonarScanner"
-    stage('SonarQube Analysis') {
+    // ── 5. SonarCloud Analysis ─────────────────────────────────────────────
+    // Sends analysis to https://sonarcloud.io. Org slug and project key come
+    // from sonar-project.properties (committed). Token comes from the
+    // 'sonarcloud-token' credential, exposed as SONAR_TOKEN above.
+    //
+    // Requires: Manage Jenkins → Tools → SonarQube Scanner installation
+    //   name = "SonarScanner" (the tool itself is provider-agnostic — same
+    //   binary works against SonarQube or SonarCloud).
+    //
+    // For PR analysis (optional): SonarCloud auto-detects PR context if the
+    // SonarCloud GitHub App is installed on the repo. Otherwise pass
+    // -Dsonar.pullrequest.key / .branch / .base explicitly.
+    stage('SonarCloud Analysis') {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          script {
-            def scannerHome = tool 'SonarScanner'
-            sh """
-              ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectBaseDir=${WORKSPACE}
-            """
-          }
+        script {
+          def scannerHome = tool 'SonarScanner'
+          // No withSonarQubeEnv wrapper: we pass host.url + token explicitly so
+          // the build does not depend on Jenkins-side server configuration.
+          // This avoids the failure mode where someone re-points the named
+          // server and breaks the pipeline silently.
+          sh """
+            ${scannerHome}/bin/sonar-scanner \\
+              -Dsonar.projectBaseDir=${WORKSPACE} \\
+              -Dsonar.host.url=${SONAR_HOST_URL} \\
+              -Dsonar.token=${SONAR_TOKEN}
+          """
         }
       }
     }
 
     // ── 6. Quality Gate ────────────────────────────────────────────────────
-    // Polls SonarQube directly via curl using SONAR_TOKEN (injected by
-    // withSonarQubeEnv). Avoids waitForQualityGate whose exception handling
-    // bypasses all Groovy try/catch in the Jenkins sandbox.
+    // Polls SonarCloud directly via curl. SonarCloud's REST API is
+    // compatible with SonarQube's, so the same /api/ce/task and
+    // /api/qualitygates/project_status endpoints work — only the host
+    // changes. We pass the token via Bearer header (SonarCloud's
+    // recommended auth pattern), which also works for SonarQube ≥9.9.
 
     stage('Quality Gate') {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          script {
-            def reportFile = "${WORKSPACE}/.scannerwork/report-task.txt"
-            if (!fileExists(reportFile)) {
-              echo 'report-task.txt not found — skipping quality gate check.'
-              return
-            }
+        script {
+          def reportFile = "${WORKSPACE}/.scannerwork/report-task.txt"
+          if (!fileExists(reportFile)) {
+            echo 'report-task.txt not found — skipping quality gate check.'
+            return
+          }
 
-            // Parse report-task.txt with sh grep — no Pipeline Utility Steps plugin needed
-            def taskId     = sh(returnStdout: true, script: "grep -m1 '^ceTaskId='     '${reportFile}' | cut -d= -f2-").trim()
-            def projectKey = sh(returnStdout: true, script: "grep -m1 '^projectKey='   '${reportFile}' | cut -d= -f2-").trim()
-            def serverUrl  = sh(returnStdout: true, script: "grep -m1 '^serverUrl='    '${reportFile}' | cut -d= -f2-").trim()
-            def hostUrl    = env.SONAR_HOST_URL ?: serverUrl
+          // Parse report-task.txt with sh grep — no Pipeline Utility Steps plugin needed
+          def taskId     = sh(returnStdout: true, script: "grep -m1 '^ceTaskId='     '${reportFile}' | cut -d= -f2-").trim()
+          def projectKey = sh(returnStdout: true, script: "grep -m1 '^projectKey='   '${reportFile}' | cut -d= -f2-").trim()
+          def hostUrl    = env.SONAR_HOST_URL  // 'https://sonarcloud.io', set in environment block
 
-            // Wait up to 5 minutes for the CE task to finish
-            echo "Waiting for CE task ${taskId}..."
-            def ready = false
-            for (int i = 0; i < 30 && !ready; i++) {
-              sleep 10
-              try {
-                def status = sh(returnStdout: true, script: """
-                  curl -sf -u "\$SONAR_TOKEN:" "${hostUrl}/api/ce/task?id=${taskId}" 2>/dev/null \
-                    | python3 -c "import sys,json; print(json.load(sys.stdin).get('task',{}).get('status','PENDING'))" \
-                    || echo PENDING
-                """).trim()
-                echo "  CE task status: ${status}"
-                if (status in ['SUCCESS', 'FAILED', 'CANCELLED']) { ready = true }
-              } catch (Exception ex) {
-                echo "  Poll error (attempt ${i+1}): ${ex.message}"
-              }
-            }
-
-            // Read the quality gate result
+          // Wait up to 5 minutes for the CE task to finish
+          echo "Waiting for CE task ${taskId} on ${hostUrl}..."
+          def ready = false
+          for (int i = 0; i < 30 && !ready; i++) {
+            sleep 10
             try {
-              def gateStatus = sh(returnStdout: true, script: """
-                curl -sf -u "\$SONAR_TOKEN:" "${hostUrl}/api/qualitygates/project_status?projectKey=${projectKey}" 2>/dev/null \
-                  | python3 -c "import sys,json; print(json.load(sys.stdin).get('projectStatus',{}).get('status','UNKNOWN'))" \
-                  || echo UNKNOWN
+              def status = sh(returnStdout: true, script: """
+                curl -sf -H "Authorization: Bearer \$SONAR_TOKEN" "${hostUrl}/api/ce/task?id=${taskId}" 2>/dev/null \\
+                  | python3 -c "import sys,json; print(json.load(sys.stdin).get('task',{}).get('status','PENDING'))" \\
+                  || echo PENDING
               """).trim()
-              echo "Quality Gate status: ${gateStatus}"
-              if (gateStatus == 'ERROR') {
-                currentBuild.result = 'UNSTABLE'
-                echo 'Quality Gate FAILED — build marked UNSTABLE, pipeline continues.'
-              }
+              echo "  CE task status: ${status}"
+              if (status in ['SUCCESS', 'FAILED', 'CANCELLED']) { ready = true }
             } catch (Exception ex) {
-              echo "Could not read quality gate: ${ex.message} — marking UNSTABLE, pipeline continues."
-              currentBuild.result = 'UNSTABLE'
+              echo "  Poll error (attempt ${i+1}): ${ex.message}"
             }
+          }
+
+          // Read the quality gate result
+          try {
+            def gateStatus = sh(returnStdout: true, script: """
+              curl -sf -H "Authorization: Bearer \$SONAR_TOKEN" "${hostUrl}/api/qualitygates/project_status?projectKey=${projectKey}" 2>/dev/null \\
+                | python3 -c "import sys,json; print(json.load(sys.stdin).get('projectStatus',{}).get('status','UNKNOWN'))" \\
+                || echo UNKNOWN
+            """).trim()
+            echo "Quality Gate status: ${gateStatus}"
+            if (gateStatus == 'ERROR') {
+              currentBuild.result = 'UNSTABLE'
+              echo 'Quality Gate FAILED — build marked UNSTABLE, pipeline continues.'
+            }
+          } catch (Exception ex) {
+            echo "Could not read quality gate: ${ex.message} — marking UNSTABLE, pipeline continues."
+            currentBuild.result = 'UNSTABLE'
           }
         }
       }
