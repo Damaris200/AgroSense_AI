@@ -43,6 +43,8 @@ iac/terraform/.terraform.lock.hcl
 iac/terraform/terraform.tfstate
 iac/terraform/terraform.tfstate.backup
 iac/terraform/*.tfstate*
+iac/terraform/terraform.tfvars
+iac/terraform/variables.tf.example
 
 # Ansible vault — raw file must stay local, never commit unencrypted
 iac/ansible/group_vars/agrosense_vps/vault.yml
