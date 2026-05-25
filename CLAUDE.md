@@ -171,10 +171,14 @@ Roles in order: `common` → `docker` → `k3s` → `nginx` → `agrosense`
 ### Kubernetes — direct kubectl commands
 
 ```bash
-# Deploy everything at once
+# Deploy everything (two phases — namespace first, then resources)
+kubectl apply -f iac/k8s/namespace.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Active --timeout=30s namespace/agrosense
 kubectl apply -k iac/k8s/
 
-# Deploy monitoring stack separately
+# Deploy monitoring stack separately (same two-phase pattern)
+kubectl apply -f iac/k8s/monitoring/namespace.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Active --timeout=30s namespace/monitoring
 kubectl apply -k iac/k8s/monitoring/
 
 # Check rollout status

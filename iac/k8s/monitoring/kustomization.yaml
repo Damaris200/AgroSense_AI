@@ -1,10 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Deploy monitoring stack: kubectl apply -k iac/k8s/monitoring/
+# Two-phase deploy (namespace must exist and be Active first):
+#   kubectl apply -f iac/k8s/monitoring/namespace.yaml
+#   kubectl wait --for=jsonpath='{.status.phase}'=Active --timeout=30s namespace/monitoring
+#   kubectl apply -k iac/k8s/monitoring/
+#
+# namespace.yaml is intentionally NOT listed below so namespaced resources
+# cannot be submitted before the namespace is Active.
 
 resources:
-  - namespace.yaml
   - prometheus-configmap.yaml
   - prometheus.yaml
   - grafana.yaml

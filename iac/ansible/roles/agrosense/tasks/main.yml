@@ -21,6 +21,13 @@
     | kubectl apply -f - --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: true
 
+- name: Wait for agrosense namespace to be Active
+  shell: >
+    kubectl wait --for=jsonpath='{.status.phase}'=Active
+    --timeout=30s namespace/{{ app_namespace }}
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: false
+
 - name: Create monitoring namespace
   shell: >
     kubectl create namespace {{ monitoring_namespace }}
@@ -28,6 +35,13 @@
     --kubeconfig=/etc/rancher/k3s/k3s.yaml
     | kubectl apply -f - --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: true
+
+- name: Wait for monitoring namespace to be Active
+  shell: >
+    kubectl wait --for=jsonpath='{.status.phase}'=Active
+    --timeout=30s namespace/{{ monitoring_namespace }}
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: false
 
 # Create the agrosense-secrets K8s Secret from an env file to avoid shell quoting issues.
 - name: Write agrosense-secrets env file
@@ -94,11 +108,10 @@
   no_log: true
   changed_when: true
 
-- name: Apply agrosense K8s manifests (excluding secrets.yaml)
+- name: Apply agrosense K8s manifests (namespace already created above)
   shell: |
     kubectl apply \
       --kubeconfig=/etc/rancher/k3s/k3s.yaml \
-      -f {{ k8s_manifests_dest }}/namespace.yaml \
       -f {{ k8s_manifests_dest }}/configmap.yaml \
       -f {{ k8s_manifests_dest }}/postgres/ \
       -f {{ k8s_manifests_dest }}/kafka/ \
