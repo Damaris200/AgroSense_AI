@@ -31,7 +31,7 @@ metadata:
     app: postgres
 spec:
   serviceName: postgres-headless
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: postgres
@@ -86,11 +86,11 @@ spec:
           resources:
             requests:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "100m"
               ephemeral-storage: "1Gi"
             limits:
               memory: "1Gi"
-              cpu: "500m"
+              cpu: "300m"
               ephemeral-storage: "2Gi"
       volumes:
         - name: init-scripts

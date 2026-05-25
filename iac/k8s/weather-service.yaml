@@ -6,7 +6,7 @@ metadata:
   labels:
     app: weather-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: weather-service
@@ -71,7 +71,7 @@ spec:
           resources:
             requests:
               memory: "128Mi"
-              cpu: "100m"
+              cpu: "50m"
               ephemeral-storage: "256Mi"
             limits:
               memory: "256Mi"

@@ -35,7 +35,7 @@ metadata:
   labels:
     app: grafana
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: grafana
@@ -86,7 +86,7 @@ spec:
           resources:
             requests:
               memory: "128Mi"
-              cpu: "100m"
+              cpu: "50m"
               ephemeral-storage: "1Gi"
             limits:
               memory: "256Mi"

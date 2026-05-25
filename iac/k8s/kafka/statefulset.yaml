@@ -106,11 +106,11 @@ spec:
           resources:
             requests:
               memory: "768Mi"
-              cpu: "150m"
+              cpu: "100m"
               ephemeral-storage: "512Mi"
             limits:
               memory: "1536Mi"
-              cpu: "500m"
+              cpu: "300m"
               ephemeral-storage: "2Gi"
       volumes:
         - name: kraft-config

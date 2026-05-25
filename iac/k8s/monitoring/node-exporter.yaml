@@ -35,11 +35,11 @@ spec:
           resources:
             requests:
               memory: "64Mi"
-              cpu: "50m"
+              cpu: "20m"
               ephemeral-storage: "100Mi"
             limits:
               memory: "128Mi"
-              cpu: "100m"
+              cpu: "50m"
               ephemeral-storage: "200Mi"
       volumes:
         - name: rootfs

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ai-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ai-service
@@ -76,11 +76,11 @@ spec:
           resources:
             requests:
               memory: "256Mi"
-              cpu: "200m"
+              cpu: "50m"
               ephemeral-storage: "256Mi"
             limits:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "200m"
               ephemeral-storage: "512Mi"
 ---
 apiVersion: v1

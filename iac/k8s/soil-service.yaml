@@ -6,7 +6,7 @@ metadata:
   labels:
     app: soil-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: soil-service
@@ -66,7 +66,7 @@ spec:
           resources:
             requests:
               memory: "128Mi"
-              cpu: "100m"
+              cpu: "50m"
               ephemeral-storage: "256Mi"
             limits:
               memory: "256Mi"
