@@ -43,8 +43,32 @@
     --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: false
 
+# Pre-flight: assert every secret is defined AND not a placeholder.
+# Naming each variable individually so the failure message tells you exactly
+# which one is missing or still set to "USER:PASSWORD@HOST".
+- name: Verify all vault secrets are real values (not placeholders)
+  assert:
+    that:
+      - vault_jwt_secret is defined and vault_jwt_secret | length > 0
+      - vault_openai_api_key is defined and vault_openai_api_key | length > 0 and 'REPLACE_ME' not in vault_openai_api_key
+      - vault_tomorrow_api_key is defined and vault_tomorrow_api_key | length > 0 and 'REPLACE_ME' not in vault_tomorrow_api_key
+      - vault_smtp_pass is defined and vault_smtp_pass | length > 0 and 'REPLACE_ME' not in vault_smtp_pass
+      - vault_neon_auth_database_url is defined and 'USER:PASSWORD' not in vault_neon_auth_database_url
+      - vault_neon_farm_database_url is defined and 'USER:PASSWORD' not in vault_neon_farm_database_url
+      - vault_mongodb_weather_url is defined and 'USER:PASSWORD' not in vault_mongodb_weather_url
+      - vault_mongodb_soil_url is defined and 'USER:PASSWORD' not in vault_mongodb_soil_url
+      - vault_mongodb_ai_url is defined and 'USER:PASSWORD' not in vault_mongodb_ai_url
+      - vault_mongodb_notification_url is defined and 'USER:PASSWORD' not in vault_mongodb_notification_url
+      - vault_mongodb_analytics_url is defined and 'USER:PASSWORD' not in vault_mongodb_analytics_url
+    fail_msg: >
+      One of the vault_* variables is missing, empty, or still set to a
+      placeholder. Edit group_vars/agrosense_vps/vault.yml and replace every
+      "USER:PASSWORD@HOST.neon.tech" / "USER:PASSWORD@CLUSTER.mongodb.net"
+      / "REPLACE_ME" with your real Neon + Atlas connection strings and API keys.
+
 # Create the agrosense-secrets K8s Secret from an env file.
 # Database URLs point at managed providers (Neon + MongoDB Atlas), not a local PG.
+# `no_log` is OFF here for debugging; flip back to true once Ansible is happy.
 - name: Write agrosense-secrets env file
   copy:
     dest: /tmp/agrosense-secrets.env
@@ -61,7 +85,7 @@
       AI_DATABASE_URL={{ vault_mongodb_ai_url }}
       NOTIFICATION_DATABASE_URL={{ vault_mongodb_notification_url }}
       ANALYTICS_DATABASE_URL={{ vault_mongodb_analytics_url }}
-  no_log: true
+  no_log: false
 
 - name: Create agrosense-secrets from env file
   shell: |
