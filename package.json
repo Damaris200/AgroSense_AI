@@ -13,6 +13,7 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "kafkajs": "^2.2.4",
+    "mongoose": "^9.6.2",
     "node-ssh": "^13.2.1",
     "zod": "^4.3.6"
   }

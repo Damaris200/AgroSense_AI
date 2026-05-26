@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
 }
 
 model Recommendation {
@@ -16,7 +15,7 @@ model Recommendation {
   model        String
   generatedAt  DateTime @default(now()) @map("generated_at")
 
-  @@map("recommendations")
   @@index([farmId])
   @@index([submissionId])
+  @@map("recommendations")
 }

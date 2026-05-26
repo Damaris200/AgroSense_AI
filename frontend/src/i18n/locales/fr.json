@@ -1,0 +1,128 @@
+{
+  "language": {
+    "label": "Langue",
+    "english": "Anglais",
+    "french": "Français",
+    "switchTo": "Passer en {{lang}}"
+  },
+  "brand": {
+    "name": "AgroSense AI",
+    "tagline": "Des décisions intelligentes pour chaque ferme"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "impact": "Impact",
+    "signIn": "Connexion",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord",
+    "signOut": "Déconnexion",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "switchToDark": "Passer en mode sombre",
+    "switchToLight": "Passer en mode clair",
+    "ariaHome": "Accueil AgroSense AI"
+  },
+  "hero": {
+    "badge": "Propulsé par l'IA",
+    "title": "AgroSense AI",
+    "subtitle": "Des décisions intelligentes pour chaque ferme",
+    "description": "Conseils agricoles pilotés par l'IA pour les petits exploitants, combinant signaux météo, observations sur le terrain et recommandations exploitables en quelques secondes.",
+    "ctaPrimary": "Commencer",
+    "ctaSecondary": "Connexion",
+    "ariaCtaPrimary": "Commencer avec AgroSense AI",
+    "ariaCtaSecondary": "Se connecter à AgroSense AI",
+    "stats": {
+      "decisionCycleLabel": "Cycle de décision",
+      "decisionCycleValue": "< 2 secondes",
+      "coverageLabel": "Couverture conseil",
+      "coverageValue": "Météo + sol",
+      "experienceLabel": "Expérience agriculteur",
+      "experienceValue": "Mobile d'abord"
+    },
+    "snapshot": {
+      "label": "Aperçu conseil en direct",
+      "title": "Recommandation champ nord",
+      "active": "Actif",
+      "recLabel": "Recommandation",
+      "recValue": "Irriguer dans les 24 prochaines heures.",
+      "recHint": "L'humidité du sol diminue tandis que la probabilité de pluie reste faible.",
+      "biLabel": "Diffusion bilingue",
+      "biValue": "Alertes en anglais et en français",
+      "biHint": "Les agriculteurs reçoivent des conseils localisés sur smartphones et appareils à faible bande passante.",
+      "onboardingLabel": "Inscription du champ",
+      "onboardingValue": "Enregistrer la ferme, les cultures et la localisation",
+      "guidanceLabel": "Conseils exploitables",
+      "guidanceValue": "Des conseils conçus pour les conditions réelles sur le terrain"
+    }
+  },
+  "auth": {
+    "login": {
+      "formTitle": "Connectez-vous à AgroSense AI",
+      "formDescription": "Accédez à votre tableau de bord, vos dernières recommandations et vos alertes en temps réel.",
+      "panelTitle": "L'intelligence agricole professionnelle, quand vous en avez besoin",
+      "panelDescription": "Authentification adossée à l'API avec sessions persistantes et routes protégées.",
+      "highlight1": "Livraison de conseils en temps réel avec authentification API.",
+      "highlight2": "Interface mobile-first conçue pour les agriculteurs et évaluateurs.",
+      "highlight3": "Sessions persistantes : les actualisations ne déconnectent pas les utilisateurs.",
+      "highlight4": "Expérience bilingue pour les parcours anglais et français.",
+      "needAccount": "Besoin d'un compte ?",
+      "createOne": "Créez-en un ici",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "vous@ferme.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "or": "ou",
+      "passkey": "Continuer avec une clé d'accès",
+      "verifyingPasskey": "Vérification de la clé d'accès...",
+      "passkeyHint": "La clé d'accès utilise la biométrie de votre appareil (empreinte/visage) si disponible.",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe"
+    },
+    "register": {
+      "formTitle": "Créez votre compte AgroSense",
+      "formDescription": "Commencez avec un parcours d'inscription soigné et validé, connecté directement à votre backend.",
+      "panelTitle": "Lancez un flux agricole plus intelligent dès le premier écran",
+      "panelDescription": "Création de compte adossée à l'API avec connexion persistante et routes protégées.",
+      "highlight1": "Inscription validée avec react-hook-form et Zod.",
+      "highlight2": "Retours en ligne pour un remplissage plus propre et plus sûr.",
+      "highlight3": "Création de compte adossée à l'API avec connexion persistante.",
+      "highlight4": "Prise en charge linguistique pour les parcours anglais et français.",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signInInstead": "Se connecter à la place",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Anya Okoro",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "vous@ferme.com",
+      "phone": "Numéro de téléphone",
+      "phonePlaceholder": "+2348012345678",
+      "language": "Langue",
+      "english": "Anglais",
+      "french": "Français",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Créez un mot de passe fort",
+      "submit": "Créer le compte",
+      "submitting": "Création du compte..."
+    }
+  },
+  "dashboard": {
+    "sectionFarmer": "Agriculteur",
+    "sectionAdmin": "Administrateur",
+    "items": {
+      "overview": "Vue d'ensemble",
+      "myFarms": "Mes fermes",
+      "weather": "Météo",
+      "soilAnalysis": "Analyse du sol",
+      "recommendations": "Recommandations",
+      "notifications": "Notifications",
+      "profile": "Profil",
+      "adminOverview": "Vue d'ensemble admin",
+      "users": "Utilisateurs",
+      "adminNotifications": "Notifications"
+    },
+    "signOut": "Déconnexion",
+    "closeSidebar": "Fermer la barre latérale"
+  }
+}

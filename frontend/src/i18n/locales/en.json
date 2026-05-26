@@ -1,0 +1,128 @@
+{
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "french": "French",
+    "switchTo": "Switch to {{lang}}"
+  },
+  "brand": {
+    "name": "AgroSense AI",
+    "tagline": "Smart decisions for every farm"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "impact": "Impact",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode",
+    "ariaHome": "AgroSense AI home"
+  },
+  "hero": {
+    "badge": "Powered by AI",
+    "title": "AgroSense AI",
+    "subtitle": "Smart Decisions for Every Farm",
+    "description": "Event-driven AI advisory for small-scale farmers, combining weather signals, field observations, and actionable crop guidance in seconds.",
+    "ctaPrimary": "Get Started",
+    "ctaSecondary": "Sign In",
+    "ariaCtaPrimary": "Get started with AgroSense AI",
+    "ariaCtaSecondary": "Sign in to AgroSense AI",
+    "stats": {
+      "decisionCycleLabel": "Decision cycle",
+      "decisionCycleValue": "< 2 seconds",
+      "coverageLabel": "Advisory coverage",
+      "coverageValue": "Weather + soil",
+      "experienceLabel": "Farmer experience",
+      "experienceValue": "Mobile first"
+    },
+    "snapshot": {
+      "label": "Live advisory snapshot",
+      "title": "North field recommendation",
+      "active": "Active",
+      "recLabel": "Recommendation",
+      "recValue": "Irrigate within the next 24 hours.",
+      "recHint": "Soil moisture is trending down while rainfall probability remains low.",
+      "biLabel": "Bilingual delivery",
+      "biValue": "English and French alerts",
+      "biHint": "Farmers receive localized advice on both smartphones and low-bandwidth devices.",
+      "onboardingLabel": "Field onboarding",
+      "onboardingValue": "Register farm, crops, and location",
+      "guidanceLabel": "Actionable guidance",
+      "guidanceValue": "Advice designed for real field conditions"
+    }
+  },
+  "auth": {
+    "login": {
+      "formTitle": "Sign in to AgroSense AI",
+      "formDescription": "Access your farm dashboard, latest recommendations, and real-time advisory updates.",
+      "panelTitle": "Professional farm intelligence, ready when you are",
+      "panelDescription": "API-backed authentication with persistent sessions and protected routes.",
+      "highlight1": "Real-time advisory delivery with API-backed authentication.",
+      "highlight2": "Mobile-first UI designed for farmers and evaluators.",
+      "highlight3": "Persistent sessions so refreshes do not log users out.",
+      "highlight4": "Bilingual experience for English and French workflows.",
+      "needAccount": "Need an account?",
+      "createOne": "Create one here",
+      "email": "Email address",
+      "emailPlaceholder": "you@farm.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "or": "or",
+      "passkey": "Continue with Passkey",
+      "verifyingPasskey": "Verifying passkey...",
+      "passkeyHint": "Passkey uses your device biometric (fingerprint/face) where available.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "register": {
+      "formTitle": "Create your AgroSense account",
+      "formDescription": "Start with a polished, fully validated onboarding flow connected directly to your backend.",
+      "panelTitle": "Launch a smarter farming workflow from the first screen",
+      "panelDescription": "API-backed account creation with persistent login and protected routes.",
+      "highlight1": "Validated onboarding with react-hook-form and Zod.",
+      "highlight2": "Inline feedback for cleaner, more confident form completion.",
+      "highlight3": "API-backed account creation with persistent login.",
+      "highlight4": "Language support for English and French user journeys.",
+      "haveAccount": "Already have an account?",
+      "signInInstead": "Sign in instead",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Anya Okoro",
+      "email": "Email address",
+      "emailPlaceholder": "you@farm.com",
+      "phone": "Phone number",
+      "phonePlaceholder": "+2348012345678",
+      "language": "Language",
+      "english": "English",
+      "french": "French",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "submit": "Create Account",
+      "submitting": "Creating account..."
+    }
+  },
+  "dashboard": {
+    "sectionFarmer": "Farmer",
+    "sectionAdmin": "Admin",
+    "items": {
+      "overview": "Overview",
+      "myFarms": "My Farms",
+      "weather": "Weather",
+      "soilAnalysis": "Soil Analysis",
+      "recommendations": "Recommendations",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "adminOverview": "Admin Overview",
+      "users": "Users",
+      "adminNotifications": "Notifications"
+    },
+    "signOut": "Sign Out",
+    "closeSidebar": "Close sidebar"
+  }
+}

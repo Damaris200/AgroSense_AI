@@ -4,19 +4,18 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
 }
 
 model SoilData {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  farmId      String   @map("farm_id")
-  ph          Float
-  moisture    Float
-  nitrogen    Float
-  phosphorus  Float
-  potassium   Float
-  analyzedAt  DateTime @default(now()) @map("analyzed_at")
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  farmId     String   @map("farm_id")
+  ph         Float
+  moisture   Float
+  nitrogen   Float
+  phosphorus Float
+  potassium  Float
+  analyzedAt DateTime @default(now()) @map("analyzed_at")
 
-  @@map("soil_data")
   @@index([farmId])
+  @@map("soil_data")
 }

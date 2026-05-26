@@ -1,9 +1,11 @@
 import { ArrowRight, BadgeCheck, Bot, Languages, Sprout, Wheat } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { useTheme } from '@/context/ThemeContext';
 
 export function HeroSection() {
+  const { t } = useTranslation();
   const { isDark } = useTheme();
 
   return (
@@ -49,50 +51,49 @@ export function HeroSection() {
         <div className="max-w-3xl space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100 backdrop-blur-sm">
             <Bot className="h-3.5 w-3.5" />
-            Powered by Gemini AI
+            {t('hero.badge')}
           </div>
 
           <div className="space-y-5">
             <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl">
-              {'AgroSense AI'}
-              <span className="block text-emerald-200">Smart Decisions for Every Farm</span>
+              {t('hero.title')}
+              <span className="block text-emerald-200">{t('hero.subtitle')}</span>
             </h1>
             <p className="max-w-2xl text-base leading-8 text-emerald-50/85 sm:text-lg">
-              Event-driven AI advisory for small-scale farmers, combining weather signals, field observations,
-              and actionable crop guidance in seconds.
+              {t('hero.description')}
             </p>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link
               to="/register"
-              aria-label="Get started with AgroSense AI"
+              aria-label={t('hero.ariaCtaPrimary')}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-base font-semibold text-emerald-900 shadow-lg transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-900"
             >
-              Get Started
+              {t('hero.ctaPrimary')}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/login"
-              aria-label="Sign in to AgroSense AI"
+              aria-label={t('hero.ariaCtaSecondary')}
               className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-900"
             >
-              Sign In
+              {t('hero.ctaSecondary')}
             </Link>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-emerald-100/80">Decision cycle</p>
-              <p className="mt-2 font-display text-2xl font-bold text-white">&lt; 2 seconds</p>
+              <p className="text-sm font-medium text-emerald-100/80">{t('hero.stats.decisionCycleLabel')}</p>
+              <p className="mt-2 font-display text-2xl font-bold text-white">{t('hero.stats.decisionCycleValue')}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-emerald-100/80">Advisory coverage</p>
-              <p className="mt-2 font-display text-2xl font-bold text-white">Weather + soil</p>
+              <p className="text-sm font-medium text-emerald-100/80">{t('hero.stats.coverageLabel')}</p>
+              <p className="mt-2 font-display text-2xl font-bold text-white">{t('hero.stats.coverageValue')}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-emerald-100/80">Farmer experience</p>
-              <p className="mt-2 font-display text-2xl font-bold text-white">Mobile first</p>
+              <p className="text-sm font-medium text-emerald-100/80">{t('hero.stats.experienceLabel')}</p>
+              <p className="mt-2 font-display text-2xl font-bold text-white">{t('hero.stats.experienceValue')}</p>
             </div>
           </div>
         </div>
@@ -106,11 +107,11 @@ export function HeroSection() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-emerald-200/85">Live advisory snapshot</p>
-                  <h2 className="mt-3 font-display text-2xl font-bold text-white">North field recommendation</h2>
+                  <p className="text-sm uppercase tracking-[0.24em] text-emerald-200/85">{t('hero.snapshot.label')}</p>
+                  <h2 className="mt-3 font-display text-2xl font-bold text-white">{t('hero.snapshot.title')}</h2>
                 </div>
                 <div className="rounded-full bg-emerald-300/20 px-3 py-1 text-xs font-semibold text-emerald-100">
-                  Active
+                  {t('hero.snapshot.active')}
                 </div>
               </div>
 
@@ -118,19 +119,19 @@ export function HeroSection() {
                 <div className={`rounded-2xl p-4 ${isDark ? 'bg-white/5' : 'bg-zinc-950/20'}`}>
                   <div className="flex items-center gap-3">
                     <BadgeCheck className="h-5 w-5 text-lime-200" />
-                    <p className="text-sm font-medium text-emerald-50">Recommendation</p>
+                    <p className="text-sm font-medium text-emerald-50">{t('hero.snapshot.recLabel')}</p>
                   </div>
-                  <p className="mt-3 text-lg font-semibold text-white">Irrigate within the next 24 hours.</p>
-                  <p className="mt-2 text-sm text-emerald-100/75">Soil moisture is trending down while rainfall probability remains low.</p>
+                  <p className="mt-3 text-lg font-semibold text-white">{t('hero.snapshot.recValue')}</p>
+                  <p className="mt-2 text-sm text-emerald-100/75">{t('hero.snapshot.recHint')}</p>
                 </div>
 
                 <div className={`rounded-2xl p-4 ${isDark ? 'bg-white/5' : 'bg-zinc-950/20'}`}>
                   <div className="flex items-center gap-3">
                     <Languages className="h-5 w-5 text-lime-200" />
-                    <p className="text-sm font-medium text-emerald-50">Bilingual delivery</p>
+                    <p className="text-sm font-medium text-emerald-50">{t('hero.snapshot.biLabel')}</p>
                   </div>
-                  <p className="mt-3 text-lg font-semibold text-white">English and French alerts</p>
-                  <p className="mt-2 text-sm text-emerald-100/75">Farmers receive localized advice on both smartphones and low-bandwidth devices.</p>
+                  <p className="mt-3 text-lg font-semibold text-white">{t('hero.snapshot.biValue')}</p>
+                  <p className="mt-2 text-sm text-emerald-100/75">{t('hero.snapshot.biHint')}</p>
                 </div>
               </div>
             </div>
@@ -146,8 +147,8 @@ export function HeroSection() {
                     <Sprout className="h-5 w-5 text-emerald-100" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-emerald-100/80">Field onboarding</p>
-                    <p className="text-lg font-semibold text-white">Register farm, crops, and location</p>
+                    <p className="text-sm font-medium text-emerald-100/80">{t('hero.snapshot.onboardingLabel')}</p>
+                    <p className="text-lg font-semibold text-white">{t('hero.snapshot.onboardingValue')}</p>
                   </div>
                 </div>
               </div>
@@ -161,8 +162,8 @@ export function HeroSection() {
                     <Wheat className="h-5 w-5 text-emerald-100" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-emerald-100/80">Actionable guidance</p>
-                    <p className="text-lg font-semibold text-white">Advice designed for real field conditions</p>
+                    <p className="text-sm font-medium text-emerald-100/80">{t('hero.snapshot.guidanceLabel')}</p>
+                    <p className="text-lg font-semibold text-white">{t('hero.snapshot.guidanceValue')}</p>
                   </div>
                 </div>
               </div>

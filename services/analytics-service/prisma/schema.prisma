@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
 }
 
 model EventLog {
@@ -14,7 +13,7 @@ model EventLog {
   payloadJson  Json     @map("payload_json")
   loggedAt     DateTime @default(now()) @map("logged_at")
 
-  @@map("event_logs")
   @@index([submissionId])
   @@index([eventType])
+  @@map("event_logs")
 }

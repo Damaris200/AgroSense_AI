@@ -1,4 +1,5 @@
 import { AlertCircle, Eye, EyeOff, Fingerprint, LoaderCircle, Mail, LockKeyhole } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 
 import { AuthSplitLayout } from '@/components/layout/AuthSplitLayout';
@@ -6,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/hooks/useLoginForm';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const {
     form,
@@ -24,21 +26,21 @@ export function LoginPage() {
 
   return (
     <AuthSplitLayout
-      formTitle="Sign in to AgroSense AI"
-      formDescription="Access your farm dashboard, latest recommendations, and real-time advisory updates."
-      panelTitle="Professional farm intelligence, ready when you are"
-      panelDescription="API-backed authentication with persistent sessions and protected routes."
+      formTitle={t('auth.login.formTitle')}
+      formDescription={t('auth.login.formDescription')}
+      panelTitle={t('auth.login.panelTitle')}
+      panelDescription={t('auth.login.panelDescription')}
       panelHighlights={[
-        'Real-time advisory delivery with API-backed authentication.',
-        'Mobile-first UI designed for farmers and evaluators.',
-        'Persistent sessions so refreshes do not log users out.',
-        'Bilingual experience for English and French workflows.',
+        t('auth.login.highlight1'),
+        t('auth.login.highlight2'),
+        t('auth.login.highlight3'),
+        t('auth.login.highlight4'),
       ]}
       footerLink={
         <p>
-          Need an account?{' '}
+          {t('auth.login.needAccount')}{' '}
           <Link to="/register" className="font-semibold text-emerald-700 transition hover:text-emerald-800">
-            Create one here
+            {t('auth.login.createOne')}
           </Link>
           .
         </p>
@@ -58,7 +60,7 @@ export function LoginPage() {
           {/* Email */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-semibold text-zinc-900">
-              Email address
+              {t('auth.login.email')}
             </label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -68,7 +70,7 @@ export function LoginPage() {
                 autoComplete="email"
                 {...form.register('email')}
                 className="w-full rounded-2xl border border-zinc-200 bg-white py-3.5 pl-11 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="you@farm.com"
+                placeholder={t('auth.login.emailPlaceholder')}
               />
             </div>
             {errors.email && <p className="text-sm text-rose-600">{errors.email.message}</p>}
@@ -77,7 +79,7 @@ export function LoginPage() {
           {/* Password */}
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-semibold text-zinc-900">
-              Password
+              {t('auth.login.password')}
             </label>
             <div className="relative">
               <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -87,12 +89,12 @@ export function LoginPage() {
                 autoComplete="current-password"
                 {...form.register('password')}
                 className="w-full rounded-2xl border border-zinc-200 bg-white py-3.5 pl-11 pr-12 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="Enter your password"
+                placeholder={t('auth.login.passwordPlaceholder')}
               />
               <button
                 type="button"
                 onClick={togglePassword}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 transition hover:text-zinc-700"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -109,16 +111,16 @@ export function LoginPage() {
             {isSubmitting ? (
               <>
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                Signing in...
+                {t('auth.login.submitting')}
               </>
             ) : (
-              'Sign In'
+              t('auth.login.submit')
             )}
           </button>
 
           <div className="flex items-center gap-3 pt-1">
             <div className="h-px flex-1 bg-zinc-200" />
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">or</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-zinc-400">{t('auth.login.or')}</span>
             <div className="h-px flex-1 bg-zinc-200" />
           </div>
 
@@ -131,18 +133,18 @@ export function LoginPage() {
             {isPasskeySubmitting ? (
               <>
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                Verifying passkey...
+                {t('auth.login.verifyingPasskey')}
               </>
             ) : (
               <>
                 <Fingerprint className="h-4 w-4" />
-                Continue with Passkey
+                {t('auth.login.passkey')}
               </>
             )}
           </button>
 
           <p className="text-center text-xs text-zinc-500">
-            Passkey uses your device biometric (fingerprint/face) where available.
+            {t('auth.login.passkeyHint')}
           </p>
         </form>
       </div>
