@@ -80,6 +80,11 @@ spec:
               value: "/var/lib/kafka/data"
             - name: KAFKA_LOG_RETENTION_HOURS
               value: "168"
+            # Shrink JVM heap so the broker fits in a 2Gi container limit
+            # alongside the rest of k3s on a 4vCPU/8GB DO Droplet. Without
+            # this, cp-kafka defaults to -Xmx1G -Xms1G and OOMs on startup.
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx768m -Xms256m"
             - name: CLUSTER_ID
               valueFrom:
                 secretKeyRef:
@@ -105,12 +110,12 @@ spec:
             failureThreshold: 6
           resources:
             requests:
-              memory: "768Mi"
-              cpu: "100m"
+              memory: "1Gi"
+              cpu: "200m"
               ephemeral-storage: "512Mi"
             limits:
-              memory: "1536Mi"
-              cpu: "300m"
+              memory: "2Gi"
+              cpu: "500m"
               ephemeral-storage: "2Gi"
       volumes:
         - name: kraft-config
