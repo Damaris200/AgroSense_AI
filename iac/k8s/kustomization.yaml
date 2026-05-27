@@ -18,7 +18,11 @@ namespace: agrosense
 
 resources:
   - configmap.yaml
-  - secrets.yaml
+  # secrets.yaml is NOT listed here. The agrosense-secrets K8s Secret is
+  # created imperatively by Ansible from vault.yml (see
+  # iac/ansible/roles/agrosense/tasks/main.yml). Ansible's rsync excludes
+  # secrets.yaml from /opt/agrosense/k8s/ on the VPS, so referencing it
+  # here would make `kubectl apply -k` fail at deploy time.
 
   # Infrastructure
   # Postgres + MongoDB are managed externally (Neon + MongoDB Atlas).
