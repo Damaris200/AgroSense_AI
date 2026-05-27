@@ -18,6 +18,11 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       automountServiceAccountToken: false
+      # Disable Kubernetes service-env-injection. Without this, kubelet injects
+      # KAFKA_PORT=tcp://<cluster-ip>:9092 (from the kafka Service) which
+      # Confluent's configure script mistakes for the legacy `port` setting,
+      # prints "port is deprecated", and silently exits — Kafka never launches.
+      enableServiceLinks: false
       initContainers:
         - name: kraft-format
           image: confluentinc/cp-kafka:7.6.0
