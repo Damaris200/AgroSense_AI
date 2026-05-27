@@ -11,8 +11,11 @@ RUN rm -rf /root/.bun/install/cache \
 # Copy source
 COPY . .
 
-# Generate Prisma client
-RUN bunx prisma generate
+# Self-heal schema (Prisma 7 IDE extension keeps stripping `url`; Prisma 6 needs it)
+# and generate the client.
+RUN grep -q 'env("DATABASE_URL")' prisma/schema.prisma \
+      || sed -i '/^\s*provider\s*=/a\  url      = env("DATABASE_URL")' prisma/schema.prisma \
+    && bunx prisma generate
 
 # Run migrations then start (entrypoint handles both)
 EXPOSE 4001

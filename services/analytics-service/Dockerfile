@@ -7,7 +7,11 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN bunx prisma generate
+# Self-heal schema (Prisma 7 IDE extension keeps stripping `url`; Prisma 6 needs it)
+# and generate the client.
+RUN grep -q 'env("DATABASE_URL")' prisma/schema.prisma \
+      || sed -i '/^\s*provider\s*=/a\  url      = env("DATABASE_URL")' prisma/schema.prisma \
+    && bunx prisma generate
 
 EXPOSE 4007
 CMD ["bun", "run", "start:docker"]
