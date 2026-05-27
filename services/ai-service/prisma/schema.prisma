@@ -4,7 +4,9 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  // Connection URLs are no longer supported in schema files.
+  // Move connection URLs to prisma.config.ts and pass adapter or accelerateUrl
+  // to the PrismaClient constructor. See https://pris.ly/d/config-datasource
 }
 
 model Recommendation {
