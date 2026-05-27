@@ -49,16 +49,13 @@ spec:
               value: "orchestrator-service"
             - name: KAFKA_GROUP_ID
               value: "orchestrator-service-group"
-          livenessProbe:
-            tcpSocket:
-              port: 4005
-            initialDelaySeconds: 30
-            periodSeconds: 15
-          readinessProbe:
-            tcpSocket:
-              port: 4005
-            initialDelaySeconds: 15
-            periodSeconds: 10
+          # No HTTP liveness/readiness probes — the orchestrator is a pure Kafka
+          # consumer with no HTTP server. The "starting on port 4005" log line is
+          # misleading; the code never actually calls listen(4005). If the bun
+          # process dies, the container dies and Kubernetes restarts it — that
+          # is sufficient liveness signal for a single-replica consumer.
+          # If you ever add an HTTP /health endpoint to orchestrator-service,
+          # re-add probes here pointing to that path.
           resources:
             requests:
               memory: "128Mi"
