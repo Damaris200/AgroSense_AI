@@ -14,5 +14,6 @@ resources:
   - prometheus.yaml
   - grafana.yaml
   - node-exporter.yaml
+  - ingress.yaml
 
 namespace: monitoring
