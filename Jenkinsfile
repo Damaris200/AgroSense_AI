@@ -163,7 +163,7 @@ pipeline {
         stage('frontend') {
           steps {
             dir('frontend') {
-              sh 'bun run test:coverage'
+              sh 'node ./node_modules/vitest/vitest.mjs run --coverage'
             }
           }
         }
