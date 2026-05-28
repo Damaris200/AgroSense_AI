@@ -184,19 +184,25 @@ pipeline {
     // -Dsonar.pullrequest.key / .branch / .base explicitly.
     stage('SonarCloud Analysis') {
       steps {
-        script {
-          def scannerHome = tool 'SonarScanner'
-          // No withSonarQubeEnv wrapper: we pass host.url + token explicitly so
-          // the build does not depend on Jenkins-side server configuration.
-          // This avoids the failure mode where someone re-points the named
-          // server and breaks the pipeline silently.
-          sh """
-            ${scannerHome}/bin/sonar-scanner \\
-              -Dsonar.projectBaseDir=${WORKSPACE} \\
-              -Dsonar.host.url=${SONAR_HOST_URL} \\
-              -Dsonar.token=${SONAR_TOKEN}
-          """
-        }
+        // Download and run the scanner CLI inline. Avoids depending on a
+        // Jenkins-side "SonarScanner" tool installation (which is lost
+        // whenever the Jenkins home volume is wiped) and avoids docker-in-
+        // docker bind-mount pathing issues with sonar-scanner-cli image.
+        sh '''
+          set -e
+          SCANNER_VERSION=6.2.1.4610
+          SCANNER_DIR="$WORKSPACE/.sonar-scanner/sonar-scanner-${SCANNER_VERSION}"
+          if [ ! -x "$SCANNER_DIR/bin/sonar-scanner" ]; then
+            mkdir -p "$WORKSPACE/.sonar-scanner"
+            curl -sSLo /tmp/scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}.zip"
+            unzip -q -o -d "$WORKSPACE/.sonar-scanner" /tmp/scanner.zip
+            rm /tmp/scanner.zip
+          fi
+          "$SCANNER_DIR/bin/sonar-scanner" \
+            -Dsonar.projectBaseDir="$WORKSPACE" \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.token="$SONAR_TOKEN"
+        '''
       }
     }
 
