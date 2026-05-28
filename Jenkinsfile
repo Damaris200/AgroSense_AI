@@ -42,9 +42,12 @@ pipeline {
     IMG_FRONTEND     = 'damarisateh/agrosense-frontend'
 
     // ── Shared shell commands ──────────────────────────────────────────────
-    BUN_INSTALL      = 'bun install --frozen-lockfile'
-    BUN_TYPECHECK    = 'bun run typecheck'
-    BUN_TEST         = 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+    // NOTE: do NOT prefix these with BUN_. The name BUN_INSTALL is reserved
+    // by Bun itself (it treats the value as the install path) and exporting
+    // it through the Jenkins env corrupts the bun package cache location.
+    INSTALL_CMD      = 'bun install --frozen-lockfile'
+    TYPECHECK_CMD    = 'bun run typecheck'
+    TEST_CMD         = 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
 
     // Stub DATABASE_URLs used only by `prisma generate` at build time — Prisma
     // requires the env var to be set but does not connect to it. Real URLs
@@ -74,17 +77,17 @@ pipeline {
     stage('Install Dependencies') {
       parallel {
         // Prisma services: install then generate the Prisma client so tsc can find the types
-        stage('auth-service')          { steps { dir("${SVC_AUTH}")         { sh "${BUN_INSTALL} && DATABASE_URL=${PG_STUB_URL} bun run prisma:generate" } } }
-        stage('farm-service')          { steps { dir("${SVC_FARM}")         { sh "${BUN_INSTALL} && DATABASE_URL=${PG_STUB_URL} bun run prisma:generate" } } }
-        stage('weather-service')       { steps { dir("${SVC_WEATHER}")      { sh "${BUN_INSTALL} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
-        stage('soil-service')          { steps { dir("${SVC_SOIL}")         { sh "${BUN_INSTALL} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
-        stage('ai-service')            { steps { dir("${SVC_AI}")           { sh "${BUN_INSTALL} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
-        stage('notification-service')  { steps { dir("${SVC_NOTIF}")        { sh "${BUN_INSTALL} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
-        stage('analytics-service')     { steps { dir("${SVC_ANALYTICS}")    { sh "${BUN_INSTALL} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
+        stage('auth-service')          { steps { dir("${SVC_AUTH}")         { sh "${INSTALL_CMD} && DATABASE_URL=${PG_STUB_URL} bun run prisma:generate" } } }
+        stage('farm-service')          { steps { dir("${SVC_FARM}")         { sh "${INSTALL_CMD} && DATABASE_URL=${PG_STUB_URL} bun run prisma:generate" } } }
+        stage('weather-service')       { steps { dir("${SVC_WEATHER}")      { sh "${INSTALL_CMD} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
+        stage('soil-service')          { steps { dir("${SVC_SOIL}")         { sh "${INSTALL_CMD} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
+        stage('ai-service')            { steps { dir("${SVC_AI}")           { sh "${INSTALL_CMD} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
+        stage('notification-service')  { steps { dir("${SVC_NOTIF}")        { sh "${INSTALL_CMD} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
+        stage('analytics-service')     { steps { dir("${SVC_ANALYTICS}")    { sh "${INSTALL_CMD} && DATABASE_URL=${MONGO_STUB_URL} bun run prisma:generate" } } }
         // Non-Prisma services: install only
-        stage('api-gateway')           { steps { dir("${SVC_GATEWAY}")      { sh BUN_INSTALL } } }
-        stage('orchestrator-service')  { steps { dir("${SVC_ORCH}")         { sh BUN_INSTALL } } }
-        stage('frontend')              { steps { dir("${SVC_FRONTEND}")     { sh BUN_INSTALL } } }
+        stage('api-gateway')           { steps { dir("${SVC_GATEWAY}")      { sh INSTALL_CMD } } }
+        stage('orchestrator-service')  { steps { dir("${SVC_ORCH}")         { sh INSTALL_CMD } } }
+        stage('frontend')              { steps { dir("${SVC_FRONTEND}")     { sh INSTALL_CMD } } }
       }
     }
 
@@ -92,15 +95,15 @@ pipeline {
 
     stage('Typecheck') {
       parallel {
-        stage('auth-service')         { steps { dir("${SVC_AUTH}")        { sh BUN_TYPECHECK } } }
-        stage('api-gateway')          { steps { dir("${SVC_GATEWAY}")     { sh BUN_TYPECHECK } } }
-        stage('farm-service')         { steps { dir("${SVC_FARM}")        { sh BUN_TYPECHECK } } }
-        stage('weather-service')      { steps { dir("${SVC_WEATHER}")     { sh BUN_TYPECHECK } } }
-        stage('soil-service')         { steps { dir("${SVC_SOIL}")        { sh BUN_TYPECHECK } } }
-        stage('orchestrator-service') { steps { dir("${SVC_ORCH}")        { sh BUN_TYPECHECK } } }
-        stage('ai-service')           { steps { dir("${SVC_AI}")          { sh BUN_TYPECHECK } } }
-        stage('notification-service') { steps { dir("${SVC_NOTIF}")       { sh BUN_TYPECHECK } } }
-        stage('analytics-service')    { steps { dir("${SVC_ANALYTICS}")   { sh BUN_TYPECHECK } } }
+        stage('auth-service')         { steps { dir("${SVC_AUTH}")        { sh TYPECHECK_CMD } } }
+        stage('api-gateway')          { steps { dir("${SVC_GATEWAY}")     { sh TYPECHECK_CMD } } }
+        stage('farm-service')         { steps { dir("${SVC_FARM}")        { sh TYPECHECK_CMD } } }
+        stage('weather-service')      { steps { dir("${SVC_WEATHER}")     { sh TYPECHECK_CMD } } }
+        stage('soil-service')         { steps { dir("${SVC_SOIL}")        { sh TYPECHECK_CMD } } }
+        stage('orchestrator-service') { steps { dir("${SVC_ORCH}")        { sh TYPECHECK_CMD } } }
+        stage('ai-service')           { steps { dir("${SVC_AI}")          { sh TYPECHECK_CMD } } }
+        stage('notification-service') { steps { dir("${SVC_NOTIF}")       { sh TYPECHECK_CMD } } }
+        stage('analytics-service')    { steps { dir("${SVC_ANALYTICS}")   { sh TYPECHECK_CMD } } }
         // vite build performs type-checking for the frontend
         stage('frontend')             { steps { dir("${SVC_FRONTEND}")    { sh 'bun run build' } } }
       }
@@ -112,31 +115,31 @@ pipeline {
     stage('Test') {
       parallel {
         stage('analytics-service') {
-          steps { dir("${SVC_ANALYTICS}") { sh BUN_TEST } }
+          steps { dir("${SVC_ANALYTICS}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_ANALYTICS}/junit.xml" } }
         }
         stage('auth-service') {
-          steps { dir("${SVC_AUTH}") { sh BUN_TEST } }
+          steps { dir("${SVC_AUTH}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_AUTH}/junit.xml" } }
         }
         stage('weather-service') {
-          steps { dir("${SVC_WEATHER}") { sh BUN_TEST } }
+          steps { dir("${SVC_WEATHER}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_WEATHER}/junit.xml" } }
         }
         stage('soil-service') {
-          steps { dir("${SVC_SOIL}") { sh BUN_TEST } }
+          steps { dir("${SVC_SOIL}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_SOIL}/junit.xml" } }
         }
         stage('notification-service') {
-          steps { dir("${SVC_NOTIF}") { sh BUN_TEST } }
+          steps { dir("${SVC_NOTIF}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_NOTIF}/junit.xml" } }
         }
         stage('api-gateway') {
-          steps { dir("${SVC_GATEWAY}") { sh BUN_TEST } }
+          steps { dir("${SVC_GATEWAY}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_GATEWAY}/junit.xml" } }
         }
         stage('orchestrator-service') {
-          steps { dir("${SVC_ORCH}") { sh BUN_TEST } }
+          steps { dir("${SVC_ORCH}") { sh TEST_CMD } }
           post  { always { junit allowEmptyResults: true, testResults: "${SVC_ORCH}/junit.xml" } }
         }
         stage('frontend') {
