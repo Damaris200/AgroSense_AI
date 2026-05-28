@@ -3,7 +3,7 @@ FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
-# Install system deps + Docker CLI + bun + kubectl in a single layer
+# Install system deps + Docker CLI + kubectl in a single layer
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends \
@@ -16,12 +16,16 @@ RUN apt-get update \
     https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
     > /etc/apt/sources.list.d/docker.list \
     && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli \
-    && curl -fsSL https://bun.sh/install | bash \
-    && ln -sf /root/.bun/bin/bun /usr/local/bin/bun \
-    && ln -sf /root/.bun/bin/bunx /usr/local/bin/bunx \
     && curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
     && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install bun into a world-accessible location so the jenkins user can run it
+RUN BUN_INSTALL=/usr/local curl -fsSL https://bun.sh/install | bash \
+    && chmod +x /usr/local/bin/bun /usr/local/bin/bunx
+
+# Add jenkins user to the docker group so it can access /var/run/docker.sock
+RUN groupadd -f docker && usermod -aG docker jenkins
 
 # Pre-install Jenkins plugins
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
