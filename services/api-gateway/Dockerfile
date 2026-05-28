@@ -4,7 +4,7 @@ ENV BUN_INSTALL_CACHE_DIR=/tmp/bun-cache
 
 # Install dependencies (layer-cached separately from source)
 COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --ignore-scripts --production
 
 # Copy source
 COPY src ./src

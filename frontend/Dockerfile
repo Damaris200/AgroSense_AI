@@ -7,7 +7,7 @@ ARG VITE_API_BASE_URL=http://localhost:4000
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY . .
 RUN bun run build
