@@ -1,5 +1,5 @@
 # Use the slim LTS image to reduce surface area for vulnerabilities
-FROM jenkins/jenkins:lts-jdk21-slim
+FROM jenkins/jenkins:lts-jdk17
 
 USER root
 
