@@ -72,6 +72,19 @@ pipeline {
       }
     }
 
+    // ── 1b. Self-heal workspace ────────────────────────────────────────────
+    // Earlier builds accidentally exported BUN_INSTALL (a reserved bun env
+    // var) with the value 'bun install --frozen-lockfile', which caused bun
+    // to create a cache directory of that literal name inside each service
+    // folder. Those stray directories contain *.test.ts files from packages
+    // like zod, which `bun test` then discovers and runs. This step deletes
+    // them once so the bug self-corrects on the next build.
+    stage('Self-heal workspace') {
+      steps {
+        sh 'find "$WORKSPACE" -maxdepth 4 -type d -name "bun install --frozen-lockfile" -prune -exec rm -rf {} +'
+      }
+    }
+
     // ── 2. Install dependencies (all services in parallel) ─────────────────
 
     stage('Install Dependencies') {
