@@ -39,13 +39,13 @@ pipeline {
     stage('Install Dependencies') {
       parallel {
         // Prisma services: install then generate the Prisma client so tsc can find the types
-        stage('auth-service')          { steps { dir('services/auth-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('farm-service')          { steps { dir('services/farm-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('weather-service')       { steps { dir('services/weather-service')       { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('soil-service')          { steps { dir('services/soil-service')          { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('ai-service')            { steps { dir('services/ai-service')            { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('notification-service')  { steps { dir('services/notification-service')  { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
-        stage('analytics-service')     { steps { dir('services/analytics-service')     { sh 'bun install --frozen-lockfile && bun run prisma:generate' } } }
+        stage('auth-service')          { steps { dir('services/auth-service')          { sh 'bun install --frozen-lockfile && DATABASE_URL=postgresql://user:pass@localhost:5432/agrosense_auth?schema=public bun run prisma:generate' } } }
+        stage('farm-service')          { steps { dir('services/farm-service')          { sh 'bun install --frozen-lockfile && DATABASE_URL=postgresql://user:pass@localhost:5432/agrosense_farm?schema=public bun run prisma:generate' } } }
+        stage('weather-service')       { steps { dir('services/weather-service')       { sh 'bun install --frozen-lockfile && DATABASE_URL=mongodb://user:pass@localhost:27017/agrosense_weather bun run prisma:generate' } } }
+        stage('soil-service')          { steps { dir('services/soil-service')          { sh 'bun install --frozen-lockfile && DATABASE_URL=mongodb://user:pass@localhost:27017/agrosense_soil bun run prisma:generate' } } }
+        stage('ai-service')            { steps { dir('services/ai-service')            { sh 'bun install --frozen-lockfile && DATABASE_URL=mongodb://user:pass@localhost:27017/agrosense_ai bun run prisma:generate' } } }
+        stage('notification-service')  { steps { dir('services/notification-service')  { sh 'bun install --frozen-lockfile && DATABASE_URL=mongodb://user:pass@localhost:27017/agrosense_notification bun run prisma:generate' } } }
+        stage('analytics-service')     { steps { dir('services/analytics-service')     { sh 'bun install --frozen-lockfile && DATABASE_URL=mongodb://user:pass@localhost:27017/agrosense_analytics bun run prisma:generate' } } }
         // Non-Prisma services: install only
         stage('api-gateway')           { steps { dir('services/api-gateway')           { sh 'bun install --frozen-lockfile' } } }
         stage('orchestrator-service')  { steps { dir('services/orchestrator-service')  { sh 'bun install --frozen-lockfile' } } }
