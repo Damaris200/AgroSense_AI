@@ -76,6 +76,18 @@ pipeline {
 
     stage('Test') {
       parallel {
+        stage('analytics-service') {
+          steps {
+            dir('services/analytics-service') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/analytics-service/junit.xml'
+            }
+          }
+        }
         stage('auth-service') {
           steps {
             dir('services/auth-service') {
@@ -133,6 +145,25 @@ pipeline {
           post {
             always {
               junit allowEmptyResults: true, testResults: 'services/api-gateway/junit.xml'
+            }
+          }
+        }
+        stage('orchestrator-service') {
+          steps {
+            dir('services/orchestrator-service') {
+              sh 'bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=junit.xml'
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: 'services/orchestrator-service/junit.xml'
+            }
+          }
+        }
+        stage('frontend') {
+          steps {
+            dir('frontend') {
+              sh 'bun run test:coverage'
             }
           }
         }
