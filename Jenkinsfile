@@ -402,7 +402,12 @@ pipeline {
       echo 'Pipeline failed — check the stage logs above.'
     }
     always {
-      sh 'docker image prune -f || true'
+      script {
+        // Ensure we have a workspace context for the cleanup shell step.
+        node {
+          sh 'docker image prune -f || true'
+        }
+      }
     }
   }
 }
