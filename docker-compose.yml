@@ -275,14 +275,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:4000
+        # Empty base URL → axios uses relative paths like /api/auth/login.
+        # The frontend's nginx proxies /api/ to the API gateway, so port 80
+        # serves both the SPA and the API behind the same origin.
+        VITE_API_BASE_URL: ""
     image: damarisateh/agrosense-frontend:latest
     container_name: agrosense-frontend
     restart: unless-stopped
     depends_on:
       - api-gateway
     ports:
-      - '5173:80'
+      - '80:80'
     networks:
       - agrosense-net
 
