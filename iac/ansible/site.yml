@@ -7,9 +7,12 @@
 # Roles applied in order:
 #   1. common     — system updates, essential packages, UFW firewall
 #   2. docker     — Docker Engine (needed to pull/run images locally if required)
-#   3. k3s        — lightweight single-node Kubernetes + NGINX Ingress Controller
-#   4. nginx      — host-level Nginx reverse proxy (ports 80/443 → k3s NodePorts)
-#   5. agrosense  — create K8s secrets from vault, deploy all manifests
+#   3. k3s        — single-node Kubernetes + NGINX Ingress + DigitalOcean CCM
+#   4. agrosense  — create K8s secrets from vault, deploy all manifests
+#
+# The host-level Nginx role was removed: traffic now flows DO managed LB →
+# node NodePort (30080/30443) → ingress-nginx, so a host reverse proxy on
+# 80/443 is redundant (it also previously conflicted with the LB on those ports).
 
 - name: Provision AgroSense AI VPS
   hosts: agrosense_vps
@@ -24,5 +27,4 @@
     - common
     - docker
     - k3s
-    - nginx
     - agrosense

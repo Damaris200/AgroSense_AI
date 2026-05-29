@@ -5,20 +5,25 @@
 # the main kustomization) because the ingress-nginx namespace is owned
 # by the upstream installer.
 #
-# On k3s the built-in ServiceLB (Klipper) binds host ports 80/443 directly
-# to this Service, so the cluster is reachable from the public network
-# without a host-level Nginx in front. On a cloud provider with a CCM
-# (e.g. DigitalOcean, AWS, GCP), a real managed load balancer is
-# provisioned instead.
+# k3s's built-in ServiceLB (Klipper) is DISABLED (see the k3s install flags in
+# iac/ansible/roles/k3s/tasks/main.yml). Instead the DigitalOcean Cloud
+# Controller Manager watches this Service and provisions a real DO managed Load
+# Balancer (visible in the DO dashboard). The LB forwards:
+#     LB :80  → node :30080 → ingress-nginx (http)
+#     LB :443 → node :30443 → ingress-nginx (https, TLS terminated by
+#                              ingress-nginx + cert-manager via TCP passthrough)
 #
-# Port conflict: Klipper cannot bind 80/443 if the host Nginx is also
-# listening on them. Disable the host Nginx (systemctl disable --now nginx)
-# before switching to this LoadBalancer.
+# Manage the LB by editing this Service — the CCM reconciles the DO LB to match.
+# The nodePorts are pinned so the DO cloud firewall can allow exactly these two
+# ports from the load balancer.
 apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
+  annotations:
+    # Name the LB so it's recognisable in the DO dashboard.
+    service.beta.kubernetes.io/do-loadbalancer-name: "agrosense-lb"
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
@@ -38,10 +43,12 @@ spec:
     - name: http
       port: 80
       targetPort: http
+      nodePort: 30080
       protocol: TCP
       appProtocol: http
     - name: https
       port: 443
       targetPort: https
+      nodePort: 30443
       protocol: TCP
       appProtocol: https

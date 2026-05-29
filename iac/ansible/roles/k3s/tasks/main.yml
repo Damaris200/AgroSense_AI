@@ -5,11 +5,15 @@
     dest: /tmp/install-k3s.sh
     mode: "0755"
 
-- name: Install k3s (single-node, Traefik disabled — using NGINX Ingress instead)
+- name: Install k3s (single-node; Traefik + built-in ServiceLB disabled, external cloud provider)
+  # --disable servicelb + --disable-cloud-controller turn off k3s's built-in
+  # Klipper load balancer and embedded cloud controller so the DigitalOcean CCM
+  # (installed below) can provision a real managed LB instead. cloud-provider=external
+  # makes the kubelet wait for the CCM to initialise the node.
   shell: /tmp/install-k3s.sh
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
-    INSTALL_K3S_EXEC: "server --disable traefik --write-kubeconfig-mode 644"
+    INSTALL_K3S_EXEC: "server --disable traefik --disable servicelb --disable-cloud-controller --kubelet-arg cloud-provider=external --write-kubeconfig-mode 644"
   args:
     creates: /usr/local/bin/k3s
 
@@ -19,6 +23,38 @@
     port: 6443
     delay: 10
     timeout: 90
+
+# ── DigitalOcean Cloud Controller Manager ──────────────────────────────────────
+# The CCM watches Services of type LoadBalancer and provisions a real DO managed
+# LB (visible in the DO dashboard) to match. It must run before the node can be
+# initialised, since `--kubelet-arg cloud-provider=external` taints the node
+# `node.cloudprovider.kubernetes.io/uninitialized` until the CCM removes it.
+
+- name: Verify DigitalOcean API token is set in vault (not a placeholder)
+  assert:
+    that:
+      - vault_do_api_token is defined and vault_do_api_token | length > 0 and 'REPLACE_ME' not in vault_do_api_token
+    fail_msg: >
+      vault_do_api_token is missing or still a placeholder. Add a read+write
+      DigitalOcean API token to group_vars/agrosense_vps/vault.yml — the CCM
+      uses it to create and manage the load balancer.
+
+- name: Create digitalocean API token secret for the CCM (kube-system)
+  shell: |
+    kubectl -n kube-system create secret generic digitalocean \
+      --from-literal=access-token="{{ vault_do_api_token }}" \
+      --kubeconfig=/etc/rancher/k3s/k3s.yaml \
+      --dry-run=client -o yaml \
+    | kubectl apply -f - --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  no_log: true
+  changed_when: true
+
+- name: Install DigitalOcean Cloud Controller Manager (pinned v0.1.67)
+  shell: >
+    kubectl apply -f
+    https://raw.githubusercontent.com/digitalocean/digitalocean-cloud-controller-manager/master/releases/digitalocean-cloud-controller-manager/v0.1.67.yml
+    --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  changed_when: true
 
 - name: Wait for node to be Ready
   shell: kubectl get node --kubeconfig=/etc/rancher/k3s/k3s.yaml -o jsonpath='{.items[0].status.conditions[-1].type}'
