@@ -21,6 +21,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // CI runners are resource-starved (vitest reports ~80s environment + ~30s
+    // import on the Jenkins agent). The default 5s test/hook timeout is too tight
+    // for the heavier dashboard pages (full DashboardLayout tree + chained async
+    // loads + userEvent typing), which caused intermittent timeouts. Give headroom.
+    testTimeout: 30000,
+    hookTimeout: 30000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
