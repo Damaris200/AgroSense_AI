@@ -23,6 +23,12 @@ spec:
       # Confluent's configure script mistakes for the legacy `port` setting,
       # prints "port is deprecated", and silently exits — Kafka never launches.
       enableServiceLinks: false
+      # cp-kafka runs as uid 1000 (appuser). On a freshly provisioned block-storage
+      # PVC the mount is root-owned, so the broker can't write meta.properties and
+      # `kafka-storage format` fails with "Permission denied". fsGroup makes the
+      # volume group-owned by 1000 and group-writable.
+      securityContext:
+        fsGroup: 1000
       initContainers:
         - name: kraft-format
           image: confluentinc/cp-kafka:7.6.0
