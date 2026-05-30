@@ -41,6 +41,11 @@ metadata:
     app: prometheus
 spec:
   replicas: 1
+  # Recreate (not RollingUpdate): the TSDB PVC is ReadWriteOnce, so the old pod
+  # must release the volume before the new one can attach it. On a multi-node
+  # cluster a rolling update deadlocks with a Multi-Attach error.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: prometheus
