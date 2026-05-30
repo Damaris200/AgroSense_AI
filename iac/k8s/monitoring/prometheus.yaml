@@ -50,6 +50,11 @@ spec:
         app: prometheus
     spec:
       serviceAccountName: prometheus
+      # prom/prometheus runs as uid 65534 (nobody). On a freshly provisioned
+      # block-storage PVC the mount is root-owned, so without fsGroup it can't
+      # write its TSDB at /prometheus and crashloops on startup.
+      securityContext:
+        fsGroup: 65534
       containers:
         - name: prometheus
           image: prom/prometheus:v2.51.0
