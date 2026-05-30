@@ -13,4 +13,4 @@ data:
     inter.broker.listener.name=PLAINTEXT
     controller.listener.names=CONTROLLER
     listener.security.protocol.map=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
-    log.dirs=/var/lib/kafka/data
+    log.dirs=/var/lib/kafka/data/logs

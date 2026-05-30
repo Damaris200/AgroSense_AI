@@ -36,6 +36,10 @@ spec:
             - /bin/bash
             - -ec
             - |
+              # The PVC is mounted at /var/lib/kafka/data, whose root contains the
+              # ext4 "lost+found" dir. Kafka refuses a log dir with non-topic data,
+              # so keep logs in a subdirectory.
+              mkdir -p /var/lib/kafka/data/logs
               kafka-storage format \
                 --ignore-formatted \
                 --cluster-id "$CLUSTER_ID" \
@@ -88,7 +92,7 @@ spec:
             - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
               value: "true"
             - name: KAFKA_LOG_DIRS
-              value: "/var/lib/kafka/data"
+              value: "/var/lib/kafka/data/logs"
             - name: KAFKA_LOG_RETENTION_HOURS
               value: "168"
             # Shrink JVM heap so the broker fits in a 2Gi container limit
