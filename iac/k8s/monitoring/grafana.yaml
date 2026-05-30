@@ -11,7 +11,9 @@ data:
     datasources:
       - name: Prometheus
         type: prometheus
-        url: http://prometheus:9090
+        # Prometheus runs with --web.route-prefix=/prometheus, so its API is
+        # served under /prometheus — the datasource URL must include that path.
+        url: http://prometheus:9090/prometheus
         access: proxy
         isDefault: true
         editable: true
