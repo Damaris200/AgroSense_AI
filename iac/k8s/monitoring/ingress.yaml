@@ -1,6 +1,6 @@
 ---
 # Monitoring ingress — exposes Grafana at /grafana and Prometheus at /prometheus
-# on the same host as the main app (healthcarebridge.me). Shares the TLS cert
+# on the same host as the main app (healthcarebrige.me). Shares the TLS cert
 # managed by cert-manager.
 #
 # NGINX merges multiple ingresses for the same host as long as paths don't
@@ -19,7 +19,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: healthcarebridge.me
+    - host: healthcarebrige.me
       http:
         paths:
           - path: /grafana
@@ -38,5 +38,5 @@ spec:
                   number: 9090
   tls:
     - hosts:
-        - healthcarebridge.me
+        - healthcarebrige.me
       secretName: healthcarebridge-tls

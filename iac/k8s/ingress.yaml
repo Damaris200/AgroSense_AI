@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: healthcarebridge.me
+    - host: healthcarebrige.me
       http:
         paths:
           - path: /api
@@ -30,5 +30,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - healthcarebridge.me
+        - healthcarebrige.me
       secretName: healthcarebridge-tls
