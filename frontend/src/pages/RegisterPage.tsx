@@ -6,10 +6,11 @@ import { PasswordStrength } from '@/components/auth/PasswordStrength';
 import { AuthSplitLayout } from '@/components/layout/AuthSplitLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterForm } from '@/hooks/useRegisterForm';
+import { getPostLoginRoute } from '@/utils/authRoute';
 
 export function RegisterPage() {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const {
     form,
     onSubmit,
@@ -21,7 +22,7 @@ export function RegisterPage() {
     errors,
   } = useRegisterForm();
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) return <Navigate to={getPostLoginRoute(user?.role)} replace />;
 
   return (
     <AuthSplitLayout

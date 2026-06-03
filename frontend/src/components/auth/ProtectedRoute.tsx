@@ -1,9 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
+import { getPostLoginRoute } from '@/utils/authRoute';
 
-export function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  readonly allowedRoles?: Array<'farmer' | 'agronomist' | 'admin'>;
+}
+
+export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,6 +24,10 @@ export function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to={getPostLoginRoute(user.role)} replace />;
   }
 
   return <Outlet />;

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'bun:test';
 import { farmSubmissionSchema } from '../schemas/farm.schema';
 
 const VALID = {
+  name: 'North Field',
   cropType: 'maize',
   location: 'Yaounde, Cameroon',
   gpsLat:   3.848,
@@ -11,6 +12,12 @@ const VALID = {
 describe('farmSubmissionSchema', () => {
   it('accepts a valid farm submission payload', () => {
     const result = farmSubmissionSchema.safeParse(VALID);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts payload without name', () => {
+    const { name: _, ...payload } = VALID;
+    const result = farmSubmissionSchema.safeParse(payload);
     expect(result.success).toBe(true);
   });
 
@@ -59,6 +66,11 @@ describe('farmSubmissionSchema', () => {
   it('rejects non-number gpsLat (strict mode)', () => {
     const result = farmSubmissionSchema.safeParse({ ...VALID, gpsLat: 'three' });
     expect(result.success).toBe(false);
+  });
+
+  it('accepts numeric strings for gps fields', () => {
+    const result = farmSubmissionSchema.safeParse({ ...VALID, gpsLat: '3.9', gpsLng: '11.6' });
+    expect(result.success).toBe(true);
   });
 
   it('rejects unknown extra fields (strict mode)', () => {

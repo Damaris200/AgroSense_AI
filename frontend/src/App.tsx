@@ -22,8 +22,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       {/* Protected routes — dashboard and farmer/admin pages */}
-      <Route element={<ProtectedRoute />}>
-        {/* Farmer dashboard routes */}
+      <Route element={<ProtectedRoute allowedRoles={['farmer', 'agronomist']} />}>
         <Route path="/dashboard" element={<FarmerOverviewPage />} />
         <Route path="/dashboard/farms" element={<FarmerFarmsPage />} />
         <Route path="/dashboard/weather" element={<FarmerWeatherPage />} />
@@ -31,7 +30,8 @@ function App() {
         <Route path="/dashboard/recommendations" element={<FarmerRecommendationsPage />} />
         <Route path="/dashboard/notifications" element={<FarmerNotificationsPage />} />
         <Route path="/dashboard/profile" element={<ProfilePage />} />
-        {/* Admin routes */}
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
         <Route path="/admin" element={<AdminOverviewPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/notifications" element={<AdminNotificationsPage />} />

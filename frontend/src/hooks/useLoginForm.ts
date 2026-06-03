@@ -13,6 +13,7 @@ import {
   isPasskeySupported,
   signInWithPasskey,
 } from '@/utils/passkey';
+import { getPostLoginRoute } from '@/utils/authRoute';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -64,7 +65,7 @@ export function useLoginForm() {
         }
       }
 
-      navigate('/dashboard', { replace: true });
+      navigate(getPostLoginRoute(session.user.role), { replace: true });
     } catch (error) {
       setApiError(extractApiError(error, 'Unable to sign in right now.'));
     }
@@ -79,8 +80,9 @@ export function useLoginForm() {
       setSession(session);
 
       const meRes = await api.get<ApiEnvelope<{ user: AuthResponse['user'] }>>('/api/auth/me');
-      setSession({ user: meRes.data.data.user, token: session.token });
-      navigate('/dashboard', { replace: true });
+      const refreshedSession = { user: meRes.data.data.user, token: session.token };
+      setSession(refreshedSession);
+      navigate(getPostLoginRoute(refreshedSession.user.role), { replace: true });
     } catch (error) {
       logout();
       setApiError(extractApiError(error, 'Passkey sign-in failed. Use email and password.'));

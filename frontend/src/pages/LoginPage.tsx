@@ -5,10 +5,11 @@ import { Link, Navigate } from 'react-router-dom';
 import { AuthSplitLayout } from '@/components/layout/AuthSplitLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useLoginForm } from '@/hooks/useLoginForm';
+import { getPostLoginRoute } from '@/utils/authRoute';
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const {
     form,
     onSubmit,
@@ -22,7 +23,7 @@ export function LoginPage() {
     errors,
   } = useLoginForm();
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) return <Navigate to={getPostLoginRoute(user?.role)} replace />;
 
   return (
     <AuthSplitLayout

@@ -22,6 +22,19 @@ function renderRoute(initialEntry = '/dashboard') {
   );
 }
 
+function renderAdminRoute(initialEntry = '/admin') {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <Routes>
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<div>Admin Content</div>} />
+        </Route>
+        <Route path="/dashboard" element={<div>Dashboard Content</div>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
 describe('ProtectedRoute', () => {
   it('shows a loading spinner while auth is resolving', () => {
     mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: true });
@@ -57,5 +70,31 @@ describe('ProtectedRoute', () => {
     renderRoute();
 
     expect(screen.queryByText('Login Page')).toBeNull();
+  });
+
+  it('redirects non-admin users away from admin routes', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      user: { role: 'farmer' },
+    });
+
+    renderAdminRoute();
+
+    expect(screen.getByText('Dashboard Content')).toBeDefined();
+    expect(screen.queryByText('Admin Content')).toBeNull();
+  });
+
+  it('allows admin users on admin routes', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      user: { role: 'admin' },
+    });
+
+    renderAdminRoute();
+
+    expect(screen.getByText('Admin Content')).toBeDefined();
+    expect(screen.queryByText('Dashboard Content')).toBeNull();
   });
 });

@@ -6,7 +6,9 @@ import {
   Leaf,
   LogOut,
   Menu,
+  Moon,
   Sprout,
+  Sun,
   UserCircle,
   Users,
   Wheat,
@@ -48,7 +50,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -136,16 +138,48 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* mobile topbar */}
-        <div className={`flex items-center gap-3 border-b px-4 py-3 md:hidden ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className={`rounded-lg p-1.5 ${isDark ? 'text-zinc-400 hover:bg-zinc-800' : 'text-zinc-500 hover:bg-zinc-100'}`}
-          >
-            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-          <span className={`font-display text-sm font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>{t('brand.name')}</span>
+        {/* topbar */}
+        <div className={`flex items-center justify-between gap-3 border-b px-4 py-3 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className={`rounded-lg p-1.5 md:hidden ${isDark ? 'text-zinc-400 hover:bg-zinc-800' : 'text-zinc-500 hover:bg-zinc-100'}`}
+            >
+              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+            <span className={`font-display text-sm font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+              {t('brand.name')}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={`inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                isDark
+                  ? 'border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+                  : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+              }`}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{t('dashboard.signOut')}</span>
+            </button>
+            <LanguageToggle />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition ${
+                isDark
+                  ? 'border-zinc-700 bg-zinc-800 text-amber-300 hover:bg-zinc-700'
+                  : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+              }`}
+            >
+              {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>

@@ -32,6 +32,15 @@ function getGreeting(hour: number): string {
   return 'Good evening';
 }
 
+function getAiStatusMessage(recommendations: number | undefined): string {
+  if (!recommendations) {
+    return 'No recommendation yet. Submit a farm and the AI pipeline will publish advice here.';
+  }
+
+  const suffix = recommendations > 1 ? 's' : '';
+  return `Ready: ${recommendations} recommendation${suffix} generated.`;
+}
+
 function renderActivityContent(
   loading: boolean,
   overview: UserOverview | null,
@@ -150,6 +159,22 @@ export function FarmerOverviewPage() {
             >
               <Bell className="h-4 w-4 text-blue-600" />
               Notification History
+            </Link>
+          </div>
+
+          <div className={`mt-6 rounded-xl border p-4 ${isDark ? 'border-emerald-900/40 bg-emerald-900/20' : 'border-emerald-200 bg-emerald-50'}`}>
+            <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+              AI advisory engine
+            </p>
+            <p className={`mt-1 text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              {getAiStatusMessage(overview?.stats.recommendations)}
+            </p>
+            <Link
+              to="/dashboard/recommendations"
+              className={`mt-3 inline-flex items-center gap-2 text-sm font-semibold ${isDark ? 'text-emerald-300 hover:text-emerald-200' : 'text-emerald-700 hover:text-emerald-800'}`}
+            >
+              <Wheat className="h-4 w-4" />
+              Open AI recommendations
             </Link>
           </div>
 
