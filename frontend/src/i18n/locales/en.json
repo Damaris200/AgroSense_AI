@@ -24,7 +24,7 @@
     "ariaHome": "AgroSense AI home"
   },
   "hero": {
-    "badge": "Powered by AI",
+    "badge": "",
     "title": "AgroSense AI",
     "subtitle": "Smart Decisions for Every Farm",
     "description": "Event-driven AI advisory for small-scale farmers, combining weather signals, field observations, and actionable crop guidance in seconds.",

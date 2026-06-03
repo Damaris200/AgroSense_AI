@@ -58,7 +58,7 @@ pipeline {
 
   options {
     disableConcurrentBuilds()
-    timeout(time: 45, unit: 'MINUTES')
+    timeout(time: 90, unit: 'MINUTES')
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
@@ -166,6 +166,7 @@ pipeline {
     // pipeline never depends on a Jenkins-side "SonarScanner" tool
     // installation that disappears when the Jenkins home volume is wiped.
     stage('SonarCloud Analysis') {
+      options { timeout(time: 15, unit: 'MINUTES') }
       steps {
         sh '''
           set -e
