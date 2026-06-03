@@ -268,54 +268,30 @@ pipeline {
       }
     }
 
-    // Robust build+push. Two failure modes on this small VPS: (1) Docker Hub
-    // rejects a cross-mounted shared base layer with "blob unknown to registry"
-    // when many images push at once; (2) parallel builds exhaust RAM and a build
-    // is OOM-killed. Both are transient. DO_BUILD_PUSH retries the push up to 8
-    // times with backoff + jitter, and Jenkins retry(3) re-runs the whole
-    // build+push for that service if even the build flaked. Combined, a service
-    // self-heals instead of failing the pipeline.
+    // Build & Push — SEQUENTIAL (one image at a time). The 8GB VPS cannot build
+    // 10 images in parallel without OOM-killing random builds. Building one at a
+    // time uses a fraction of the RAM and is near-100% reliable; it's slower but
+    // it always finishes. Each push still retries up to 8× to absorb Docker
+    // Hub's transient "blob unknown" races, and retry(2) re-runs a flaked build.
     stage('Build & Push') {
       environment {
-        PUSH_RETRY = 'sleep $((RANDOM % 8)); n=0; until docker push "$IMG"; do n=$((n+1)); if [ $n -ge 8 ]; then echo "push failed after 8 attempts"; exit 1; fi; echo "push retry $n..."; sleep $((10 + n * 5)); done'
+        PUSH_RETRY = 'n=0; until docker push "$IMG"; do n=$((n+1)); if [ $n -ge 8 ]; then echo "push failed after 8 attempts"; exit 1; fi; echo "push retry $n..."; sleep $((10 + n * 5)); done'
       }
-      parallel {
-        stage('auth-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_AUTH}:${IMAGE_TAG} ./${SVC_AUTH}; IMG=${IMG_AUTH}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('api-gateway') {
-          steps { retry(3) { sh "docker build -t ${IMG_GATEWAY}:${IMAGE_TAG} ./${SVC_GATEWAY}; IMG=${IMG_GATEWAY}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('farm-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_FARM}:${IMAGE_TAG} ./${SVC_FARM}; IMG=${IMG_FARM}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('weather-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_WEATHER}:${IMAGE_TAG} ./${SVC_WEATHER}; IMG=${IMG_WEATHER}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('soil-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_SOIL}:${IMAGE_TAG} ./${SVC_SOIL}; IMG=${IMG_SOIL}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('orchestrator-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_ORCH}:${IMAGE_TAG} ./${SVC_ORCH}; IMG=${IMG_ORCH}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('ai-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_AI}:${IMAGE_TAG} ./${SVC_AI}; IMG=${IMG_AI}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('notification-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_NOTIF}:${IMAGE_TAG} ./${SVC_NOTIF}; IMG=${IMG_NOTIF}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('analytics-service') {
-          steps { retry(3) { sh "docker build -t ${IMG_ANALYTICS}:${IMAGE_TAG} ./${SVC_ANALYTICS}; IMG=${IMG_ANALYTICS}:${IMAGE_TAG}; ${PUSH_RETRY}" } }
-        }
-        stage('frontend') {
-          steps {
-            retry(3) {
-              sh """
-                docker build --build-arg VITE_API_BASE_URL=http://${VPS_HOST}:4000 -t ${IMG_FRONTEND}:${IMAGE_TAG} ./${SVC_FRONTEND}
-                IMG=${IMG_FRONTEND}:${IMAGE_TAG}; ${PUSH_RETRY}
-              """
-            }
-          }
+      steps {
+        retry(2) { sh "docker build -t ${IMG_AUTH}:${IMAGE_TAG} ./${SVC_AUTH}; IMG=${IMG_AUTH}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_GATEWAY}:${IMAGE_TAG} ./${SVC_GATEWAY}; IMG=${IMG_GATEWAY}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_FARM}:${IMAGE_TAG} ./${SVC_FARM}; IMG=${IMG_FARM}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_WEATHER}:${IMAGE_TAG} ./${SVC_WEATHER}; IMG=${IMG_WEATHER}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_SOIL}:${IMAGE_TAG} ./${SVC_SOIL}; IMG=${IMG_SOIL}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_ORCH}:${IMAGE_TAG} ./${SVC_ORCH}; IMG=${IMG_ORCH}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_AI}:${IMAGE_TAG} ./${SVC_AI}; IMG=${IMG_AI}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_NOTIF}:${IMAGE_TAG} ./${SVC_NOTIF}; IMG=${IMG_NOTIF}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) { sh "docker build -t ${IMG_ANALYTICS}:${IMAGE_TAG} ./${SVC_ANALYTICS}; IMG=${IMG_ANALYTICS}:${IMAGE_TAG}; ${PUSH_RETRY}" }
+        retry(2) {
+          sh """
+            docker build --build-arg VITE_API_BASE_URL=http://${VPS_HOST}:4000 -t ${IMG_FRONTEND}:${IMAGE_TAG} ./${SVC_FRONTEND}
+            IMG=${IMG_FRONTEND}:${IMAGE_TAG}; ${PUSH_RETRY}
+          """
         }
       }
     }
