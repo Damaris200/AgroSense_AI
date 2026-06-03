@@ -165,24 +165,31 @@ pipeline {
     // Downloads sonar-scanner-cli inline (caches in workspace), so the
     // pipeline never depends on a Jenkins-side "SonarScanner" tool
     // installation that disappears when the Jenkins home volume is wiped.
+    // Non-blocking: the scanner runs locally on a CPU-constrained VPS, so a slow
+    // or timed-out scan must NOT abort the build. catchError downgrades any
+    // failure/timeout here to UNSTABLE (yellow) and lets Build & Deploy proceed.
+    // The analysis still uploads to SonarCloud whenever it finishes; see the
+    // dashboard for the gate result.
     stage('SonarCloud Analysis') {
-      options { timeout(time: 15, unit: 'MINUTES') }
+      options { timeout(time: 12, unit: 'MINUTES') }
       steps {
-        sh '''
-          set -e
-          SCANNER_VERSION=6.2.1.4610
-          SCANNER_DIR="$WORKSPACE/.sonar-scanner/sonar-scanner-${SCANNER_VERSION}"
-          if [ ! -x "$SCANNER_DIR/bin/sonar-scanner" ]; then
-            mkdir -p "$WORKSPACE/.sonar-scanner"
-            curl -sSLo /tmp/scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}.zip"
-            unzip -q -o -d "$WORKSPACE/.sonar-scanner" /tmp/scanner.zip
-            rm /tmp/scanner.zip
-          fi
-          "$SCANNER_DIR/bin/sonar-scanner" \
-            -Dsonar.projectBaseDir="$WORKSPACE" \
-            -Dsonar.host.url="$SONAR_HOST_URL" \
-            -Dsonar.token="$SONAR_TOKEN"
-        '''
+        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+          sh '''
+            set -e
+            SCANNER_VERSION=6.2.1.4610
+            SCANNER_DIR="$WORKSPACE/.sonar-scanner/sonar-scanner-${SCANNER_VERSION}"
+            if [ ! -x "$SCANNER_DIR/bin/sonar-scanner" ]; then
+              mkdir -p "$WORKSPACE/.sonar-scanner"
+              curl -sSLo /tmp/scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}.zip"
+              unzip -q -o -d "$WORKSPACE/.sonar-scanner" /tmp/scanner.zip
+              rm /tmp/scanner.zip
+            fi
+            "$SCANNER_DIR/bin/sonar-scanner" \
+              -Dsonar.projectBaseDir="$WORKSPACE" \
+              -Dsonar.host.url="$SONAR_HOST_URL" \
+              -Dsonar.token="$SONAR_TOKEN"
+          '''
+        }
       }
     }
 
@@ -194,7 +201,9 @@ pipeline {
     // recommended auth pattern), which also works for SonarQube ≥9.9.
 
     stage('Quality Gate') {
+      options { timeout(time: 6, unit: 'MINUTES') }
       steps {
+       catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
         script {
           def reportFile = "${WORKSPACE}/.scannerwork/report-task.txt"
           if (!fileExists(reportFile)) {
@@ -241,6 +250,7 @@ pipeline {
             echo "Could not read quality gate: ${ex.message} (informational only — pipeline continues)."
           }
         }
+       }
       }
     }
 
