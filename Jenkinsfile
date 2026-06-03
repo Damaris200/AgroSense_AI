@@ -193,6 +193,7 @@ pipeline {
                 -Dsonar.host.url="$SONAR_HOST_URL" \
                 -Dsonar.token="$SONAR_TOKEN" || echo "Sonar scan slow/failed (likely bridge-server OOM) — continuing, build marked UNSTABLE."
             '''
+          }
         }
       }
     }
