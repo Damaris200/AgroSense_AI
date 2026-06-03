@@ -62,7 +62,7 @@ describe('useRegisterForm', () => {
     });
 
     await act(async () => {
-      await result.current.onSubmit({ preventDefault() {}, persist() {} } as unknown as Event);
+      await result.current.onSubmit({ preventDefault() {}, persist() {} } as unknown as Parameters<typeof result.current.onSubmit>[0]);
     });
 
     await waitFor(() => {
@@ -103,7 +103,7 @@ describe('useRegisterForm', () => {
     });
 
     await act(async () => {
-      await result.current.onSubmit({ preventDefault() {}, persist() {} } as unknown as Event);
+      await result.current.onSubmit({ preventDefault() {}, persist() {} } as unknown as Parameters<typeof result.current.onSubmit>[0]);
     });
 
     await waitFor(() => {
