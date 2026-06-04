@@ -303,8 +303,10 @@ pipeline {
 
     // ── 8. Deploy to Kubernetes (main branch only) ─────────────────────────
 
+    // NOTE: no `when { branch 'main' }` — this is a single-branch pipeline job,
+    // so env.BRANCH_NAME is never set and that guard would skip Deploy on EVERY
+    // build (the "images stuck at an old tag" bug). Checkout already pins main.
     stage('Deploy to K8s') {
-      when { branch 'main' }
       steps {
         sshagent(credentials: ['agrosense-vps-key']) {
           sh """
