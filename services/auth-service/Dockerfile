@@ -2,7 +2,9 @@ FROM oven/bun:1 AS base
 WORKDIR /app
 ENV BUN_INSTALL_CACHE_DIR=/tmp/bun-cache
 
-# Install dependencies first (layer cache)
+# Install dependencies first (layer cache). --ignore-scripts is kept so Prisma's
+# postinstall doesn't run before the schema is copied; bcrypt is the pure-JS
+# bcryptjs (no native compile needed), so it works fine without build scripts.
 COPY package.json bun.lock* ./
 RUN rm -rf /root/.bun/install/cache \
     && mkdir -p /tmp/bun-cache \
