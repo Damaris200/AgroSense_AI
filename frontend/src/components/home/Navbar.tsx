@@ -47,15 +47,19 @@ function NavAuthButtons({ isDark, isAuthenticated, logout }: NavAuthButtonsProps
       <Link
         to="/login"
         className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-          isDark ? 'text-emerald-100 hover:bg-white/10' : 'text-emerald-800 hover:bg-emerald-50'
+          isDark
+            ? 'text-emerald-100 hover:bg-white/10'
+            : 'text-emerald-700 hover:bg-emerald-50'
         }`}
       >
         {t('nav.signIn')}
       </Link>
       <Link
         to="/register"
-        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-          isDark ? 'bg-white text-emerald-800 hover:bg-emerald-50' : 'bg-emerald-600 text-black hover:bg-emerald-700'
+        className={`rounded-full px-5 py-2 text-sm font-semibold text-white shadow-sm transition ${
+          isDark
+            ? 'bg-emerald-500 hover:bg-emerald-400'
+            : 'bg-emerald-600 hover:bg-emerald-700'
         }`}
       >
         {t('nav.getStarted')}

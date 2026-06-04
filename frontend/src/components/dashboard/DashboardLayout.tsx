@@ -7,11 +7,11 @@ import {
   LogOut,
   Menu,
   Moon,
+   Sparkles,
   Sprout,
   Sun,
   UserCircle,
   Users,
-  Wheat,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -35,7 +35,7 @@ const navItems: NavItem[] = [
   { labelKey: 'dashboard.items.myFarms',            href: '/dashboard/farms',           icon: <Leaf className="h-4 w-4" />,         roles: ['farmer', 'agronomist'] },
   { labelKey: 'dashboard.items.weather',            href: '/dashboard/weather',         icon: <CloudRain className="h-4 w-4" />,    roles: ['farmer', 'agronomist'] },
   { labelKey: 'dashboard.items.soilAnalysis',       href: '/dashboard/soil',            icon: <FlaskConical className="h-4 w-4" />, roles: ['farmer', 'agronomist'] },
-  { labelKey: 'dashboard.items.recommendations',    href: '/dashboard/recommendations', icon: <Wheat className="h-4 w-4" />,        roles: ['farmer', 'agronomist'] },
+  { labelKey: 'dashboard.items.recommendations',    href: '/dashboard/recommendations', icon: <Sparkles className="h-4 w-4" />,     roles: ['farmer', 'agronomist'] },
   { labelKey: 'dashboard.items.notifications',      href: '/dashboard/notifications',   icon: <Bell className="h-4 w-4" />,         roles: ['farmer', 'agronomist'] },
   { labelKey: 'dashboard.items.profile',            href: '/dashboard/profile',         icon: <UserCircle className="h-4 w-4" />,   roles: ['farmer', 'agronomist'] },
   { labelKey: 'dashboard.items.adminOverview',      href: '/admin',                     icon: <BarChart2 className="h-4 w-4" />,    roles: ['admin'] },

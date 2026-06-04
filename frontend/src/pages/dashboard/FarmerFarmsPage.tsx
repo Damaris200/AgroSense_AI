@@ -35,12 +35,12 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
   const [submitted, setSubmitted]   = useState(false);
   const [error, setError]           = useState('');
 
-  const inputCls = `w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+  const inputCls = `w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-offset-1 ${
     isDark
-      ? 'border-zinc-700 bg-zinc-800 text-white placeholder-zinc-500 focus:ring-emerald-600'
-      : 'border-zinc-200 bg-white text-zinc-900 placeholder-zinc-400 focus:ring-emerald-500'
+      ? 'border-zinc-700 bg-zinc-800/80 text-white placeholder-zinc-500 focus:border-emerald-600 focus:ring-emerald-600/40 focus:ring-offset-zinc-900'
+      : 'border-zinc-300 bg-zinc-50 text-zinc-900 placeholder-zinc-400 focus:border-emerald-500 focus:bg-white focus:ring-emerald-500/30 focus:ring-offset-white'
   }`;
-  const labelCls = `mb-1 block text-xs font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`;
+  const labelCls = `mb-1.5 block text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`;
 
   async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,24 +71,36 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
         onClick={onClose}
       />
       <div
-        className={`relative z-10 w-full max-w-md rounded-2xl border p-6 shadow-2xl ${
-          isDark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-100 bg-white'
+        className={`relative z-10 w-full max-w-md overflow-hidden rounded-2xl border shadow-2xl ${
+          isDark ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-200 bg-white'
         }`}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className={`absolute right-4 top-4 rounded-lg p-1 transition ${
-            isDark ? 'text-zinc-400 hover:bg-zinc-800' : 'text-zinc-400 hover:bg-zinc-100'
+          className={`absolute right-4 top-4 rounded-lg p-1.5 transition ${
+            isDark ? 'text-zinc-400 hover:bg-zinc-800 hover:text-white' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700'
           }`}
         >
           <X className="h-4 w-4" />
         </button>
 
-        <h2 className={`mb-5 font-semibold text-lg ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-          Submit a New Farm
-        </h2>
+        <div className={`flex items-center gap-3 border-b px-6 py-5 ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700'}`}>
+            <Sprout className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className={`font-display text-lg font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+              Submit a New Farm
+            </h2>
+            <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              We&apos;ll fetch weather &amp; soil data, then generate AI advice.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6">
 
         {submitted ? (
           <div className="py-8 text-center">
@@ -130,22 +142,27 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
               <label htmlFor="farm-crop-type" className={labelCls}>Crop Type</label>
               <input id="farm-crop-type" required className={inputCls} value={form.cropType} onChange={e => setForm(f => ({ ...f, cropType: e.target.value }))} placeholder="e.g. Maize" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="farm-gps-lat" className={labelCls}>GPS Latitude</label>
-                <input id="farm-gps-lat" required type="number" step="any" className={inputCls} value={form.gpsLat} onChange={e => setForm(f => ({ ...f, gpsLat: e.target.value }))} placeholder="6.4541" />
-              </div>
-              <div>
-                <label htmlFor="farm-gps-lng" className={labelCls}>GPS Longitude</label>
-                <input id="farm-gps-lng" required type="number" step="any" className={inputCls} value={form.gpsLng} onChange={e => setForm(f => ({ ...f, gpsLng: e.target.value }))} placeholder="7.5087" />
+            <div className={`rounded-xl border p-3.5 ${isDark ? 'border-zinc-800 bg-zinc-800/40' : 'border-zinc-100 bg-zinc-50/70'}`}>
+              <p className={`mb-2.5 flex items-center gap-1.5 text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                <MapPin className="h-3.5 w-3.5 text-emerald-500" /> GPS Coordinates
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="farm-gps-lat" className={labelCls}>GPS Latitude</label>
+                  <input id="farm-gps-lat" required type="number" step="any" className={inputCls} value={form.gpsLat} onChange={e => setForm(f => ({ ...f, gpsLat: e.target.value }))} placeholder="6.4541" />
+                </div>
+                <div>
+                  <label htmlFor="farm-gps-lng" className={labelCls}>GPS Longitude</label>
+                  <input id="farm-gps-lng" required type="number" step="any" className={inputCls} value={form.gpsLng} onChange={e => setForm(f => ({ ...f, gpsLng: e.target.value }))} placeholder="7.5087" />
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-1">
+            <div className={`flex gap-3 border-t pt-4 ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
               <button
                 type="button"
                 onClick={onClose}
-                className={`flex-1 rounded-xl border py-2.5 text-sm font-semibold transition ${
+                className={`rounded-xl border px-5 py-2.5 text-sm font-semibold transition active:scale-95 ${
                   isDark ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : 'border-zinc-200 text-zinc-600 hover:bg-zinc-50'
                 }`}
               >
@@ -154,13 +171,14 @@ function FarmSubmitModal({ onClose, onSaved, isDark }: ModalProps) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 active:scale-95 disabled:opacity-60"
               >
                 {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : 'Submit Farm'}
               </button>
             </div>
           </form>
         )}
+        </div>
       </div>
     </div>
   );

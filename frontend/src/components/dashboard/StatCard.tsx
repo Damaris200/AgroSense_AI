@@ -21,14 +21,20 @@ export function StatCard({ label, value, icon, accent = 'emerald', sub }: StatCa
   const colors = accentMap[accent];
 
   return (
-    <div className={`rounded-2xl border p-5 ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-zinc-100 bg-white'}`}>
+    <div
+      className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-0.5 ${
+        isDark
+          ? 'border-zinc-800 bg-zinc-900 shadow-lg shadow-black/20 hover:border-zinc-700'
+          : 'border-zinc-100 bg-white shadow-sm hover:border-zinc-200 hover:shadow-md'
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{label}</p>
-          <p className={`mt-1.5 font-display text-3xl font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>{value}</p>
+          <p className={`mt-1.5 font-display text-3xl font-bold tabular-nums ${isDark ? 'text-white' : 'text-zinc-900'}`}>{value}</p>
           {sub && <p className={`mt-1 text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>{sub}</p>}
         </div>
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isDark ? colors.darkBg : colors.bg}`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${isDark ? colors.darkBg : colors.bg}`}>
           {icon}
         </div>
       </div>
