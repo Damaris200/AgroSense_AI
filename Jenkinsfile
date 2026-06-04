@@ -289,8 +289,12 @@ pipeline {
         retry(2) { sh "docker build -t ${IMG_NOTIF}:${IMAGE_TAG} ./${SVC_NOTIF}; IMG=${IMG_NOTIF}:${IMAGE_TAG}; ${PUSH_RETRY}" }
         retry(2) { sh "docker build -t ${IMG_ANALYTICS}:${IMAGE_TAG} ./${SVC_ANALYTICS}; IMG=${IMG_ANALYTICS}:${IMAGE_TAG}; ${PUSH_RETRY}" }
         retry(2) {
+          // Build with an EMPTY API base URL so the frontend calls the API
+          // same-origin (/api/...), which nginx proxies to api-gateway over
+          // HTTPS. Pointing at http://<ip>:4000 caused mixed-content
+          // "Network Error" on the https site.
           sh """
-            docker build --build-arg VITE_API_BASE_URL=http://${VPS_HOST}:4000 -t ${IMG_FRONTEND}:${IMAGE_TAG} ./${SVC_FRONTEND}
+            docker build --build-arg VITE_API_BASE_URL= -t ${IMG_FRONTEND}:${IMAGE_TAG} ./${SVC_FRONTEND}
             IMG=${IMG_FRONTEND}:${IMAGE_TAG}; ${PUSH_RETRY}
           """
         }

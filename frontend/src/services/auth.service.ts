@@ -9,8 +9,13 @@ export interface ApiEnvelope<T> {
   error?: string;
 }
 
+// All request paths already start with "/api" (e.g. "/api/auth/login"). In
+// production the frontend is served by nginx, which proxies "/api" → api-gateway,
+// so the base URL must be EMPTY = same-origin. That keeps calls on HTTPS and
+// avoids mixed-content "Network Error" (which happens if we point at http://ip:4000).
+// VITE_API_BASE_URL stays overridable for local dev (e.g. http://localhost:4000).
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
   headers: {
     'Content-Type': 'application/json',
   },
