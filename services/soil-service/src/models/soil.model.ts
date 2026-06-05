@@ -11,6 +11,9 @@ export const farmSavedEventSchema = z.object({
   cropType:     z.string().trim().min(1),
   gpsLat:       z.number().min(-90).max(90),
   gpsLng:       z.number().min(-180).max(180),
+  soilColor:    z.string().optional().default('brown'),
+  soilTexture:  z.string().optional().default('loamy'),
+  soilMoisture: z.string().optional().default('moist'),
   savedAt:      z.string().datetime(),
 });
 

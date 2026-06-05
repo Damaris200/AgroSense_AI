@@ -15,7 +15,6 @@ export async function saveFarm(event: FarmSubmittedEvent): Promise<FarmSavedEven
       gpsLng:       event.gpsLng,
     },
   });
-
   return {
     submissionId: farm.submissionId,
     farmId:       farm.id,
@@ -27,6 +26,9 @@ export async function saveFarm(event: FarmSubmittedEvent): Promise<FarmSavedEven
     location:     farm.location,
     gpsLat:       farm.gpsLat,
     gpsLng:       farm.gpsLng,
+    soilColor:    event.soilColor    ?? 'brown',
+    soilTexture:  event.soilTexture  ?? 'loamy',
+    soilMoisture: event.soilMoisture ?? 'moist',
     savedAt:      farm.createdAt.toISOString(),
   };
 }

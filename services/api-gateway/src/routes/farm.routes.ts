@@ -7,18 +7,17 @@ import { env } from '../config/env';
 
 const router = Router();
 
-// POST /api/farm  — submit a farm for analysis (Kafka)
 router.post(
   '/',
   optionalAuth as any,
   validateBody(farmSubmissionSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { cropType, location, gpsLat, gpsLng, name } = req.body as {
+      const { cropType, location, gpsLat, gpsLng, name, soilColor, soilTexture, soilMoisture } = req.body as {
         cropType: string; location: string; gpsLat: number; gpsLng: number; name?: string;
+        soilColor: string; soilTexture: string; soilMoisture: string;
       };
       const user = req.jwtUser;
-
       const event = {
         submissionId: crypto.randomUUID(),
         userId:       user?.sub   ?? 'anonymous',
@@ -29,11 +28,12 @@ router.post(
         location,
         gpsLat,
         gpsLng,
+        soilColor,
+        soilTexture,
+        soilMoisture,
         submittedAt: new Date().toISOString(),
       };
-
       await publishEvent('farm.submitted', event);
-
       res.status(202).json({
         success:      true,
         message:      'Farm submission received and queued for processing',
@@ -45,7 +45,6 @@ router.post(
   },
 );
 
-// GET /api/farm  — list farms for the authenticated user (proxied to farm-service)
 router.get('/', requireAuth as any, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.jwtUser!.sub;

@@ -245,6 +245,7 @@ services:
       SMTP_USER: "${SMTP_USER:?SMTP_USER must be set in .env}"
       SMTP_PASS: "${SMTP_PASS:?SMTP_PASS must be set in .env}"
       SMTP_FROM: "${SMTP_FROM:?SMTP_FROM must be set in .env}"
+      SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
     networks:
       - agrosense-net
 

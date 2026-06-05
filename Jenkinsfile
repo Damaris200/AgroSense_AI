@@ -315,7 +315,7 @@ pipeline {
        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
         sshagent(credentials: ['agrosense-vps-key']) {
           sh """
-            ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} '
+            ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST '
               set -e
               kubectl apply -k /opt/agrosense/k8s/ --kubeconfig=${KUBECONFIG_REMOTE}
 

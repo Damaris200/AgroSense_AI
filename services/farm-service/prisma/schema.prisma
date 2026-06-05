@@ -18,6 +18,7 @@ model Farm {
   location     String
   gpsLat       Float    @map("gps_lat")
   gpsLng       Float    @map("gps_lng")
+  status       String   @default("processing")
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("farms")

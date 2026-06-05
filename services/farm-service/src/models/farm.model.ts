@@ -10,6 +10,9 @@ export const farmSubmittedEventSchema = z.object({
   location:     z.string().min(1),
   gpsLat:       z.number().min(-90).max(90),
   gpsLng:       z.number().min(-180).max(180),
+  soilColor:    z.enum(['red','brown','black','grey','yellow']).optional().default('brown'),
+  soilTexture:  z.enum(['sandy','loamy','clayey','silty']).optional().default('loamy'),
+  soilMoisture: z.enum(['dry','moist','wet']).optional().default('moist'),
   submittedAt:  z.string(),
 });
 
@@ -26,5 +29,8 @@ export interface FarmSavedEvent {
   location:     string;
   gpsLat:       number;
   gpsLng:       number;
+  soilColor:    string;
+  soilTexture:  string;
+  soilMoisture: string;
   savedAt:      string;
 }

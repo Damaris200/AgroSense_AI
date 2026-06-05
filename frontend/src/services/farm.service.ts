@@ -2,23 +2,27 @@ import { api } from './auth.service';
 import type { ApiEnvelope } from './auth.service';
 
 export interface Farm {
-  id:          string;
+  id:           string;
   submissionId: string;
-  userId:      string;
-  name:        string;
-  cropType:    string;
-  location:    string;
-  gpsLat:      number;
-  gpsLng:      number;
-  createdAt:   string;
+  userId:       string;
+  name:         string;
+  cropType:     string;
+  location:     string;
+  gpsLat:       number;
+  gpsLng:       number;
+  createdAt:    string;
+  status?:      string;
 }
 
 export interface FarmSubmitPayload {
-  name:     string;
-  cropType: string;
-  location: string;
-  gpsLat:   number;
-  gpsLng:   number;
+  name:         string;
+  cropType:     string;
+  location:     string;
+  gpsLat:       number;
+  gpsLng:       number;
+  soilColor:    string;
+  soilTexture:  string;
+  soilMoisture: string;
 }
 
 export async function getMyFarms(): Promise<Farm[]> {

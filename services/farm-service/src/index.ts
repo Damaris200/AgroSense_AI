@@ -1,9 +1,9 @@
 import { config } from 'dotenv';
 config();
-
 import express from "express";
 import farmRoutes from "./routes/farm.routes";
 import { startFarmSubmittedConsumer } from "./events/consumers/farm-submitted.consumer";
+import { startSoilAnalyzedConsumer } from "./events/consumers/soil-analyzed.consumer";
 
 const app = express();
 app.use(express.json());
@@ -14,9 +14,10 @@ app.get("/health", (_req, res) => {
 });
 
 const PORT = process.env.PORT ?? 4002;
-
 app.listen(PORT, async () => {
   console.log(`[farm-service] running on port ${PORT}`);
   await startFarmSubmittedConsumer();
   console.log(`[farm-service] listening for farm.submitted events`);
+  await startSoilAnalyzedConsumer();
+  console.log(`[farm-service] listening for soil.analyzed events`);
 });
