@@ -52,8 +52,11 @@ async function fetchFromTomorrow(lat: number, lng: number): Promise<ParsedWeathe
   const url =
     `https://api.tomorrow.io/v4/weather/realtime?location=${lat},${lng}&apikey=${env.tomorrowApiKey}&units=metric`;
 
+  // Bound the request so a hung socket cannot block the Kafka consumer past its
+  // sessionTimeout and trigger a rebalance loop.
   const res = await fetch(url, {
     headers: { accept: 'application/json' },
+    signal:  AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {

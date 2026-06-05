@@ -3,7 +3,11 @@ import OpenAI from "openai";
 const openAiModel = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
 const openAiKey   = process.env.OPENAI_API_KEY ?? "";
 
-const client = openAiKey && openAiKey !== "mock" ? new OpenAI({ apiKey: openAiKey }) : null;
+// timeout/maxRetries keep a slow or hanging OpenAI call from blocking the Kafka
+// consumer past its sessionTimeout (the SDK default is a 10-minute timeout).
+const client = openAiKey && openAiKey !== "mock"
+  ? new OpenAI({ apiKey: openAiKey, timeout: 20000, maxRetries: 1 })
+  : null;
 
 export function getOpenAiModel(): string {
   return openAiModel;
@@ -67,7 +71,10 @@ Use simple, actionable language.`;
       console.warn("[ai-service] OpenAI quota exceeded — using mock recommendation");
       return generateMockRecommendation(data);
     }
-    throw err;
+    // Any other failure (timeout, network, 5xx) must not stall the pipeline —
+    // fall back to a deterministic recommendation so recommendation.generated still flows.
+    console.error("[ai-service] OpenAI call failed — using mock recommendation:", err?.message ?? err);
+    return generateMockRecommendation(data);
   }
 }
 

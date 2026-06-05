@@ -18,6 +18,11 @@ function getTransporter(): nodemailer.Transporter {
         user: smtpUser,
         pass: smtpPass,
       },
+      // Fail fast on an unreachable/slow SMTP server. These must stay well under the
+      // Kafka consumer sessionTimeout (30s) so a hung email never starves heartbeats.
+      connectionTimeout: 10000,
+      greetingTimeout:   10000,
+      socketTimeout:     15000,
     });
   }
   return _transporter;

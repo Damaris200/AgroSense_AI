@@ -7,4 +7,9 @@ export const kafka = new Kafka({
   logLevel: env.nodeEnv === 'production' ? logLevel.WARN : logLevel.ERROR,
 });
 
-export const consumer = kafka.consumer({ groupId: env.kafkaGroupId });
+export const consumer = kafka.consumer({
+  groupId:           env.kafkaGroupId,
+  sessionTimeout:    30000,
+  heartbeatInterval: 3000,
+  rebalanceTimeout:  60000,
+});
