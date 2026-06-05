@@ -1,0 +1,127 @@
+---
+- name: AgroSense AI Infrastructure Setup
+  hosts: vps
+  become: yes
+  vars:
+    app_dir: /opt/agrosense
+    repo_url: https://github.com/Damaris200/AgroSense_AI.git
+    docker_compose_version: "v2.27.0"
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install system dependencies
+      apt:
+        name:
+          - curl
+          - git
+          - unzip
+          - ufw
+          - nginx
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Install Docker
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Install k3s (lightweight Kubernetes)
+      shell: curl -sfL https://get.k3s.io | sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Install kubectl
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Install Bun runtime
+      shell: curl -fsSL https://bun.sh/install | bash
+      args:
+        creates: /root/.bun/bin/bun
+
+    - name: Configure UFW firewall - allow SSH
+      ufw:
+        rule: allow
+        port: '22'
+
+    - name: Configure UFW firewall - allow HTTP
+      ufw:
+        rule: allow
+        port: '80'
+
+    - name: Configure UFW firewall - allow HTTPS
+      ufw:
+        rule: allow
+        port: '443'
+
+    - name: Configure UFW firewall - allow app ports
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      loop:
+        - '3000'
+        - '3003'
+        - '3004'
+        - '3006'
+        - '4000'
+        - '4001'
+        - '4002'
+        - '4006'
+        - '4007'
+        - '8080'
+        - '9090'
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+    - name: Clone AgroSense AI repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: yes
+
+    - name: Copy environment file
+      copy:
+        src: .env
+        dest: "{{ app_dir }}/.env"
+        mode: '0600'
+
+    - name: Start all services with Docker Compose
+      shell: docker compose up -d --build
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Verify all containers are running
+      shell: docker compose ps --format json
+      args:
+        chdir: "{{ app_dir }}"
+      register: containers_status
+
+    - name: Display running containers
+      debug:
+        var: containers_status.stdout
+
+    - name: Configure k3s kubeconfig
+      shell: export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && kubectl get nodes
+      register: k8s_nodes
+
+    - name: Display Kubernetes nodes
+      debug:
+        var: k8s_nodes.stdout

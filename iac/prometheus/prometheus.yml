@@ -1,0 +1,48 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['agrosense-api-gateway:4000']
+    metrics_path: '/metrics'
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['agrosense-auth:4001']
+    metrics_path: '/metrics'
+
+  - job_name: 'farm-service'
+    static_configs:
+      - targets: ['agrosense-farm:4002']
+    metrics_path: '/metrics'
+
+  - job_name: 'weather-service'
+    static_configs:
+      - targets: ['agrosense-weather:3003']
+    metrics_path: '/metrics'
+
+  - job_name: 'soil-service'
+    static_configs:
+      - targets: ['agrosense-soil:3004']
+    metrics_path: '/metrics'
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['agrosense-notification:3006']
+    metrics_path: '/metrics'
+
+  - job_name: 'ai-service'
+    static_configs:
+      - targets: ['agrosense-ai:4006']
+    metrics_path: '/metrics'
+
+  - job_name: 'analytics-service'
+    static_configs:
+      - targets: ['agrosense-analytics:4007']
+    metrics_path: '/metrics'

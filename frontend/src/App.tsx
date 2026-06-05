@@ -14,6 +14,7 @@ import { FarmerSoilPage } from './pages/dashboard/FarmerSoilPage';
 import { FarmerRecommendationsPage } from './pages/dashboard/FarmerRecommendationsPage';
 import { FarmerNotificationsPage } from './pages/dashboard/FarmerNotificationsPage';
 import { ProfilePage } from './pages/dashboard/ProfilePage';
+import { AboutPage } from './pages/AboutPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/about" element={<AboutPage />} />
       {/* Protected routes — dashboard and farmer/admin pages */}
       <Route element={<ProtectedRoute allowedRoles={['farmer', 'agronomist']} />}>
         <Route path="/dashboard" element={<FarmerOverviewPage />} />

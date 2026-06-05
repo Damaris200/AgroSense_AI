@@ -75,9 +75,10 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { label: t('nav.features'), href: '#features' },
-    { label: t('nav.howItWorks'), href: '#how-it-works' },
-    { label: t('nav.impact'), href: '#impact' },
+    { label: t('nav.features'), href: '/#features' },
+    { label: t('nav.howItWorks'), href: '/#how-it-works' },
+    { label: t('nav.impact'), href: '/#impact' },
+    { label: 'About Us', href: '/about' },
   ];
 
   function closeMenu() {

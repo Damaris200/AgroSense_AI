@@ -5,6 +5,8 @@ networks:
 volumes:
   jenkins_home:
   kafka_data:
+  prometheus_data:
+  grafana_data:
 
 services:
 
@@ -22,7 +24,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.6.0
     container_name: agrosense-kafka
-    restart: unless-stopped
+    restart: always
     ports:
       - '9092:9092'
     environment:
@@ -58,7 +60,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-auth:latest
     container_name: agrosense-auth
-    restart: unless-stopped
+    restart: always
     environment:
       NODE_ENV: production
       PORT: 4001
@@ -82,7 +84,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-api-gateway:latest
     container_name: agrosense-api-gateway
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -117,7 +119,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-farm:latest
     container_name: agrosense-farm
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -137,7 +139,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-weather:latest
     container_name: agrosense-weather
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -160,7 +162,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-soil:latest
     container_name: agrosense-soil
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -182,7 +184,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-orchestrator:latest
     container_name: agrosense-orchestrator
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -201,7 +203,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-ai:latest
     container_name: agrosense-ai
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -225,7 +227,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-notification:latest
     container_name: agrosense-notification
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -252,7 +254,7 @@ services:
       dockerfile: Dockerfile
     image: damarisateh/agrosense-analytics:latest
     container_name: agrosense-analytics
-    restart: unless-stopped
+    restart: always
     depends_on:
       kafka:
         condition: service_healthy
@@ -281,7 +283,7 @@ services:
         VITE_API_BASE_URL: ""
     image: damarisateh/agrosense-frontend:latest
     container_name: agrosense-frontend
-    restart: unless-stopped
+    restart: always
     depends_on:
       - api-gateway
     ports:
@@ -296,7 +298,7 @@ services:
       context: ./iac/docker/jenkins
       dockerfile: Dockerfile
     container_name: jenkins
-    restart: unless-stopped
+    restart: always
     group_add:
       - "999"
     ports:
@@ -312,3 +314,36 @@ services:
   # Jenkins pipeline against SonarCloud (https://sonarcloud.io). See
   # sonar-project.properties for project key + organization and Jenkinsfile
   # stage 'SonarCloud Analysis' for the scanner invocation.
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: agrosense-prometheus
+    restart: always
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./iac/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - agrosense-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: agrosense-grafana
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: agrosense2026
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - agrosense-net
