@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import type { RecommendationGeneratedEvent, EmailPayload } from '../models/notification.model';
 
 export function buildRecommendationEmail(event: RecommendationGeneratedEvent): EmailPayload {
@@ -11,33 +10,27 @@ export function buildRecommendationEmail(event: RecommendationGeneratedEvent): E
   return { to: event.userEmail, subject, html };
 }
 
-// A single reusable SMTP transporter (created lazily on first send).
-let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
-
-function getTransporter() {
-  if (!transporter) {
-    const port = Number(process.env.SMTP_PORT ?? 587);
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST ?? "smtp.ethereal.email",
-      port,
-      secure: port === 465, // 465 = implicit TLS; 587 = STARTTLS
-      auth: process.env.SMTP_USER
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        : undefined,
-    });
-  }
-  return transporter;
-}
-
 export async function sendEmail(payload: EmailPayload): Promise<void> {
-  const from = process.env.SMTP_FROM ?? "AgroSense AI <noreply@agrosense.ai>";
+  const apiKey = process.env.SENDGRID_API_KEY ?? "";
+  const fromEmail = process.env.SMTP_USER ?? "wepngongshalom23@gmail.com";
 
-  await getTransporter().sendMail({
-    from,
-    to: payload.to,
-    subject: payload.subject,
-    html: payload.html,
+  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: payload.to }] }],
+      from: { email: fromEmail, name: "AgroSense AI" },
+      subject: payload.subject,
+      content: [{ type: "text/html", value: payload.html }],
+    }),
   });
 
-  console.log("[notification-service] email sent via SMTP to " + payload.to);
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error("SendGrid error " + response.status + ": " + body);
+  }
+  console.log("[notification-service] email sent via SendGrid to " + payload.to);
 }
