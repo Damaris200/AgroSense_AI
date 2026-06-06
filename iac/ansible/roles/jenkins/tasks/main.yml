@@ -1,0 +1,76 @@
+---
+# Jenkins runs as a Docker container on the VPS (NOT inside k3s). It builds the
+# image from iac/docker/jenkins (Jenkins LTS + Docker CLI + Bun) and exposes the
+# dashboard on :8080. The Docker socket is mounted so pipeline stages can build
+# and push the service images, exactly as in docker-compose.yml.
+
+- name: Allow Jenkins web UI (8080) through UFW
+  ufw:
+    rule: allow
+    port: "8080"
+    proto: tcp
+
+- name: Allow Jenkins inbound agent port (50000) through UFW
+  ufw:
+    rule: allow
+    port: "50000"
+    proto: tcp
+
+- name: Create Jenkins build-context directory on VPS
+  file:
+    path: /opt/agrosense/jenkins
+    state: directory
+    mode: "0755"
+
+- name: Copy Jenkins Docker build context to VPS
+  synchronize:
+    src: "{{ playbook_dir }}/../docker/jenkins/"
+    dest: /opt/agrosense/jenkins/
+    delete: yes
+
+- name: Build the Jenkins image
+  shell: docker build -t agrosense-jenkins:latest /opt/agrosense/jenkins
+  changed_when: true
+
+# The jenkins user inside the container must share the host's docker group GID to
+# use the mounted /var/run/docker.sock. Detecting it (instead of hard-coding 999)
+# keeps this working regardless of how the host assigned the docker group.
+- name: Detect host docker group GID
+  shell: "getent group docker | cut -d: -f3"
+  register: docker_gid
+  changed_when: false
+
+- name: Create the jenkins_home Docker volume (persists across restarts)
+  shell: docker volume create jenkins_home
+  changed_when: false
+
+- name: (Re)create the Jenkins container
+  shell: |
+    docker rm -f jenkins 2>/dev/null || true
+    docker run -d --name jenkins --restart always \
+      --group-add {{ docker_gid.stdout }} \
+      -p 8080:8080 -p 50000:50000 \
+      -v jenkins_home:/var/jenkins_home \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      agrosense-jenkins:latest
+  changed_when: true
+
+- name: Wait for the Jenkins web UI to accept connections
+  wait_for:
+    host: 127.0.0.1
+    port: 8080
+    delay: 15
+    timeout: 180
+
+- name: Read the Jenkins initial admin password (first boot only)
+  shell: >
+    docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+    2>/dev/null || echo "(already set up — use your existing admin credentials)"
+  register: jenkins_admin_pw
+  changed_when: false
+
+- name: Show how to reach Jenkins
+  debug:
+    msg:
+      - "Jenkins dashboard:  http://{{ ansible_host }}:8080"
+      - "Initial admin password: {{ jenkins_admin_pw.stdout }}"

@@ -20,14 +20,16 @@ data:
 
   # Auth
   JWT_EXPIRES_IN: "24h"
-  # Replace with your domain or VPS IP for production
-  CORS_ORIGIN: "https://healthcarebrige.me"
+  # App is served and called through the same ingress IP (same-origin), so CORS
+  # rarely triggers. "*" keeps the API reachable when the app is opened by raw IP
+  # (no domain).
+  CORS_ORIGIN: "*"
 
-  # SMTP (non-secret parts)
-  SMTP_HOST: "smtp.ethereal.email"
+  # SMTP (non-secret parts) — Gmail SMTP with an app password (SMTP_PASS is in the secret)
+  SMTP_HOST: "smtp.gmail.com"
   SMTP_PORT: "587"
-  SMTP_USER: "estel.skiles@ethereal.email"
-  SMTP_FROM: "AgroSense AI <estel.skiles@ethereal.email>"
+  SMTP_USER: "wepngongshalom23@gmail.com"
+  SMTP_FROM: "AgroSense AI <wepngongshalom23@gmail.com>"
 
   # AI
   OPENAI_MODEL: "ft:gpt-4.1-mini-2025-04-14:personal:farm-recommendation:DcEPwNUN"

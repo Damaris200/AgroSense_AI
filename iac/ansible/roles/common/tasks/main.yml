@@ -1,11 +1,15 @@
 ---
-- name: Update apt cache and upgrade packages
+- name: Update apt cache (wait out the boot-time unattended-upgrades lock, retry)
   apt:
     update_cache: yes
-    upgrade: safe
     cache_valid_time: 3600
+    lock_timeout: 180
+  register: apt_update
+  until: apt_update is succeeded
+  retries: 5
+  delay: 15
 
-- name: Install required system packages
+- name: Install required system packages (lock-safe, retried)
   apt:
     name:
       - curl
@@ -20,7 +24,13 @@
       - jq
       - netcat-openbsd
       - python3-pip
+      - rsync
     state: present
+    lock_timeout: 180
+  register: apt_pkgs
+  until: apt_pkgs is succeeded
+  retries: 5
+  delay: 15
 
 - name: Allow SSH through UFW
   ufw:

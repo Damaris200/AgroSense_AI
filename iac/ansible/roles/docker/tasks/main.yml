@@ -27,6 +27,11 @@
       - gnupg
     state: present
     update_cache: yes
+    lock_timeout: 180
+  register: docker_prereqs
+  until: docker_prereqs is succeeded
+  retries: 5
+  delay: 15
   when: docker_check.rc != 0
 
 - name: Create keyrings directory
@@ -63,6 +68,11 @@
       - docker-compose-plugin
     state: present
     update_cache: yes
+    lock_timeout: 180
+  register: docker_engine
+  until: docker_engine is succeeded
+  retries: 5
+  delay: 15
   when: docker_check.rc != 0
 
 - name: Enable and start Docker daemon

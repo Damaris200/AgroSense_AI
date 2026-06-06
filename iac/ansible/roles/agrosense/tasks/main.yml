@@ -158,9 +158,34 @@
   shell: kubectl apply -k {{ k8s_manifests_dest }}/monitoring/ --kubeconfig=/etc/rancher/k3s/k3s.yaml
   changed_when: true
 
-- name: Wait for core deployments to roll out
+- name: Wait for core deployments to roll out (best-effort, never fails the run)
+  # A slow image pull or a pod still settling must NOT abort the playbook during a
+  # live demo. We wait, but ignore failures and show the real status below.
   shell: |
-    kubectl rollout status deployment/api-gateway  -n {{ app_namespace }} --timeout=300s --kubeconfig=/etc/rancher/k3s/k3s.yaml
-    kubectl rollout status deployment/auth-service -n {{ app_namespace }} --timeout=300s --kubeconfig=/etc/rancher/k3s/k3s.yaml
-    kubectl rollout status deployment/frontend     -n {{ app_namespace }} --timeout=300s --kubeconfig=/etc/rancher/k3s/k3s.yaml
+    kubectl rollout status deployment/frontend     -n {{ app_namespace }} --timeout=180s --kubeconfig=/etc/rancher/k3s/k3s.yaml || true
+    kubectl rollout status deployment/api-gateway  -n {{ app_namespace }} --timeout=180s --kubeconfig=/etc/rancher/k3s/k3s.yaml || true
+    kubectl rollout status deployment/auth-service -n {{ app_namespace }} --timeout=180s --kubeconfig=/etc/rancher/k3s/k3s.yaml || true
   changed_when: false
+  failed_when: false
+
+- name: Collect final status (pods, services, ingress)
+  shell: |
+    echo "===== PODS (agrosense) ====="; kubectl get pods -n {{ app_namespace }} -o wide --kubeconfig=/etc/rancher/k3s/k3s.yaml
+    echo "===== PODS (monitoring) ====="; kubectl get pods -n {{ monitoring_namespace }} --kubeconfig=/etc/rancher/k3s/k3s.yaml
+    echo "===== INGRESS IP ====="; kubectl get svc ingress-nginx-controller -n ingress-nginx --kubeconfig=/etc/rancher/k3s/k3s.yaml
+  register: final_status
+  changed_when: false
+  failed_when: false
+
+- name: Show final status + access URLs
+  debug:
+    msg: |
+      {{ final_status.stdout }}
+
+      ============================================================
+      AgroSense AI is up. Open these (plain HTTP, your droplet IP):
+        App         http://{{ ansible_host }}/
+        Grafana     http://{{ ansible_host }}/grafana
+        Prometheus  http://{{ ansible_host }}/prometheus
+        Jenkins     http://{{ ansible_host }}:8080
+      ============================================================

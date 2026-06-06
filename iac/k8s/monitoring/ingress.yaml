@@ -1,11 +1,6 @@
----
-# Monitoring ingress — exposes Grafana at /grafana and Prometheus at /prometheus
-# on the same host as the main app (healthcarebrige.me). Shares the TLS cert
-# managed by cert-manager.
-#
-# NGINX merges multiple ingresses for the same host as long as paths don't
-# collide. This ingress lives in the `monitoring` namespace so it can backend
-# services in that namespace.
+# IP-only access (no domain, no TLS). Host-less, so it shares the default server
+# with the app ingress: /grafana and /prometheus are routed by path on the same
+# LoadBalancer IP. Plain HTTP (no cert-manager / TLS for a bare IP).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -15,12 +10,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   rules:
-    - host: healthcarebrige.me
-      http:
+    - http:
         paths:
           - path: /grafana
             pathType: Prefix
@@ -36,7 +29,3 @@ spec:
                 name: prometheus
                 port:
                   number: 9090
-  tls:
-    - hosts:
-        - healthcarebrige.me
-      secretName: healthcarebridge-tls

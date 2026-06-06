@@ -1,3 +1,8 @@
+# IP-only access (no domain, no TLS):
+#   - No `host:` -> this is the default/catch-all server, so it answers on the
+#     LoadBalancer's raw IP for ANY Host header.
+#   - No `tls:` / cert-manager annotation -> plain HTTP on port 80 (Let's Encrypt
+#     cannot issue a certificate for a bare IP address).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -7,12 +12,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   rules:
-    - host: healthcarebrige.me
-      http:
+    - http:
         paths:
           - path: /api
             pathType: Prefix
@@ -28,7 +31,3 @@ spec:
                 name: frontend
                 port:
                   number: 80
-  tls:
-    - hosts:
-        - healthcarebrige.me
-      secretName: healthcarebridge-tls

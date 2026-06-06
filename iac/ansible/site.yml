@@ -9,6 +9,7 @@
 #   2. docker     — Docker Engine (needed to pull/run images locally if required)
 #   3. k3s        — single-node Kubernetes + NGINX Ingress + DigitalOcean CCM
 #   4. agrosense  — create K8s secrets from vault, deploy all manifests
+#   5. jenkins    — build + run the Jenkins CI dashboard as a Docker container
 #
 # The host-level Nginx role was removed: traffic now flows DO managed LB →
 # node NodePort (30080/30443) → ingress-nginx, so a host reverse proxy on
@@ -28,3 +29,4 @@
     - docker
     - k3s
     - agrosense
+    - jenkins

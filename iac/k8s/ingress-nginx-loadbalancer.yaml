@@ -1,29 +1,17 @@
-# Exposes the NGINX Ingress Controller via a Service of type LoadBalancer.
+# Exposes the NGINX Ingress Controller on the droplet's OWN IP.
 #
-# This reconciles the Service named "ingress-nginx-controller" that the
-# upstream ingress-nginx installer creates. Applied separately (not via
-# the main kustomization) because the ingress-nginx namespace is owned
-# by the upstream installer.
-#
-# k3s's built-in ServiceLB (Klipper) is DISABLED (see the k3s install flags in
-# iac/ansible/roles/k3s/tasks/main.yml). Instead the DigitalOcean Cloud
-# Controller Manager watches this Service and provisions a real DO managed Load
-# Balancer (visible in the DO dashboard). The LB forwards:
-#     LB :80  → node :30080 → ingress-nginx (http)
-#     LB :443 → node :30443 → ingress-nginx (https, TLS terminated by
-#                              ingress-nginx + cert-manager via TCP passthrough)
-#
-# Manage the LB by editing this Service — the CCM reconciles the DO LB to match.
-# The nodePorts are pinned so the DO cloud firewall can allow exactly these two
-# ports from the load balancer.
+# k3s's built-in ServiceLB (Klipper) handles this Service of type LoadBalancer:
+# it runs a small per-node pod that binds host ports 80 and 443 directly on the
+# droplet. Traffic flows:
+#     droplet :80  -> ingress-nginx (http)
+#     droplet :443 -> ingress-nginx (https)
+# Open the app at  http://<droplet-ip>/  — no external/managed load balancer,
+# no DNS, and no LB health checks to go "unhealthy".
 apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
-  annotations:
-    # Name the LB so it's recognisable in the DO dashboard.
-    service.beta.kubernetes.io/do-loadbalancer-name: "agrosense-lb"
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
@@ -31,10 +19,6 @@ metadata:
     app.kubernetes.io/part-of: agrosense
 spec:
   type: LoadBalancer
-  externalTrafficPolicy: Local
-  ipFamilyPolicy: SingleStack
-  ipFamilies:
-    - IPv4
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx
@@ -43,12 +27,8 @@ spec:
     - name: http
       port: 80
       targetPort: http
-      nodePort: 30080
       protocol: TCP
-      appProtocol: http
     - name: https
       port: 443
       targetPort: https
-      nodePort: 30443
       protocol: TCP
-      appProtocol: https
