@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'bun:test';
-import { simulateSoilData, buildSoilAnalyzedEvent } from '../services/soil.service';
+import { deriveSoilData, buildSoilAnalyzedEvent } from '../services/soil.service';
 
-// ── simulateSoilData ──────────────────────────────────────────────────────────
+// ── deriveSoilData ────────────────────────────────────────────────────────────
+// Soil readings are now derived from the farmer's observations
+// (colour / texture / moisture) instead of being randomly simulated.
 
-describe('simulateSoilData', () => {
+describe('deriveSoilData', () => {
   it('returns all required nutrient fields', () => {
-    const data = simulateSoilData('maize');
+    const data = deriveSoilData('brown', 'loamy', 'moist');
     expect(data).toHaveProperty('ph');
     expect(data).toHaveProperty('moisture');
     expect(data).toHaveProperty('nitrogen');
@@ -13,36 +15,45 @@ describe('simulateSoilData', () => {
     expect(data).toHaveProperty('potassium');
   });
 
-  it('returns pH within valid range (0–14)', () => {
-    for (let i = 0; i < 20; i++) {
-      const { ph } = simulateSoilData('rice');
-      expect(ph).toBeGreaterThanOrEqual(0);
-      expect(ph).toBeLessThanOrEqual(14);
+  it('returns pH within valid range (0–14) for every colour/texture', () => {
+    const colors = ['red', 'brown', 'black', 'grey', 'yellow'];
+    const textures = ['sandy', 'loamy', 'clayey', 'silty'];
+    for (const c of colors) {
+      for (const t of textures) {
+        const { ph } = deriveSoilData(c, t, 'moist');
+        expect(ph).toBeGreaterThanOrEqual(0);
+        expect(ph).toBeLessThanOrEqual(14);
+      }
     }
   });
 
   it('returns moisture within valid range (0–100)', () => {
-    for (let i = 0; i < 20; i++) {
-      const { moisture } = simulateSoilData('wheat');
+    for (const m of ['dry', 'moist', 'wet']) {
+      const { moisture } = deriveSoilData('brown', 'loamy', m);
       expect(moisture).toBeGreaterThanOrEqual(0);
       expect(moisture).toBeLessThanOrEqual(100);
     }
   });
 
   it('returns non-negative nutrient values', () => {
-    for (let i = 0; i < 10; i++) {
-      const { nitrogen, phosphorus, potassium } = simulateSoilData('cassava');
-      expect(nitrogen).toBeGreaterThanOrEqual(0);
-      expect(phosphorus).toBeGreaterThanOrEqual(0);
-      expect(potassium).toBeGreaterThanOrEqual(0);
-    }
+    const { nitrogen, phosphorus, potassium } = deriveSoilData('black', 'clayey', 'wet');
+    expect(nitrogen).toBeGreaterThanOrEqual(0);
+    expect(phosphorus).toBeGreaterThanOrEqual(0);
+    expect(potassium).toBeGreaterThanOrEqual(0);
   });
 
   it('returns numbers rounded to 2 decimal places', () => {
-    const data = simulateSoilData('maize');
+    const data = deriveSoilData('brown', 'loamy', 'moist');
     const decimalPlaces = (n: number) => (n.toString().split('.')[1] ?? '').length;
     expect(decimalPlaces(data.ph)).toBeLessThanOrEqual(2);
     expect(decimalPlaces(data.moisture)).toBeLessThanOrEqual(2);
+  });
+
+  it('falls back to sensible defaults for unknown observations', () => {
+    const data = deriveSoilData('unknown', 'unknown', 'unknown');
+    expect(data.ph).toBeGreaterThan(0);
+    expect(data.moisture).toBeGreaterThanOrEqual(0);
+    expect(data.nitrogen).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -71,6 +82,9 @@ describe('buildSoilAnalyzedEvent', () => {
     cropType:     'maize',
     gpsLat:       6.4541,
     gpsLng:       7.5087,
+    soilColor:    'brown',
+    soilTexture:  'loamy',
+    soilMoisture: 'moist',
     savedAt:      '2026-04-21T10:00:00.000Z',
   };
 
