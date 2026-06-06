@@ -270,30 +270,55 @@ describe('Farmer dashboard pages', () => {
   it('submits a farm through the modal flow', async () => {
     vi.mocked(getMyFarms).mockResolvedValueOnce([]);
 
-    const user = userEvent.setup();
-    renderWithRouter(<FarmerFarmsPage />);
+    // The location field geocodes via OpenStreetMap; stub fetch to return one hit.
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => [
+        { display_name: 'Yaounde, Centre, Cameroon', lat: '3.8480', lon: '11.5021' },
+      ],
+    })) as unknown as typeof fetch;
 
-    expect(await screen.findByText('No farms yet')).toBeInTheDocument();
+    try {
+      const user = userEvent.setup();
+      renderWithRouter(<FarmerFarmsPage />);
 
-    await user.click(screen.getByRole('button', { name: /Submit a Farm/i }));
-    expect(screen.getByText('Submit a New Farm')).toBeInTheDocument();
+      expect(await screen.findByText('No farms yet')).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText('Farm Name'), 'River Plot');
-    await user.type(screen.getByLabelText('Location / Village'), 'Yaounde');
-    await user.type(screen.getByLabelText('Crop Type'), 'Cassava');
-    await user.type(screen.getByLabelText('GPS Latitude'), '6.4541');
-    await user.type(screen.getByLabelText('GPS Longitude'), '7.5087');
+      await user.click(screen.getByRole('button', { name: /Submit a Farm/i }));
+      expect(screen.getByText('Register a New Farm')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Submit Farm/i }));
+      await user.type(screen.getByLabelText('Farm Name'), 'River Plot');
 
-    expect(await screen.findByText('Farm submitted!')).toBeInTheDocument();
-    expect(submitFarm).toHaveBeenCalledWith({
-      name: 'River Plot',
-      cropType: 'Cassava',
-      location: 'Yaounde',
-      gpsLat: 6.4541,
-      gpsLng: 7.5087,
-    });
+      // Location is an autocomplete: type, wait for the geocode result, then pick it.
+      await user.type(screen.getByPlaceholderText(/Bafoussam/i), 'Yaounde');
+      const suggestion = await screen.findByText(
+        'Yaounde, Centre, Cameroon', {}, { timeout: 3000 },
+      );
+      await user.click(suggestion);
+
+      // Crop type and soil observations are dropdowns.
+      await user.selectOptions(screen.getByLabelText('Crop Type'), 'Cassava');
+      await user.selectOptions(screen.getByLabelText('Soil Colour'), 'brown');
+      await user.selectOptions(screen.getByLabelText('Soil Texture'), 'loamy');
+      await user.selectOptions(screen.getByLabelText('Current Moisture Feel'), 'moist');
+
+      await user.click(screen.getByRole('button', { name: /Submit Farm/i }));
+
+      expect(await screen.findByText('Farm submitted!')).toBeInTheDocument();
+      expect(submitFarm).toHaveBeenCalledWith({
+        name: 'River Plot',
+        cropType: 'Cassava',
+        location: expect.stringContaining('Yaounde'),
+        gpsLat: 3.848,
+        gpsLng: 11.5021,
+        soilColor: 'brown',
+        soilTexture: 'loamy',
+        soilMoisture: 'moist',
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 
   it('renders weather cards when data is available', async () => {
