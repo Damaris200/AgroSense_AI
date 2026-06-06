@@ -7,6 +7,9 @@ const VALID = {
   location: 'Yaounde, Cameroon',
   gpsLat:   3.848,
   gpsLng:   11.502,
+  soilColor:    'brown',
+  soilTexture:  'loamy',
+  soilMoisture: 'moist',
 };
 
 describe('farmSubmissionSchema', () => {
