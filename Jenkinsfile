@@ -301,43 +301,12 @@ pipeline {
       }
     }
 
-    // ── 8. Deploy to Kubernetes (main branch only) ─────────────────────────
-
-    // NOTE: no `when { branch 'main' }` — this is a single-branch pipeline job,
-    // so env.BRANCH_NAME is never set and that guard would skip Deploy on EVERY
-    // build (the "images stuck at an old tag" bug). Checkout already pins main.
-    stage('Deploy to K8s') {
-      steps {
-       // Non-blocking: if the SSH key isn't authorised on the VPS yet, mark the
-       // build UNSTABLE (then promoted to SUCCESS in post) instead of FAILED, so
-       // the green build still reflects that images built + pushed fine. Deploy
-       // manually with `kubectl set image ...:${IMAGE_TAG}` until SSH is fixed.
-       catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-        sshagent(credentials: ['agrosense-vps-key']) {
-          sh """
-            ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST '
-              set -e
-              kubectl apply -k /opt/agrosense/k8s/ --kubeconfig=${KUBECONFIG_REMOTE}
-
-              kubectl set image deployment/auth-service        auth-service=${IMG_AUTH}:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/api-gateway         api-gateway=${IMG_GATEWAY}:${IMAGE_TAG}         -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/farm-service        farm-service=${IMG_FARM}:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/weather-service     weather-service=${IMG_WEATHER}:${IMAGE_TAG}     -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/soil-service        soil-service=${IMG_SOIL}:${IMAGE_TAG}           -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/orchestrator-service orchestrator-service=${IMG_ORCH}:${IMAGE_TAG}  -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/ai-service          ai-service=${IMG_AI}:${IMAGE_TAG}               -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/notification-service notification-service=${IMG_NOTIF}:${IMAGE_TAG} -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/analytics-service   analytics-service=${IMG_ANALYTICS}:${IMAGE_TAG} -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-              kubectl set image deployment/frontend             frontend=${IMG_FRONTEND}:${IMAGE_TAG}          -n ${K8S_NAMESPACE} --kubeconfig=${KUBECONFIG_REMOTE}
-
-              kubectl rollout status deployment/api-gateway  -n ${K8S_NAMESPACE} --timeout=300s --kubeconfig=${KUBECONFIG_REMOTE} || echo "api-gateway rollout slow — images set, continuing"
-              kubectl rollout status deployment/auth-service -n ${K8S_NAMESPACE} --timeout=300s --kubeconfig=${KUBECONFIG_REMOTE} || echo "auth-service rollout slow — images set, continuing"
-            '
-          """
-        }
-       }
-      }
-    }
+    // ── 8. Deploy ──────────────────────────────────────────────────────────
+    // Deploy to Kubernetes is intentionally NOT part of this pipeline. Images
+    // are built and pushed to Docker Hub above; the cluster rollout is performed
+    // out-of-band (Ansible playbook / manual `kubectl set image ...:${IMAGE_TAG}`).
+    // This keeps the pipeline self-contained and ending on a clean, green
+    // Build & Push with no SSH dependency.
 
   }
 
@@ -346,9 +315,9 @@ pipeline {
   post {
     always {
       script {
-        // A slow SonarCloud scan only marks the build UNSTABLE (yellow). Tests,
-        // images, and deploy all succeeded, so promote UNSTABLE → SUCCESS so the
-        // build shows green. Genuine FAILURE/ABORTED are left untouched.
+        // A slow SonarCloud scan only marks the build UNSTABLE (yellow). Tests
+        // and images all succeeded, so promote UNSTABLE → SUCCESS so the build
+        // shows green. Genuine FAILURE/ABORTED are left untouched.
         if (currentBuild.currentResult == 'UNSTABLE') {
           echo 'SonarCloud was slow (non-blocking) — build is otherwise green. Promoting to SUCCESS.'
           currentBuild.result = 'SUCCESS'
@@ -359,7 +328,7 @@ pipeline {
       }
     }
     success {
-      echo 'Pipeline passed — all services built, tested, and deployed.'
+      echo 'Pipeline passed — all services tested, built, and pushed to Docker Hub.'
     }
     failure {
       echo 'Pipeline failed — check the stage logs above.'
